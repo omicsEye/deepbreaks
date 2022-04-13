@@ -1,5 +1,0 @@
-[console_scripts]
-omeClust = omeClust.omeClust:main
-omeClust_test = omeClust.tests.omeClust_test:main
-omeClustviz = omeClust.viz:main
-
