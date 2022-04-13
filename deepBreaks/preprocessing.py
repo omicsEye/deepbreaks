@@ -3,10 +3,12 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from scipy.stats import chi2_contingency
+from tqdm import tqdm
 
 
 #read data function
 def read_data(file_path, seq_type = None, is_main = True):
+    #
     if file_path.endswith('.csv'):
         dat = pd.read_csv(file_path, sep = ',', index_col= 0)
     elif file_path.endswith('.tsv'):
@@ -138,7 +140,7 @@ def ham_dist(dat, anaType, threshold):
     
     tmp1 = np.array(dat_dum).T
     tmp2 = tmp1.reshape(dat_dum.shape[1],1,dat_dum.shape[0])
-    dis = ((tmp2!= tmp1).sum(axis = 2)/dat.shape[0])**2
+    dis = ((tmp2 == tmp1).sum(axis = 2)/dat.shape[0])
     
     rnam = dat_dum.columns.tolist()
     dis = pd.DataFrame(dis, columns=rnam, index = rnam)
@@ -153,7 +155,51 @@ def ham_dist(dat, anaType, threshold):
     dis.columns = ['l0', 'l1', 'cor']
     return dis
     
- 
+#create dummy vars, drop those which are below a certain threshold, then calculate the similarity between these remaining columns
+def ham_dist2(dat, threshold = 0.2):
+    import gc
+    
+    #make dummy vars and keep all of them
+    tmp1 = pd.get_dummies(dat,drop_first=False)
+    
+    #drop rare cases
+    cl = tmp1.columns[(tmp1.sum()/dat.shape[0]>threshold)]
+    tmp1 = tmp1[cl]
+    
+    #creating empty dataFrame to keep the results
+    rnam = tmp1.columns.tolist()
+    dis = pd.DataFrame(columns=rnam, index = rnam)
+    
+    tmp1 = np.array(tmp1).T
+    
+    last = range(tmp1.shape[0])
+    for i in tqdm(last):
+#         print(i)
+        dist_vec = (tmp1[0,:] == tmp1).sum(axis = 1)
+
+        dis.iloc[i,i:] = dist_vec
+        dis.iloc[i:,i] = dist_vec
+        tmp1 = np.delete(tmp1, 0, 0)
+        if i%1000 == 0:
+            gc.collect()
+    gc.collect()
+    gc.collect()
+    dis = dis/dat.shape[0]
+    print('Reset indexes')    
+    dis.reset_index(inplace=True)
+    print('reshaping')
+    dis = dis.melt(id_vars='index')
+    dis['index'] = dis['index'].str.split('_').str[0]
+    dis['variable'] = dis['variable'].str.split('_').str[0]
+    gc.collect()
+    gc.collect()
+    dis = dis[dis['index']!=dis['variable']]
+    print('Selecting max values')
+    dis = dis.groupby(['index', 'variable']).max().reset_index()
+    dis.columns = ['l0', 'l1', 'cor']
+    return dis
+
+
 ###grouping features based on DBSCAN clustering algo 
 def db_grouped(dat, report_dir, threshold = 0.8):
     from sklearn.cluster import DBSCAN
