@@ -1,0 +1,9 @@
+latex>=0.0.1
+Cython>=0.29.2
+Numpy>=1.9.2
+Scipy>=0.17.0
+Matplotlib>=1.5.1
+Scikit-learn>=0.14.1
+pandas>=0.18.1
+Community==1.0.0b1
+networkx>=0.2.5
