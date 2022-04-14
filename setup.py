@@ -16,7 +16,7 @@ try:
         "Operating System :: MacOS",
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 except ImportError:
@@ -34,7 +34,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 
-VERSION = "1.1.8"
+VERSION = "1.1.1"
 AUTHOR = "Ali Rahnavard"
 AUTHOR_EMAIL = "gholamali.rahnavard@gmail.com"
 MAINTAINER = "Ali Rahnavard"
@@ -44,10 +44,10 @@ MAINTAINER_EMAIL = "gholamali.rahnavard@gmail.com"
 # this has been added since PyPI has turned off the download stats
 # this will be removed when PyPI Warehouse is production as it
 # will have download stats
-COUNTER_URL = "https://github.com/omicsEye/omeClust/blob/master/README.md"
+COUNTER_URL = "https://github.com/omicsEye/deepBreaks/blob/master/README.md"
 counter_file = "README.md"
 if not os.path.isfile(counter_file):
-    print("Downloading counter file to track omeClust downloads" +
+    print("Downloading counter file to track deepBreaks downloads" +
           " since the global PyPI download stats are currently turned off.")
     try:
         pass  # file, headers = urlretrieve(COUNTER_URL,counter_file)
@@ -55,15 +55,15 @@ if not os.path.isfile(counter_file):
         print("Unable to download counter")
 
 setup(
-    name="omeClust",
+    name="deepBreaks",
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     version=VERSION,
     license="MIT",
-    description="omeClust: multi-resolution clustering",
-    long_description="omeClust provides an elegant clustering approach " + \
+    description="deepBreaks: multi-resolution clustering",
+    long_description="deepBreaks provides an elegant clustering approach " + \
                      "to find clusters in data sets with different density and resolution.",
-    url="http://github.com/omicsEye/omeClust",
+    url="http://github.com/omicsEye/deepBreaks",
     keywords=['clustering', 'multi-resolution', 'hierarchically'],
     platforms=['Linux', 'MacOS', "Windows"],
     classifiers=classifiers,
@@ -82,10 +82,10 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'omeClust = omeClust.omeClust:main',
-            'omeClustviz = omeClust.viz:main',
-            'omeClust_test = omeClust.tests.omeClust_test:main'
+            'deepBreaks = deepBreaks.deepBreaks:main',
+            'deepBreaksviz = deepBreaks.viz:main',
+            'deepBreaks_test = deepBreaks.tests.deepBreaks_test:main'
         ]},
-    test_suite='omeClust.tests.omeClust_test',
+    test_suite='deepBreaks.tests.deepBreaks_test',
     zip_safe=False
 )
