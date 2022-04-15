@@ -2,6 +2,7 @@
 from preprocessing import *
 from models import *
 from visualization import *
+from sklearn.metrics import adjusted_mutual_info_score
 import os
 import datetime
 import argparse
@@ -61,7 +62,7 @@ def main():
     print('Shape of data after missing/constant care: ', df_cleaned.shape)
 
     print('Shape of data before imbalanced care: ', df_cleaned.shape)
-    df_cleaned = imb_care(dat=df_cleaned, imbalance_treshold=0.025)
+    df_cleaned = imb_care(dat=df_cleaned, imbalance_threshold=0.025)
     print('Shape of data after imbalanced care: ', df_cleaned.shape)
 
     if args.fraction is not None:
@@ -70,10 +71,11 @@ def main():
         print('number of columns of main data after: ', df_cleaned.shape[1])
 
     print('correlation analysis')
-    cr = ham_dist2(dat=df_cleaned, threshold=0.2)
+    # cr = ham_dist(dat=df_cleaned, threshold=0.2)
+    cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)
 
     print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=.95)
+    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=.85)
 
     print('grouping features')
     dc = group_features(dat=dc_df, report_dir=report_dir)

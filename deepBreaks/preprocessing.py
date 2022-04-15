@@ -6,27 +6,27 @@ from scipy.stats import chi2_contingency
 from tqdm import tqdm
 
 
-#read data function
-def read_data(file_path, seq_type = None, is_main = True):
+# read data function
+def read_data(file_path, seq_type=None, is_main=True):
     #
     if file_path.endswith('.csv'):
-        dat = pd.read_csv(file_path, sep = ',', index_col= 0)
+        dat = pd.read_csv(file_path, sep=',', index_col=0)
     elif file_path.endswith('.tsv'):
-        dat = pd.read_csv(file_path, sep = '\t', index_col= 0)
+        dat = pd.read_csv(file_path, sep='\t', index_col=0)
     elif file_path.endswith(('.xlsx', '.xls')):
-        dat = pd.read_excel(file_path, sep = '\t', index_col= 0)
+        dat = pd.read_excel(file_path, sep='\t', index_col=0)
     elif file_path.endswith('.fasta'):
-        #importing seq data
-        seq_dict = {rec.id : list(rec.seq) for rec in SeqIO.parse(file_path, "fasta")}
+        # importing seq data
+        seq_dict = {rec.id: list(rec.seq) for rec in SeqIO.parse(file_path, "fasta")}
         dat = pd.DataFrame.from_dict(seq_dict, orient='index')
     else:
         print('For now, we can only read csv, tsv, excel, and fasta files.')
         exit()
-    
+
     if is_main:
-        #naming each position as p + its rank
-        dat.columns = [str('p'+str(i)) for i in range(1, dat.shape[1]+1)]
-        #replacing unwanted characters with nan
+        # naming each position as p + its rank
+        dat.columns = [str('p' + str(i)) for i in range(1, dat.shape[1] + 1)]
+        # replacing unwanted characters with nan
         if seq_type == 'nu':
             na_values = ['-', 'r', 'y', 'k', 'm', 's', 'w', 'b', 'd', 'h', 'v', 'n']
         else:
@@ -39,153 +39,147 @@ def read_data(file_path, seq_type = None, is_main = True):
     return dat
 
 
-#### use top categories only:
+# use top categories only:
 def balanced_classes(dat, meta_dat, feature):
     tmp = dat.merge(meta_dat[feature], left_index=True, right_index=True)
-    vl = tmp[feature].value_counts()/tmp.shape[0]
-    categories_to_keep = vl[vl>1/len(vl)/2].index.tolist()
+    vl = tmp[feature].value_counts() / tmp.shape[0]
+    categories_to_keep = vl[vl > 1 / len(vl) / 2].index.tolist()
     tmp = tmp[tmp[feature].isin(categories_to_keep)]
-    dat = tmp.drop(feature, axis = 1)
+    dat = tmp.drop(feature, axis=1)
     return dat
 
 
-#taking care of missing and constant columns
-def missing_constant_care(dat, missing_treshold = 0.05):
+# taking care of missing and constant columns
+def missing_constant_care(dat, missing_threshold=0.05):
     tmp = dat.copy()
-    treshold = tmp.shape[0]*missing_treshold
-    cl = tmp.columns[tmp.isna().sum() > treshold]
-    tmp.drop(cl , axis = 1, inplace=True)
+    threshold = tmp.shape[0] * missing_threshold
+    cl = tmp.columns[tmp.isna().sum() > threshold]
+    tmp.drop(cl, axis=1, inplace=True)
     for cl in tmp.columns:
         tmp[cl] = tmp[cl].fillna(tmp[cl].mode()[0])
-    tmp = tmp.loc[:,tmp.nunique()!=1]
+    tmp = tmp.loc[:, tmp.nunique() != 1]
     return tmp
+
 
 # a function which check if one character in a certain column is below a threshold or not
 # and replace that character with the mode of that column of merge the rare cases together
 
-def colCleaner_column(dat, column, threshold = 0.015):
-   
+def colCleaner_column(dat, column, threshold=0.015):
     vl = dat[column].value_counts()
-    ls = vl/dat.shape[0] < threshold
-    ls = ls.index[ls==True].tolist()
-    
+    ls = vl / dat.shape[0] < threshold
+    ls = ls.index[ls == True].tolist()
+
     if len(ls) > 2:
         dat[column].replace(ls, ''.join(ls), inplace=True)
-        ls = vl/dat.shape[0] < threshold
-        ls = ls.index[ls==True].tolist()
+        ls = vl / dat.shape[0] < threshold
+        ls = ls.index[ls == True].tolist()
 
-    if len(ls)>0:
-        md = vl.index[vl==max(vl)][0]
+    if len(ls) > 0:
+        md = vl.index[vl == max(vl)][0]
         dat[column].replace(ls, md, inplace=True)
-    
+
     return dat[column]
 
 
-#taking care of imbalancedness in columns
-def imb_care(dat, imbalance_treshold = 0.05):
+# taking care of rare cases in columns
+def imb_care(dat, imbalance_threshold=0.05):
     tmp = dat.copy()
-    nuniq = tmp.nunique()
-    cols_to_check = nuniq.index[nuniq>1].tolist()
+    n_uniq = tmp.nunique()
+    cols_to_check = n_uniq.index[n_uniq > 1].tolist()
     for cl in cols_to_check:
-        tmp[cl] = colCleaner_column(dat=tmp, column=cl, threshold=imbalance_treshold)
-    nuniq = tmp.nunique()
-    cl_uniq = nuniq.index[nuniq==1].tolist()
-    if len(cl_uniq)>0:
-        tmp.drop(cl_uniq, axis = 1, inplace = True)
+        tmp[cl] = colCleaner_column(dat=tmp, column=cl, threshold=imbalance_threshold)
+    n_uniq = tmp.nunique()
+    cl_uniq = n_uniq.index[n_uniq == 1].tolist()
+    if len(cl_uniq) > 0:
+        tmp.drop(cl_uniq, axis=1, inplace=True)
     return tmp
 
-#function to sample from features 
-def col_sampler(dat, sample_frac = 1):
-    if sample_frac < 1 :
-        samples = int(dat.shape[1]*sample_frac)
-        cl = np.random.choice(dat.columns, samples, replace = False).tolist()
+
+# function to sample from features 
+def col_sampler(dat, sample_frac=1):
+    if sample_frac < 1:
+        samples = int(dat.shape[1] * sample_frac)
+        cl = np.random.choice(dat.columns, samples, replace=False).tolist()
         # remove the columns with the n
         dat = dat[cl]
     return dat
 
 
-#function to calculate Cramer's V score
-def cramers_V(var1,var2):
-    crosstab =np.array(pd.crosstab(var1,var2, rownames=None, colnames=None)) # Cross table building
-    stat = chi2_contingency(crosstab)[0] # Keeping of the test statistic of the Chi2 test
-    obs = np.sum(crosstab) # Number of observations
-    mini = min(crosstab.shape)-1 # Take the minimum value between the columns and the rows of the cross table
-    return (stat/(obs*mini))
+# function to calculate Cramer's V score
+def cramers_V(var1, var2):
+    crosstab = np.array(pd.crosstab(var1, var2, rownames=None, colnames=None))  # Cross table building
+    stat = chi2_contingency(crosstab)[0]  # Keeping of the test statistic of the Chi2 test
+    obs = np.sum(crosstab)  # Number of observations
+    mini = min(crosstab.shape) - 1  # Take the minimum value between the columns and the rows of the cross table
+    return (stat / (obs * mini))
 
-#function for creating correlation data frame and just report those which are above a treashold
-def cor_cal(dat, report_dir, threshold = 0.8):
-    print('extepected_calculations: ', dat.shape[1]*(dat.shape[1]-1)/2)
+
+# function for creating correlation data frame and just report those which are above a treashold
+def cor_cal(dat, report_dir, threshold=0.8):
+    print('expected_calculations: ', dat.shape[1] * (dat.shape[1] - 1) / 2)
     cn = 0
     cr = pd.DataFrame(columns=['l0', 'l1', 'cor'])
     col_check = []
-    for cl in combinations(dat.columns, 2): #all paired combinations of df columns
+    for cl in combinations(dat.columns, 2):  # all paired combinations of df columns
         cn += 1
-        if cn%5000 == 0: #show each 5000 steps
+        if cn % 5000 == 0:  # show each 5000 steps
             print(cn)
-        cv = cramers_V(dat[cl[0]],dat[cl[1]])
+        cv = cramers_V(dat[cl[0]], dat[cl[1]])
         cr.loc[len(cr)] = [cl[0], cl[1], cv]
         cr.loc[len(cr)] = [cl[1], cl[0], cv]
-    
-    cr.to_csv(str(report_dir + '/' + 'correlation_matrix.csv'), index = False)
 
-    return cr#[cr['cor'] >= threshold]
+    cr.to_csv(str(report_dir + '/' + 'correlation_matrix.csv'), index=False)
+
+    return cr  # [cr['cor'] >= threshold]
 
 
-#create dummy vars, drop those which are below a certain threshold, then calculate the similarity between these remaining columns
-def ham_dist(dat, anaType, threshold):
-    
-    dat_dum = pd.get_dummies(dat,drop_first=False)
-    cl = dat_dum.columns[(dat_dum.sum()/dat.shape[0]>threshold)]
-    dat_dum = dat_dum[cl]
-    
-    tmp1 = np.array(dat_dum).T
-    tmp2 = tmp1.reshape(dat_dum.shape[1],1,dat_dum.shape[0])
-    dis = ((tmp2 == tmp1).sum(axis = 2)/dat.shape[0])
-    
-    rnam = dat_dum.columns.tolist()
-    dis = pd.DataFrame(dis, columns=rnam, index = rnam)
-    
-    dis.reset_index(inplace=True)
-    dis = dis.melt(id_vars='index')
-    dis['index'] = dis['index'].str.split('_').str[0]
-    dis['variable'] = dis['variable'].str.split('_').str[0]
-    
-    dis = dis[dis['index']!=dis['variable']]
-    dis = dis.groupby(['index', 'variable']).max().reset_index()
-    dis.columns = ['l0', 'l1', 'cor']
-    return dis
-    
-#create dummy vars, drop those which are below a certain threshold, then calculate the similarity between these remaining columns
-def ham_dist2(dat, threshold = 0.2):
+# a function to calculate adjusted mutual information for all the paired combinations of the dat dataset
+def dist_cols(dat, score_func):
+    # creating empty dataFrame to keep the results
+    cn = 0
+    cr = pd.DataFrame(columns=['l0', 'l1', 'cor'])
+
+    for cl in tqdm(combinations(dat.columns, 2),
+                   total=(dat.shape[1] * (dat.shape[1] - 1)) / 2):  # all paired combinations of dat columns
+
+        score = score_func(dat[cl[0]], dat[cl[1]])
+        cr.loc[len(cr)] = [cl[0], cl[1], score]
+        cr.loc[len(cr)] = [cl[1], cl[0], score]
+
+    cr.loc[cr['cor'] < 0, 'cor'] = 0
+    return cr
+
+
+# create dummy vars, drop those which are below a certain threshold, then calculate the similarity between these remaining columns
+def ham_dist(dat, threshold=0.2):
     import gc
-    
-    #make dummy vars and keep all of them
-    tmp1 = pd.get_dummies(dat,drop_first=False)
-    
-    #drop rare cases
-    cl = tmp1.columns[(tmp1.sum()/dat.shape[0]>threshold)]
+
+    # make dummy vars and keep all of them
+    tmp1 = pd.get_dummies(dat, drop_first=False)
+
+    # drop rare cases
+    cl = tmp1.columns[(tmp1.sum() / dat.shape[0] > threshold)]
     tmp1 = tmp1[cl]
-    
-    #creating empty dataFrame to keep the results
-    rnam = tmp1.columns.tolist()
-    dis = pd.DataFrame(columns=rnam, index = rnam)
-    
+
+    # creating empty dataFrame to keep the results
+    r_nam = tmp1.columns.tolist()
+    dis = pd.DataFrame(columns=r_nam, index=r_nam)
+
     tmp1 = np.array(tmp1).T
-    
+
     last = range(tmp1.shape[0])
     for i in tqdm(last):
-#         print(i)
-        dist_vec = (tmp1[0,:] == tmp1).sum(axis = 1)
+        dist_vec = (tmp1[0, :] == tmp1).sum(axis=1)
 
-        dis.iloc[i,i:] = dist_vec
-        dis.iloc[i:,i] = dist_vec
+        dis.iloc[i, i:] = dist_vec
+        dis.iloc[i:, i] = dist_vec
         tmp1 = np.delete(tmp1, 0, 0)
-        if i%1000 == 0:
+        if i % 1000 == 0:
             gc.collect()
     gc.collect()
     gc.collect()
-    dis = dis/dat.shape[0]
-    print('Reset indexes')    
+    dis = dis / dat.shape[0]
+    print('Reset indexes')
     dis.reset_index(inplace=True)
     print('reshaping')
     dis = dis.melt(id_vars='index')
@@ -193,96 +187,78 @@ def ham_dist2(dat, threshold = 0.2):
     dis['variable'] = dis['variable'].str.split('_').str[0]
     gc.collect()
     gc.collect()
-    dis = dis[dis['index']!=dis['variable']]
+    dis = dis[dis['index'] != dis['variable']]
     print('Selecting max values')
     dis = dis.groupby(['index', 'variable']).max().reset_index()
     dis.columns = ['l0', 'l1', 'cor']
     return dis
 
 
-###grouping features based on DBSCAN clustering algo 
-def db_grouped(dat, report_dir, threshold = 0.8):
+# grouping features based on DBSCAN clustering algo
+def db_grouped(dat, report_dir, threshold=0.8):
     from sklearn.cluster import DBSCAN
 
     cr_mat = dat.pivot(index='l0', columns='l1', values='cor')
     cr_mat.fillna(1, inplace=True)
-    cr_mat = (cr_mat-1)**2
-    
-    db = DBSCAN(eps=(threshold-1)**2, min_samples=2, metric='precomputed', n_jobs=-1)
+    cr_mat = (cr_mat - 1) ** 2
+
+    db = DBSCAN(eps=(threshold - 1) ** 2, min_samples=2, metric='precomputed', n_jobs=-1)
     db.fit(cr_mat)
 
     dc_df = pd.DataFrame(cr_mat.index.tolist(), columns=['feature'])
     dc_df['group'] = db.labels_
-    
-    
-    
+
     clusters = list(set(db.labels_))
     for cluster in clusters:
         if cluster == -1:
-            dc_df.loc[dc_df['group']==-1, 'group'] = 'No_gr'
+            dc_df.loc[dc_df['group'] == -1, 'group'] = 'No_gr'
         else:
-            dc_df.loc[dc_df['group']==cluster, 'group'] = 'g'+str(cluster)
+            dc_df.loc[dc_df['group'] == cluster, 'group'] = 'g' + str(cluster)
     try:
-        dc_df = dc_df[dc_df['group']!='No_gr']
+        dc_df = dc_df[dc_df['group'] != 'No_gr']
     except:
         dc_df = pd.DataFrame(columns=['feature', 'group'])
-    
-    dc_df.to_csv(str(report_dir + '/' + 'correlated_positions_DBSCAN.csv'), index = False)
+
+    dc_df.to_csv(str(report_dir + '/' + 'correlated_positions_DBSCAN.csv'), index=False)
     return dc_df
 
-def col_extract(dat, cl1 = 'l0', cl2 = 'l1'):
+
+def col_extract(dat, cl1='l0', cl2='l1'):
     ft_list = dat[cl1].tolist()
     ft_list.extend(dat[cl2].tolist())
     ft_list = list(set(ft_list))
     return ft_list
 
 
-#function for grouping features in saving them in a dictionary file
+# function for grouping features in saving them in a dictionary file
 def group_features(dat, report_dir):
     dc = {}
-    # cr_copy = dat.copy()
-    # ft_list = col_extract(cr_copy)
-    
-    # cor_ft_list = []
-    # for ft in ft_list:
-    #     if ft not in cor_ft_list:
-    #         ln = 0
-    #         tmp = cr_copy.loc[(cr_copy['l0']==ft) | (cr_copy['l1']==ft),:]
-    #         while len(tmp) != ln:
-    #             ft_sub_list = col_extract(tmp)
-    #             ln = len(tmp)
-    #             tmp = cr_copy.loc[(cr_copy['l0'].isin(ft_sub_list)) | (cr_copy['l1'].isin(ft_sub_list)),:]
-
-    #         ft_fin_list = col_extract(tmp)
-    #         dc[ft_fin_list[0]] = ft_fin_list[1:]
-    #         cor_ft_list.extend(ft_fin_list)
-
     if len(dat) > 0:
         for name, gr in dat.groupby('group'):
-            tmp = dat.loc[dat['group']==name, 'feature'].tolist()
+            tmp = dat.loc[dat['group'] == name, 'feature'].tolist()
             dc[tmp[0]] = tmp[1:]
 
-        dc_temp = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in dc.items() ]))
-        dc_temp.to_csv(str(report_dir + '/' + 'correlated_positions.csv'), index = False)
+        dc_temp = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dc.items()]))
+        dc_temp.to_csv(str(report_dir + '/' + 'correlated_positions.csv'), index=False)
     return dc
 
 
-#function that gets the grouped dictionary and returns a dataframe of grouped features
+# function that gets the grouped dictionary and returns a dataframe of grouped features
 def group_extend(dic):
     dc_df = pd.DataFrame(columns=['feature', 'group'])
     for n, k in enumerate(dic.keys()):
-        
         ft = dic[k].copy()
         ft.append(k)
-        col = [str('g'+ str(n))]*len(ft)
+        col = [str('g' + str(n))] * len(ft)
         tmp = pd.DataFrame(list(zip(ft, col)), columns=['feature', 'group'])
         dc_df = dc_df.append(tmp, ignore_index=True)
     dc_df['feature'] = dc_df['feature'].str.split('p').str[1]
     dc_df['feature'] = dc_df['feature'].astype(int)
     return dc_df
 
-#function for removing the correlated features from the main dataframe
+
+# function for removing the correlated features from the main dataframe
 def cor_remove(dat, dic):
     for k in dic.keys():
-        dat.drop(dic[k], axis = 1, inplace = True)
+        dat.drop(dic[k], axis=1, inplace=True)
     return dat
