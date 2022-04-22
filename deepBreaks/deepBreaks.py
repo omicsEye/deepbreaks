@@ -62,7 +62,7 @@ def main():
     print('Shape of data after missing/constant care: ', df_cleaned.shape)
 
     print('Shape of data before imbalanced care: ', df_cleaned.shape)
-    df_cleaned = imb_care(dat=df_cleaned, imbalance_threshold=0.025)
+    df_cleaned = imb_care(dat=df_cleaned, imbalance_threshold=0.05)
     print('Shape of data after imbalanced care: ', df_cleaned.shape)
 
     if args.fraction is not None:
@@ -75,7 +75,7 @@ def main():
     cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)
 
     print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=.85)
+    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=0.9)
 
     print('grouping features')
     dc = group_features(dat=dc_df, report_dir=report_dir)
@@ -91,7 +91,7 @@ def main():
 
     # model
     print('preparing env')
-    select_top = 3
+    select_top = 5
     top_models, train_cols, model_names = fit_models(dat=df_cleaned, meta_var=args.metavar,
                                                      model_type=args.anatype, models_to_select=select_top,
                                                      report_dir=report_dir)
@@ -111,9 +111,9 @@ def main():
                                n_positions=positions, report_dir=report_dir)
     dp_plot(dat=mean_imp, model_name='mean', imp_col='mean_imp', report_dir=report_dir)
 
-    plot_imp_all(trained_models=top_models, dat=df_cleaned, train_cols=train_cols,
-                 grouped_features=dc_df, meta_var=args.metavar, model_type=args.anatype,
-                 n_positions=positions, report_dir=report_dir)
+    # plot_imp_all(trained_models=top_models, dat=df_cleaned, train_cols=train_cols,
+    #              grouped_features=dc_df, meta_var=args.metavar, model_type=args.anatype,
+    #              n_positions=positions, report_dir=report_dir)
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')
     file_names = os.listdir(report_dir)
@@ -124,5 +124,6 @@ def main():
     return print('done!')
 
 
-main()
-
+# main()
+if __name__ == "__main__":
+    main()

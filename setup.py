@@ -16,7 +16,7 @@ try:
         "Operating System :: MacOS",
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 except ImportError:
@@ -30,15 +30,15 @@ except ImportError:
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 
 VERSION = "1.1.1"
-AUTHOR = "Ali Rahnavard"
-AUTHOR_EMAIL = "gholamali.rahnavard@gmail.com"
-MAINTAINER = "Ali Rahnavard"
-MAINTAINER_EMAIL = "gholamali.rahnavard@gmail.com"
+AUTHOR = "Mahdi Baghbanzadeh"
+AUTHOR_EMAIL = "mbagh@gwu.edu"
+MAINTAINER = "Mahdi Baghbanzadeh"
+MAINTAINER_EMAIL = "mbagh@gwu.edu"
 
 # try to download the bitbucket counter file to count downloads
 # this has been added since PyPI has turned off the download stats
@@ -60,31 +60,31 @@ setup(
     author_email=AUTHOR_EMAIL,
     version=VERSION,
     license="MIT",
-    description="deepBreaks: multi-resolution clustering",
-    long_description="deepBreaks provides an elegant clustering approach " + \
-                     "to find clusters in data sets with different density and resolution.",
+    description="deepBreaks: Prioritizing important regions of sequencing data for function prediction",
+    long_description="deepBreaks provides a generic method to identify important changes in association with the " + \
+                     "phenotype of interest using multi-alignment sequencing data from a population.",
     url="http://github.com/omicsEye/deepBreaks",
-    keywords=['clustering', 'multi-resolution', 'hierarchically'],
+    keywords=['machine learning', 'genomics', 'sequencing data'],
     platforms=['Linux', 'MacOS', "Windows"],
     classifiers=classifiers,
     # long_description=open('readme.md').read(),
     install_requires=[
-        "latex >= 0.0.1",
-        "Cython >= 0.29.2",
-        "Numpy >= 1.9.2",
-        "Scipy >= 0.17.0",
-        "Matplotlib >= 1.5.1",
-        "Scikit-learn >= 0.14.1",
-        "pandas >= 0.18.1",
-        "Community == 1.0.0b1",
-        "networkx >= 0.2.5"
+        'setuptools==52.0.0',
+        'numpy==1.19.5',
+        'pandas==1.2.3',
+        'datetime==4.3',
+        'bio==1.3.3',
+        'scipy==1.5.4',
+        'tqdm==4.59.0',
+        'matplotlib==3.3.4',
+        'seaborn==0.11.1',
+        'scikit-learn==0.23.2',
+        'pycaret==2.3.6'
     ],
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'deepBreaks = deepBreaks.deepBreaks:main',
-            'deepBreaksviz = deepBreaks.viz:main',
-            'deepBreaks_test = deepBreaks.tests.deepBreaks_test:main'
+            'deepBreaks = deepBreaks.deepBreaks:main'
         ]},
     test_suite='deepBreaks.tests.deepBreaks_test',
     zip_safe=False

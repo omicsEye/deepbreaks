@@ -194,12 +194,74 @@ def ham_dist(dat, threshold=0.2):
     return dis
 
 
+# calculate vectorized normalized mutual information
+def vec_nmi(dat):
+    # get the sample size
+    N = dat.shape[0]
+    # create empty dataframe
+    dat_temp = pd.DataFrame(columns=dat.columns, index=dat.columns)
+
+    # transpose main dataframe
+    df_dum = pd.get_dummies(dat).T.reset_index()
+    df_dum[['position', 'char']] = df_dum['index'].str.split("_", expand=True)
+    df_dum.drop(['index'], axis=1, inplace=True)
+
+    # total samples within each position with specific character
+    col_sum = df_dum.iloc[:, :-2].sum(axis=1)
+
+    # array of all data
+    my_array = np.array(df_dum.iloc[:, :-2])
+
+    for name, gr in df_dum.groupby(['position']):
+        mu_list = []
+        char_list = list(set(df_dum.loc[df_dum['position'] == name, 'char']))
+        temp = df_dum[['position', 'char']]
+
+        for ch in char_list:
+            temp['inter' + ch] = None
+            temp['ui_vi'] = None
+            temp['mui' + ch] = None
+
+            intersects = my_array[(df_dum['position'] == name) & (df_dum['char'] == ch)]
+            intersects = intersects + my_array
+            intersects = intersects == 2
+
+            temp['inter' + ch] = intersects.sum(axis=1)
+
+            temp['ui_vi'] = temp.loc[(temp['position'] == name) & (df_dum['char'] == ch), 'inter' + ch].values * col_sum
+            temp['mui' + ch] = (temp['inter' + ch] / N) * (np.log(N * (temp['inter' + ch]) / temp['ui_vi']))
+
+            mu_list.append('mui' + ch)
+
+        # sum over all entropies
+        temp = temp.groupby('position')[mu_list].sum().sum(axis=1)
+
+        # insert into dataframe
+        dat_temp[name] = temp
+
+    dat_temp.fillna(0, inplace=True)
+
+    # calculate average entropies
+    entropies = np.diag(dat_temp)
+    m_entropies = np.tile(entropies, reps=[len(entropies), 1])
+    avg_entropies = (entropies.reshape(len(entropies), 1) + m_entropies) / 2
+
+    # calculate normalized mutual information
+    dat_temp = dat_temp / avg_entropies
+    dat_temp.fillna(0, inplace=True)
+
+    return dat_temp
+
+
 # grouping features based on DBSCAN clustering algo
-def db_grouped(dat, report_dir, threshold=0.8):
+def db_grouped(dat, report_dir, threshold=0.8, needs_pivot=False):
     from sklearn.cluster import DBSCAN
 
-    cr_mat = dat.pivot(index='l0', columns='l1', values='cor')
-    cr_mat.fillna(1, inplace=True)
+    if needs_pivot:
+        cr_mat = dat.pivot(index='l0', columns='l1', values='cor')
+        cr_mat.fillna(1, inplace=True)
+    else:
+        cr_mat = dat
     cr_mat = (cr_mat - 1) ** 2
 
     db = DBSCAN(eps=(threshold - 1) ** 2, min_samples=2, metric='precomputed', n_jobs=-1)
