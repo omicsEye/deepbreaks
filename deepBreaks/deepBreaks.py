@@ -1,7 +1,7 @@
 # importing libraries
-from preprocessing import *
-from models import *
-from visualization import *
+from deepBreaks.preprocessing import *
+from deepBreaks.models import *
+from deepBreaks.visualization import *
 from sklearn.metrics import adjusted_mutual_info_score
 import os
 import datetime
