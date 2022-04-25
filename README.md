@@ -110,14 +110,14 @@ $ deepBreaks -h
 4. `--metavar` or `-mv` name of the meta variable
 5. `--anatype` or `-a` analysis type, options are `reg` for regression and `cl` for classification
 6. `--fraction` or `-fr` fraction of the main data (sequence positions) to run. it is optional, but you can enter a value between 0 and 1 to sample from the main data set.
-<br>
-## Output ##
+## Output ##  
 1. correlated positions. We group all the collinear positions together.
 2. models summary. list of models and their performance metrics.
 3. plot of the feature importance of the top models in *modelName_dpi.png* format.
 4. csv files of feature importance based on top models containing, feature, importance, relative importance, group of the position (we group all the collinear positions together)
 5. plots and csv file of average of feature importance of top models.
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
+
 ### Demo run using synthetic data ###
 
 ### Support ###
