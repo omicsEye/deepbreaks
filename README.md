@@ -5,7 +5,11 @@ changes in association with the phenotype of interest
 using multi-alignment sequencing data from a population.
 
 ---
----
+**Citation:**
+
+
+Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
+
 ---
 # deepBreaks user manual
 
@@ -26,7 +30,7 @@ using multi-alignment sequencing data from a population.
 # Features #
 1. Generic software that can handle any kind of sequencing data and phenotypes
 2. One place to do all analysis and producing high-quality visualizations
-3. optimized computation
+3. Optimized computation
 4. User-friendly software
 5. gives us information about the predictive power of most discriminative positions in a sequencing data
 # DeepBreaks #
