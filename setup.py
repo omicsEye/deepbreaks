@@ -70,16 +70,17 @@ setup(
     # long_description=open('readme.md').read(),
     install_requires=[
         'setuptools==52.0.0',
-        'numpy==1.19.5',
-        'pandas==1.2.3',
-        'datetime==4.3',
-        'bio==1.3.3',
-        'scipy==1.5.4',
-        'tqdm==4.59.0',
-        'matplotlib==3.3.4',
-        'seaborn==0.11.1',
-        'scikit-learn==0.23.2',
-        'pycaret==2.3.6'
+        # 'numpy==1.19.5',
+        # 'pandas==1.2.3',
+        # 'datetime==4.3',
+
+        # 'scipy==1.5.4',
+        # 'tqdm==4.59.0',
+        # 'matplotlib==3.3.4',
+        # 'seaborn==0.11.1',
+        # 'scikit-learn==0.23.2',
+        'pycaret==2.3.6',
+        'bio==1.3.3'
     ],
     packages=find_packages(),
     entry_points={
