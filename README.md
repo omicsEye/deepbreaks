@@ -32,7 +32,7 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 2. One place to do all analysis and producing high-quality visualizations
 3. Optimized computation
 4. User-friendly software
-5. gives us information about the predictive power of most discriminative positions in a sequencing data
+5. Provides a predictive power of most discriminative positions in a sequencing data
 # DeepBreaks #
 ## deepBreaks approach ##
 ![deepBreaks Workflow overview](img/fig1_overview.png)
@@ -70,13 +70,13 @@ conda 4.9.2
 <span style="color:#fc0335">if not, you must make *conda* available to your system for further steps.</span>
 if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).
   
-* Third create a new conda environment with the following command:
+* Third create a new conda environment (let's call it deepBreaks_env) with the following command:
 ```
-$ conda create --name YOUR-EVN-NAME python=3.8
+$ conda create --name deepBreaks_env python=3.8
 ```
 * Then activate your conda environment:
 ```commandline
-conda activate YOUR-EVN-NAME 
+conda activate deepBreaks_env 
 ```
 * Finally, install *deepBreaks*:
 ```commandline
