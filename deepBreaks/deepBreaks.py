@@ -72,10 +72,10 @@ def main():
 
     print('correlation analysis')
     # cr = ham_dist(dat=df_cleaned, threshold=0.2)
-    cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)
-
+    # cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)
+    cr = vec_nmi(dat=df_cleaned)
     print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=0.9)
+    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=0.9, needs_pivot=False)
 
     print('grouping features')
     dc = group_features(dat=dc_df, report_dir=report_dir)

@@ -90,14 +90,29 @@ python setup.py install
 
 To test if deepBreaks is installed correctly, you may run the following command in the terminal:
 
-```
-#!cmd
-
+```#!cmd
 deepBreaks -h
-
 ```
-
 Which yields deepBreaks command line options.
+```commandline
+usage: deepBreaks [-h] 
+--seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar METAVAR --anatype {reg,cl} [--fraction FRACTION]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --seqfile SEQFILE, -sf SEQFILE
+                        files contains the sequences
+  --seqtype SEQTYPE, -st SEQTYPE
+                        type of sequence: nuc, amino-acid
+  --meta_data META_DATA, -md META_DATA
+                        files contains the meta data
+  --metavar METAVAR, -mv METAVAR
+                        name of the meta var (response variable)
+  --anatype {reg,cl}, -a {reg,cl}
+                        type of analysis
+  --fraction FRACTION, -fr FRACTION
+                        fraction of main data to run
+```
 
 
 ## Options ##
@@ -123,7 +138,9 @@ $ deepBreaks -h
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
 
 ### Demo run using synthetic data ###
-
+```commandline
+$ deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
+```
 ### Support ###
 
 * Please submit your questions or issues with the software at [Issues tracker](https://github.com/omicsEye/deepBreaks/issues).

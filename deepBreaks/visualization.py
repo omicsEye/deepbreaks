@@ -5,7 +5,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-from models import fimp_single
+from deepBreaks.models import fimp_single
 
 
 # function to fix the position of annotations

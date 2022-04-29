@@ -1,7 +1,7 @@
 try:
     from setuptools import setup, find_packages
 except ImportError:
-    sys.exit("Please install setuptools.")
+    exit("Please install setuptools.")
 
 import os
 import urllib
@@ -20,7 +20,7 @@ try:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 except ImportError:
-    from urllib import urlretrieve
+    from urllib.request import urlretrieve
 
     classifiers = [
         "Programming Language :: Python",
@@ -54,6 +54,9 @@ if not os.path.isfile(counter_file):
     except EnvironmentError:
         print("Unable to download counter")
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
     name="deepBreaks",
     author=AUTHOR,
@@ -68,20 +71,8 @@ setup(
     platforms=['Linux', 'MacOS', "Windows"],
     classifiers=classifiers,
     # long_description=open('readme.md').read(),
-    install_requires=[
-        'setuptools==52.0.0',
-        # 'numpy==1.19.5',
-        # 'pandas==1.2.3',
-        # 'datetime==4.3',
 
-        # 'scipy==1.5.4',
-        # 'tqdm==4.59.0',
-        # 'matplotlib==3.3.4',
-        # 'seaborn==0.11.1',
-        # 'scikit-learn==0.23.2',
-        'pycaret==2.3.6',
-        'bio==1.3.3'
-    ],
+    install_requires=required,
     packages=find_packages(),
     entry_points={
         'console_scripts': [
