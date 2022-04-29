@@ -17,14 +17,14 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 * [Features](#features)
 * [deepBreaks](#deepBreaks)
     * [deepBreaks approach](#deepBreaks-approach)
-    * [Requirements](#requirements)
     * [Installation](#installation)
-* [Getting Started with omeClust](#getting-started-with-omeClust)
-    * [Test omeClust](#test-omeClust)
+* [Getting Started with deepBreaks](#getting-started-with-deepBreaks)
+    * [Test deepBreaks](#test-omeClust)
     * [Options](#options) 
-    * [Input](#Input)
-    * [Output](#output)  
-* [Tutorials for normalized mutual information calculation](#tutorials-for-distance-calculation)
+    * [Input](#input)
+    * [Output](#output)
+    * [Demo](#demo)
+* [Tutorials for normalized mutual information calculation](#tutorials-for-normalized-mutual-information-calculation)
 * [Support](#Support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
@@ -36,20 +36,7 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 # DeepBreaks #
 ## deepBreaks approach ##
 ![deepBreaks Workflow overview](img/fig1_overview.png)
-<br><br>
-## REQUIREMENTS ##
-* [matplotlib==3.3.4](http://matplotlib.org/)
-* [Python 3.*](https://www.python.org/download/releases/)
-* [numpy==1.19.5](http://www.numpy.org/)
-* [pandas==1.2.3](http://pandas.pydata.org/getpandas.html)
-* [setuptools==52.0.0](https://setuptools.pypa.io/en/latest/index.html)
-* [datetime==4.3](https://docs.python.org/3/library/datetime.html)
-* [bio==1.3.3](https://biopython.org/wiki/Getting_Started)
-* [scipy==1.5.4](https://scipy.org/)
-* [tqdm==4.59.0](https://tqdm.github.io/)
-* [seaborn==0.11.1](https://seaborn.pydata.org/)
-* [scikit-learn==0.23.2](https://scikit-learn.org/stable/install.html)
-<br><br>
+
 ## INSTALLATION ##
 
 
@@ -79,8 +66,13 @@ $ conda create --name deepBreaks_env python=3.8
 conda activate deepBreaks_env 
 ```
 * Finally, install *deepBreaks*:
+  * before running the following line you should change your directory to the same directory that you have cloned the deepBreaks repo:
 ```commandline
-python setup.py install
+python -m pip install .
+```
+or you can directly install if from GitHub:
+```commandline
+python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
 ------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,8 +112,6 @@ optional arguments:
 ```
 $ deepBreaks -h
 ```
-
-
 ## Input ##
 1. `--seqfile` or `-sf` PATH to a sequence data file
 2. `--seqtype` or `-st` sequence type, values are `amino-acid` and `nu` for nucleotides
@@ -137,10 +127,13 @@ $ deepBreaks -h
 5. plots and csv file of average of feature importance of top models.
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
 
-### Demo run using synthetic data ###
+## Demo ##
 ```commandline
 $ deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
 ```
+# Tutorials for normalized mutual information calculation ##
+**vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are samples an columns are positions in a sequence:
+
 ### Support ###
 
 * Please submit your questions or issues with the software at [Issues tracker](https://github.com/omicsEye/deepBreaks/issues).
