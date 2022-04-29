@@ -133,6 +133,27 @@ $ deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st a
 ```
 # Tutorials for normalized mutual information calculation ##
 **vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are samples an columns are positions in a sequence:
+<center>
+
+| | position_1 | position_2 | ... | position_n |
+| -- | --------------- | --------------- | --------------- | ----------|
+|sample 1 | A | C | ... | G |
+|sample 2 | A | C | ... | G |
+|sample 3 | T | C | ... | G |
+
+</center>
+and the out put of the function is a symmetric dataframe with rows and columns equal to positions and the value of the intersection of each row and column is their normalazied mutual information:
+
+<center>
+
+| | position_1 | position_2 | ... | position_n |
+| -- | --------------- | --------------- | --------------- | ----------|
+|position_1 | 1 | 0.02 | ... | 0.64 |
+|position_2 | 0.02 | 1 | ... | 0.02 |
+|... | ... | ... | ... | ... |
+|position_n | 0.64 | 0.02 | ... | 1 |
+
+</center>
 
 ### Support ###
 
