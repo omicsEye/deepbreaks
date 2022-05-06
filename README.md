@@ -43,7 +43,7 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 <span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
 
 * First install *conda*  
-Go to the [Anaconda website]('https://www.anaconda.com/') and download the latest version for your operating system.  
+Go to the [Anaconda website](https://www.anaconda.com/) and download the latest version for your operating system.  
 *DO NOT FORGET TO ADD CONDA TO your system PATH*
 * Second is to check for conda availability  
 open a terminal (or command line for Windows users) and run:
@@ -87,7 +87,7 @@ deepBreaks -h
 ```
 Which yields deepBreaks command line options.
 ```commandline
-usage: deepBreaks [-h] 
+usage: deepBreaks -h 
 --seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar METAVAR --anatype {reg,cl} [--fraction FRACTION]
 
 optional arguments:
@@ -142,7 +142,7 @@ $ deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st a
 |sample 3 | T | C | ... | G |
 
 </center>
-and the out put of the function is a symmetric dataframe with rows and columns equal to positions and the value of the intersection of each row and column is their normalazied mutual information:
+and the output of the function is a symmetric dataframe with rows and columns equal to positions and the value of the intersection of each row and column is their normalazied mutual information:
 
 <center>
 
