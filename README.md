@@ -48,7 +48,7 @@ Go to the [Anaconda website](https://www.anaconda.com/) and download the latest 
 * Second is to check for conda availability  
 open a terminal (or command line for Windows users) and run:
 ```
-$ conda --version
+conda --version
 ```
 it should out put something like:
 ```
@@ -59,7 +59,7 @@ if you have problems adding conda to PATH, you can find instructions [here](http
   
 * Third create a new conda environment (let's call it deepBreaks_env) with the following command:
 ```
-$ conda create --name deepBreaks_env python=3.8
+conda create --name deepBreaks_env python=3.8
 ```
 * Then activate your conda environment:
 ```commandline
