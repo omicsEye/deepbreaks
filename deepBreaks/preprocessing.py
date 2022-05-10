@@ -57,6 +57,8 @@ def missing_constant_care(dat, missing_threshold=0.05):
     tmp.drop(cl, axis=1, inplace=True)
     for cl in tmp.columns:
         tmp[cl] = tmp[cl].fillna(tmp[cl].mode()[0])
+    # mode = tmp.filter(tmp.columns).mode().iloc[0]  # mode of all the columns
+    # tmp = tmp.fillna(mode)  # replacing NA values with the mode of each column
     tmp = tmp.loc[:, tmp.nunique() != 1]
     return tmp
 

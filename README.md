@@ -129,7 +129,7 @@ $ deepBreaks -h
 
 ## Demo ##
 ```commandline
-$ deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
+deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
 ```
 # Tutorials for normalized mutual information calculation ##
 **vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are samples an columns are positions in a sequence:
