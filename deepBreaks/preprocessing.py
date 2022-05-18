@@ -6,6 +6,26 @@ from scipy.stats import chi2_contingency
 from tqdm import tqdm
 
 
+# sample size and classes check
+def check_data(meta_dat, feature, model_type):
+    if len(meta_dat) < 30:
+        raise Exception('Minimum sample size for a regression analysis is 30 samples, you provided {} samples!'.format(
+            len(meta_dat)))
+    elif model_type == 'cl':
+        vl = meta_dat[feature].value_counts() / meta_dat.shape[0]
+        if len(vl) == 1:
+            raise Exception(
+                'Minimum categories for a classification analysis is 2 classes, you provided {}'.format(len(vl)))
+        elif vl[1] < 0.25:
+            raise Exception('Provided sample is highly im-balanced, we need more data for the minority group.')
+        else:
+            message = "let's start the analysis"
+    else:
+        message = "let's start the analysis"
+
+    return print(message)
+
+
 # read data function
 def read_data(file_path, seq_type=None, is_main=True):
     #

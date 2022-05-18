@@ -32,6 +32,10 @@ def main():
     if args.seqtype not in ['nu', 'amino-acid']:
         print('For sequence data type, please enter "nu" or "amino-acid" only')
         exit()
+
+    if args.anatype not in ['reg', 'cl']:
+        print('For analysis type, please enter "reg" for regression or "cl" for classification only')
+        exit()
     # making directory
     print('directory preparation')
     dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -43,6 +47,9 @@ def main():
     print('reading meta-data')
     meta_data = read_data(args.meta_data, seq_type=None, is_main=False)
     print('meta_data:', meta_data.shape)
+
+    print('checking the quality of the data')
+    check_data(meta_data=meta_data, feature=args.metavar, model_type=args.anatype)
 
     # importing seq data
     print('reading fasta file')
