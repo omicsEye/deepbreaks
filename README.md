@@ -25,8 +25,6 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
     * [Output](#output)
     * [Demo](#demo)
 * [Tutorials for normalized mutual information calculation](#tutorials-for-normalized-mutual-information-calculation)
-* [Applications](#applications)
-  * [Coronaviruses](#coronaviruses)
 * [Support](#Support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
@@ -68,8 +66,7 @@ conda create --name deepBreaks_env python=3.8
 conda activate deepBreaks_env 
 ```
 * Finally, install *deepBreaks*:
-  * before running the following line you should change your directory to the same directory that you have cloned the 
-  deepBreaks repo:
+  * before running the following line you should change your directory to the same directory that you have cloned the deepBreaks repo:
 ```commandline
 python -m pip install .
 ```
@@ -121,14 +118,12 @@ $ deepBreaks -h
 3. `--meta_data` or `-md` PATH to metadata file
 4. `--metavar` or `-mv` name of the meta variable
 5. `--anatype` or `-a` analysis type, options are `reg` for regression and `cl` for classification
-6. `--fraction` or `-fr` fraction of the main data (sequence positions) to run. it is optional, 
-but you can enter a value between 0 and 1 to sample from the main data set.
+6. `--fraction` or `-fr` fraction of the main data (sequence positions) to run. it is optional, but you can enter a value between 0 and 1 to sample from the main data set.
 ## Output ##  
 1. correlated positions. We group all the collinear positions together.
 2. models summary. list of models and their performance metrics.
 3. plot of the feature importance of the top models in *modelName_dpi.png* format.
-4. csv files of feature importance based on top models containing, feature, importance, relative importance, 
-group of the position (we group all the collinear positions together)
+4. csv files of feature importance based on top models containing, feature, importance, relative importance, group of the position (we group all the collinear positions together)
 5. plots and csv file of average of feature importance of top models.
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
 
@@ -137,8 +132,7 @@ group of the position (we group all the collinear positions together)
 deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
 ```
 # Tutorials for normalized mutual information calculation ##
-**vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are 
-samples and columns are positions in a sequence:
+**vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are samples an columns are positions in a sequence:
 <center>
 
 | | position_1 | position_2 | ... | position_n |
@@ -148,8 +142,7 @@ samples and columns are positions in a sequence:
 |sample 3 | T | C | ... | G |
 
 </center>
-and the output of the function is a symmetric dataframe with rows and columns equal to positions and the value of the 
-intersection of each row and column is their normalazied mutual information:
+and the output of the function is a symmetric dataframe with rows and columns equal to positions and the value of the intersection of each row and column is their normalazied mutual information:
 
 <center>
 
@@ -162,36 +155,6 @@ intersection of each row and column is their normalazied mutual information:
 
 </center>
 
-# Applications #
-Here we try to use the **deepBreaks** on different datasets and elaborate on the results.  
-## Coronaviruses ##
-### Introduction ###
-In this study we have a dataset of multi-aligned sequenced coronaviruses that labeled as Bat, SARS-CoV-2, MERS, 
-SARS-related, and other. The initial size of the dataset was 1340 sequences with length of 42484. Our aim is to first, 
-train high-performing machine-learning models to predict the member of the coronavirus family based on its sequence, 
-and second, based on the top models, report the most discriminative positions in the sequence data that was 
-mostly informative to the models. Consequently, based on the positions, we can then find out which specific 
-parts that leads to a certain functionality is discriminative. The complete code for this example is 
-under [examples directory](https://github.com/omicsEye/deepbreaks/tree/master/examples).  
-After data preprocessing, the shape of the data reduced to 1239 sequences, 3 classes, and 2325 positions. It is worth 
-mentioning that during the preprocessing, we kept only the SNPs, and amon those SNPs, we clustered the highly correlated
-SNPs, and use only of the cluster members as the representative of that group.  
-### Results ###
-The results of the models that are fitted to the data with 10-fold crosse validation are as follows:  
-Below, is the confusion matrix resulted on the test data with the Random Forest Classifier:
-<p align="center">
-<img src="img/coronavirus_family/conf_matrix_corona.png" width=50% height=50%>
-</p>
-The important positions are as follows:  
-<p align="center">
-<img src="img/coronavirus_family/Light Gradient Boosting Machine_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/Random Forest Classifier_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/Ridge Classifier_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/mean_350.png" width=50% height=50%>
-</p>
-Please note that the positions that are in same clusters (highly correlated positions) are presented in the same color. 
-The last plot with the tile "important Positions - mean", shows the average importance score of the top three models.
-
-# Support #
+### Support ###
 
 * Please submit your questions or issues with the software at [Issues tracker](https://github.com/omicsEye/deepBreaks/issues).
