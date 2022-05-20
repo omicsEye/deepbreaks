@@ -9,8 +9,8 @@ from tqdm import tqdm
 # sample size and classes check
 def check_data(meta_dat, feature, model_type):
     if len(meta_dat) < 30:
-        raise Exception('Minimum sample size for a regression analysis is 30 samples, you provided {} samples!'.format(
-            len(meta_dat)))
+        raise Exception('Minimum sample size for a regression analysis is 30 samples, '
+                        'you provided {} samples!'.format(len(meta_dat)))
     elif model_type == 'cl':
         vl = meta_dat[feature].value_counts() / meta_dat.shape[0]
         if len(vl) == 1:
@@ -77,12 +77,11 @@ def missing_constant_care(dat, missing_threshold=0.05):
     tmp.drop(cl, axis=1, inplace=True)
     for cl in tmp.columns:
         tmp[cl] = tmp[cl].fillna(tmp[cl].mode()[0])
-    # mode = tmp.filter(tmp.columns).mode().iloc[0]  # mode of all the columns
-    # tmp = tmp.fillna(mode)  # replacing NA values with the mode of each column
     tmp = tmp.loc[:, tmp.nunique() != 1]
     return tmp
 
-
+# mode = tmp.filter(tmp.columns).mode().iloc[0]  # mode of all the columns
+# tmp = tmp.fillna(mode)  # replacing NA values with the mode of each column
 # a function which check if one character in a certain column is below a threshold or not
 # and replace that character with the mode of that column of merge the rare cases together
 
@@ -250,7 +249,8 @@ def vec_nmi(dat):
 
             temp['inter' + ch] = intersects.sum(axis=1)
 
-            temp['ui_vi'] = temp.loc[(temp['position'] == name) & (df_dum['char'] == ch), 'inter' + ch].values * col_sum
+            temp['ui_vi'] = temp.loc[(temp['position'] == name) & (df_dum['char'] == ch),
+                                     'inter' + ch].values * col_sum
             temp['mui' + ch] = (temp['inter' + ch] / N) * (np.log(N * (temp['inter' + ch]) / temp['ui_vi']))
 
             mu_list.append('mui' + ch)
