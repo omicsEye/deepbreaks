@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from scipy.stats import chi2_contingency
+from scipy.stats import mode
 from tqdm import tqdm
 
 
@@ -75,44 +76,45 @@ def missing_constant_care(dat, missing_threshold=0.05):
     threshold = tmp.shape[0] * missing_threshold
     cl = tmp.columns[tmp.isna().sum() > threshold]
     tmp.drop(cl, axis=1, inplace=True)
-    for cl in tmp.columns:
-        tmp[cl] = tmp[cl].fillna(tmp[cl].mode()[0])
+
+    cl = tmp.columns[tmp.isnull().sum() > 0]
+    tmp2 = tmp[cl]
+    tmp.drop(cl, axis=1, inplace=True)
+    md = mode(tmp2)[0]
+
+    tmp2 = np.where(pd.isna(tmp2), md, tmp2)
+    tmp2 = pd.DataFrame(tmp2, columns=cl, index=tmp.index)
+    tmp = pd.concat([tmp, tmp2], axis=1)
+
     tmp = tmp.loc[:, tmp.nunique() != 1]
+
     return tmp
+
 
 # mode = tmp.filter(tmp.columns).mode().iloc[0]  # mode of all the columns
 # tmp = tmp.fillna(mode)  # replacing NA values with the mode of each column
 # a function which check if one character in a certain column is below a threshold or not
 # and replace that character with the mode of that column of merge the rare cases together
-
 def colCleaner_column(dat, column, threshold=0.015):
     vl = dat[column].value_counts()
     ls = vl / dat.shape[0] < threshold
     ls = ls.index[ls == True].tolist()
 
-    if len(ls) > 2:
-        dat[column].replace(ls, ''.join(ls), inplace=True)
-        ls = vl / dat.shape[0] < threshold
-        ls = ls.index[ls == True].tolist()
-
     if len(ls) > 0:
-        md = vl.index[vl == max(vl)][0]
-        dat[column].replace(ls, md, inplace=True)
-
+        if (vl[ls].sum() / dat.shape[0]) < threshold:
+            md = vl.index[0]
+            dat[column].replace(ls, md, inplace=True)
+        else:
+            dat[column].replace(ls, ''.join(ls), inplace=True)
     return dat[column]
 
 
 # taking care of rare cases in columns
 def imb_care(dat, imbalance_threshold=0.05):
     tmp = dat.copy()
-    n_uniq = tmp.nunique()
-    cols_to_check = n_uniq.index[n_uniq > 1].tolist()
-    for cl in cols_to_check:
-        tmp[cl] = colCleaner_column(dat=tmp, column=cl, threshold=imbalance_threshold)
-    n_uniq = tmp.nunique()
-    cl_uniq = n_uniq.index[n_uniq == 1].tolist()
-    if len(cl_uniq) > 0:
-        tmp.drop(cl_uniq, axis=1, inplace=True)
+    for i in range(tmp.shape[1]):
+        tmp.iloc[:, i] = colCleaner_column(dat=tmp, column=tmp.columns[i], threshold=imbalance_threshold)
+    tmp = tmp.loc[:, tmp.nunique() != 1]
     return tmp
 
 
@@ -171,7 +173,8 @@ def dist_cols(dat, score_func):
     return cr
 
 
-# create dummy vars, drop those which are below a certain threshold, then calculate the similarity between these remaining columns
+# create dummy vars, drop those which are below a certain threshold,
+# then calculate the similarity between these remaining columns
 def ham_dist(dat, threshold=0.2):
     import gc
 
@@ -235,23 +238,24 @@ def vec_nmi(dat):
 
     for name, gr in df_dum.groupby(['position']):
         mu_list = []
-        char_list = list(set(df_dum.loc[df_dum['position'] == name, 'char']))
-        temp = df_dum[['position', 'char']]
+        char_list = list(set(df_dum.loc[df_dum.loc[:, 'position'] == name, 'char']))
+        temp = df_dum.loc[:, ['position', 'char']]
 
         for ch in char_list:
             temp['inter' + ch] = None
             temp['ui_vi'] = None
             temp['mui' + ch] = None
 
-            intersects = my_array[(df_dum['position'] == name) & (df_dum['char'] == ch)]
+            intersects = my_array[(df_dum.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch)]
             intersects = intersects + my_array
             intersects = intersects == 2
 
             temp['inter' + ch] = intersects.sum(axis=1)
 
-            temp['ui_vi'] = temp.loc[(temp['position'] == name) & (df_dum['char'] == ch),
+            temp['ui_vi'] = temp.loc[(temp.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch),
                                      'inter' + ch].values * col_sum
-            temp['mui' + ch] = (temp['inter' + ch] / N) * (np.log(N * (temp['inter' + ch]) / temp['ui_vi']))
+            temp['mui' + ch] = (temp.loc[:, 'inter' + ch] / N) * (
+                np.log(N * (temp.loc[:, 'inter' + ch]) / temp.loc[:, 'ui_vi']))
 
             mu_list.append('mui' + ch)
 
