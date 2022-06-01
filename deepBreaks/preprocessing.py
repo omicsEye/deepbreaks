@@ -1,10 +1,9 @@
-from Bio import SeqIO
+import re
 import numpy as np
 import pandas as pd
 from itertools import combinations
 from scipy.stats import chi2_contingency
 from scipy.stats import mode
-from tqdm import tqdm
 
 
 # sample size and classes check
@@ -27,6 +26,28 @@ def check_data(meta_dat, feature, model_type):
     return print(message)
 
 
+# read fasta file
+def fasta_read(f_name):
+    f = open(f_name, 'r')
+    lines = f.readlines()
+    id_re = re.compile(r'>(\S+)')
+    seq_re = re.compile(r'^(\S+)$')
+
+    tmp = {}
+
+    for line in lines:
+        id_h = id_re.search(line)
+        if id_h:
+            id = id_h.group(1)
+        else:
+            seq_l = seq_re.search(line)
+            if id in tmp.keys():
+                print('id {} has duplicated values. We kept the first read!'.format(id))
+            else:
+                tmp[id] = list(seq_l.group(1).upper())
+    return pd.DataFrame.from_dict(tmp, orient='index')
+
+
 # read data function
 def read_data(file_path, seq_type=None, is_main=True):
     #
@@ -38,8 +59,7 @@ def read_data(file_path, seq_type=None, is_main=True):
         dat = pd.read_excel(file_path, sep='\t', index_col=0)
     elif file_path.endswith('.fasta'):
         # importing seq data
-        seq_dict = {rec.id: list(rec.seq) for rec in SeqIO.parse(file_path, "fasta")}
-        dat = pd.DataFrame.from_dict(seq_dict, orient='index')
+        dat = fasta_read(f_name=file_path)
     else:
         print('For now, we can only read csv, tsv, excel, and fasta files.')
         exit()
@@ -55,8 +75,8 @@ def read_data(file_path, seq_type=None, is_main=True):
         to_replace = []
         for vl in na_values:
             to_replace.append(vl.upper())
-            to_replace.append(vl.lower())
-        dat.replace(to_replace, np.nan, inplace=True)
+            # to_replace.append(vl.lower())
+        dat = np.where(np.isin(dat, to_replace), np.nan, dat)
     return dat
 
 
@@ -162,8 +182,7 @@ def dist_cols(dat, score_func):
     cn = 0
     cr = pd.DataFrame(columns=['l0', 'l1', 'cor'])
 
-    for cl in tqdm(combinations(dat.columns, 2),
-                   total=(dat.shape[1] * (dat.shape[1] - 1)) / 2):  # all paired combinations of dat columns
+    for cl in combinations(dat.columns, 2):  # all paired combinations of dat columns
 
         score = score_func(dat[cl[0]], dat[cl[1]])
         cr.loc[len(cr)] = [cl[0], cl[1], score]
@@ -192,7 +211,7 @@ def ham_dist(dat, threshold=0.2):
     tmp1 = np.array(tmp1).T
 
     last = range(tmp1.shape[0])
-    for i in tqdm(last):
+    for i in last:
         dist_vec = (tmp1[0, :] == tmp1).sum(axis=1)
 
         dis.iloc[i, i:] = dist_vec

@@ -1,4 +1,2 @@
-biopython==1.79
 pycaret==2.3.10
 scipy==1.5.4
-tqdm==4.64.0
