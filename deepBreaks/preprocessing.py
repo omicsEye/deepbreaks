@@ -76,10 +76,7 @@ def read_data(file_path, seq_type=None, is_main=True):
         for vl in na_values:
             to_replace.append(vl.upper())
             # to_replace.append(vl.lower())
-        idx = dat.index
-        cl = dat.columns
-        dat = np.where(np.isin(dat, to_replace), np.nan, dat)
-        dat = pd.DataFrame(dat, columns=cl, index=idx)
+        dat.replace(to_replace, np.nan, inplace=True)
     return dat
 
 
