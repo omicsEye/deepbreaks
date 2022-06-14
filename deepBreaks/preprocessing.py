@@ -16,7 +16,7 @@ def check_data(meta_dat, feature, model_type):
         if len(vl) == 1:
             raise Exception(
                 'Minimum categories for a classification analysis is 2 classes, you provided {}'.format(len(vl)))
-        elif vl[1] < 0.25:
+        elif vl[1] < 1/(len(vl)*2):
             raise Exception('Provided sample is highly im-balanced, we need more data for the minority group.')
         else:
             message = "let's start the analysis"
@@ -238,7 +238,7 @@ def ham_dist(dat, threshold=0.2):
 
 
 # calculate vectorized normalized mutual information
-def vec_nmi(dat):
+def vec_nmi(dat, report_dir):
     # get the sample size
     N = dat.shape[0]
     # create empty dataframe
@@ -261,19 +261,19 @@ def vec_nmi(dat):
         temp = df_dum.loc[:, ['position', 'char']]
 
         for ch in char_list:
-            temp['inter' + ch] = None
-            temp['ui_vi'] = None
-            temp['mui' + ch] = None
+            temp.loc[:, 'inter' + ch] = None
+            temp.loc[:, 'ui_vi'] = None
+            temp.loc[:, 'mui' + ch] = None
 
             intersects = my_array[(df_dum.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch)]
             intersects = intersects + my_array
             intersects = intersects == 2
 
-            temp['inter' + ch] = intersects.sum(axis=1)
+            temp.loc[:, 'inter' + ch] = intersects.sum(axis=1)
 
-            temp['ui_vi'] = temp.loc[(temp.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch),
+            temp.loc[:, 'ui_vi'] = temp.loc[(temp.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch),
                                      'inter' + ch].values * col_sum
-            temp['mui' + ch] = (temp.loc[:, 'inter' + ch] / N) * (
+            temp.loc[:, 'mui' + ch] = (temp.loc[:, 'inter' + ch] / N) * (
                 np.log(N * (temp.loc[:, 'inter' + ch]) / temp.loc[:, 'ui_vi']))
 
             mu_list.append('mui' + ch)
@@ -294,6 +294,8 @@ def vec_nmi(dat):
     # calculate normalized mutual information
     dat_temp = dat_temp / avg_entropies
     dat_temp.fillna(0, inplace=True)
+
+    dat_temp.to_csv(str(report_dir + '/' + 'nmi.csv'), index=False)
 
     return dat_temp
 
