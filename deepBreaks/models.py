@@ -4,7 +4,29 @@ import os
 
 
 # model function
-def fit_models(dat, meta_var, model_type, models_to_select, report_dir):
+def fit_models(dat, meta_var, model_type, models_to_select, report_dir,
+               include_cl=['et', 'lr', 'xgboost', 'lightgbm', 'rf', 'gbc',
+                           'dt', 'ada', 'ridge', 'svm'],
+               include_reg=['lr', 'ridge', 'lar', 'br', 'par', 'huber',
+                            'lasso', 'et', 'xgboost', 'lightgbm', 'rf', 'dt', 'ada']
+               ):
+    """
+
+    :param dat:
+    :param meta_var:
+    :param model_type:
+    :param models_to_select:
+    :param report_dir:
+    :param include_cl: ['et', 'lr', 'xgboost', 'lightgbm', 'rf', 'gbc', 'dt', 'ada', 'ridge', 'svm']
+    :param include_reg: ['lr', 'ridge', 'lar', 'br', 'par', 'huber', 'lasso', 'et', 'xgboost',
+    'lightgbm', 'rf', 'dt', 'ada']
+    :return:
+    """
+    if model_type == 'reg' and models_to_select > len(include_reg):
+        raise TypeError('models_to_select should be smaller or equal to the number of included models.')
+    if model_type == 'cl' and models_to_select > len(include_cl):
+        raise TypeError('models_to_select should be smaller or equal to the number of included models.')
+
     if model_type == 'reg':
 
         import pycaret.regression as pycar
@@ -16,9 +38,7 @@ def fit_models(dat, meta_var, model_type, models_to_select, report_dir):
                                  )
         metric = 'MAE'
         top_models = pycar.compare_models(n_select=models_to_select, sort=metric, verbose=False,
-                                          include=['lr', 'ridge', 'lar', 'br', 'par', 'huber',
-                                                   'lasso', 'et', 'xgboost', 'lightgbm',
-                                                   'rf', 'dt', 'ada'])
+                                          include=include_reg)
 
     else:
 
@@ -30,8 +50,7 @@ def fit_models(dat, meta_var, model_type, models_to_select, report_dir):
                                  )
         metric = 'F1'
         top_models = pycar.compare_models(n_select=models_to_select, sort=metric, verbose=False,
-                                          include=['et', 'lr', 'xgboost', 'lightgbm', 'rf', 'gbc',
-                                                   'dt', 'ada', 'ridge', 'svm'])
+                                          include=include_cl)
     results_df = pycar.pull()
     results_df.to_csv(str(report_dir + '/models_summary' + '.csv'))
 
