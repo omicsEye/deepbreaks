@@ -4,6 +4,8 @@ import pandas as pd
 from itertools import combinations
 from scipy.stats import chi2_contingency
 from scipy.stats import mode
+from scipy.stats import kruskal
+import csv
 
 
 # sample size and classes check
@@ -146,6 +148,60 @@ def col_sampler(dat, sample_frac=1):
         # remove the columns with the n
         dat = dat[cl]
     return dat
+
+
+# statistical tests to drop redundant positions
+def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.15):
+    """
+    This function gets the following variables and performs statistical tests (chi-square or Kruskal–Wallis)
+    and based on the p-values and the given threshold, drops redundant positions. A report of all calculated p-values
+    will be saved into the given report directory under name of p_values.csv.
+
+    :param dat:
+    :param meta_dat:
+    :param feature:
+    :param model_type:
+    :param report_dir:
+    :param threshold:
+    :return:
+    """
+
+    def chisq_test(dat_main, col_list, resp_feature):
+        p_val_list = []
+        for cl in col_list:
+            crs = pd.crosstab(dat_main[cl], dat_main[resp_feature])
+            p_val_list.append(chi2_contingency(crs)[1])
+        return p_val_list
+
+    def kruskal_test(dat_main, col_list, resp_feature):
+        p_val_list = []
+        for cl in col_list:
+            p_val_list.append(kruskal(*[group[resp_feature].values for name, group in dat_main.groupby(cl)])[1])
+        return p_val_list
+
+    tmp = dat.merge(meta_dat[feature], left_index=True, right_index=True)
+    cols = dat.columns
+    if model_type == 'cl':
+        p_val = chisq_test(dat_main=tmp, col_list=cols, resp_feature=feature)
+    elif model_type == 'reg':
+        p_val = kruskal_test(dat_main=tmp, col_list=cols, resp_feature=feature)
+    else:
+        raise Exception('Analysis type should be either reg or cl')
+
+    with open(report_dir + "/p_values.csv", "w", newline='') as f:
+        writer = csv.writer(f)
+        headers = ['position', 'p_value']
+        writer.writerow(headers)
+        for i in range(len(p_val)):
+            content = [cols[i], p_val[i]]
+            writer.writerow(content)
+    if np.sum(np.array(p_val) < threshold) > 0:
+        cols = cols[np.array(p_val) < threshold]
+    else:
+        cols = cols[np.array(p_val) < np.median(np.array(p_val))]
+        print('None of the positions meet the p-value threshold. We selected top 50% positions!')
+
+    return dat.loc[:, cols]
 
 
 # function to calculate Cramer's V score

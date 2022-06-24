@@ -77,6 +77,10 @@ def main():
         df_cleaned = col_sampler(dat=df_cleaned, sample_frac=args.fraction)
         print('number of columns of main data after: ', df_cleaned.shape[1])
 
+    print('Statistical tests to drop redundant features')
+    df_cleaned = redundant_drop(dat=df_cleaned, meta_dat=meta_data,
+                                feature=args.metavar, model_type=args.anatype, report_dir=report_dir)
+
     print('correlation analysis')
     # cr = ham_dist(dat=df_cleaned, threshold=0.2)
     # cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)

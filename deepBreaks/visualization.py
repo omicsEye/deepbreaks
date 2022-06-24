@@ -167,8 +167,11 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features, meta_var, mo
 
         p = 0
         cn = 0
+        check = 0
 
-        while p < 0.1:
+        while p < 0.05 or check < 10:
+            if cn > len(features):
+                break
             cl = features[cn]
             cn += 1
             if cl not in feature_list:
@@ -209,4 +212,6 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features, meta_var, mo
                                         bbox_inches='tight')
                     except:
                         pass
+            if p >= 0.05:
+                check += 1
         print('Model ', i, ' Done')
