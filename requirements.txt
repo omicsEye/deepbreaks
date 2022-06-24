@@ -1,2 +1,2 @@
-pycaret==2.3.10
+pycaret[full]==2.3.10
 scipy==1.5.4
