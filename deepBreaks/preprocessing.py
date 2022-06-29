@@ -351,7 +351,7 @@ def vec_nmi(dat, report_dir):
     dat_temp = dat_temp / avg_entropies
     dat_temp.fillna(0, inplace=True)
 
-    dat_temp.to_csv(str(report_dir + '/' + 'nmi.csv'), index=False)
+    dat_temp.to_csv(str(report_dir + '/' + 'nmi.csv'), index=True)
 
     return dat_temp
 

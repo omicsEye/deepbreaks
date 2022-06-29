@@ -18,6 +18,8 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 * [deepBreaks](#deepBreaks)
     * [deepBreaks approach](#deepBreaks-approach)
     * [Installation](#installation)
+      * [Windows, Linux, Mac](#windows,-Linux,-Mac)
+      * [Apple M1 MAC](#apple-m1-mac)
 * [Getting Started with deepBreaks](#getting-started-with-deepBreaks)
     * [Test deepBreaks](#test-omeClust)
     * [Options](#options) 
@@ -40,13 +42,9 @@ Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of se
 ![deepBreaks Workflow overview](img/fig1_overview.png)
 
 ## INSTALLATION ##
-
-
-<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
-
 * First install *conda*  
 Go to the [Anaconda website](https://www.anaconda.com/) and download the latest version for your operating system.  
-*DO NOT FORGET TO ADD CONDA TO your system PATH*
+* For Windows users: DO NOT FORGET TO ADD CONDA TO your system PATH*
 * Second is to check for conda availability  
 open a terminal (or command line for Windows users) and run:
 ```
@@ -57,26 +55,69 @@ it should out put something like:
 conda 4.9.2
 ```
 <span style="color:#fc0335">if not, you must make *conda* available to your system for further steps.</span>
-if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).
-  
-* Third create a new conda environment (let's call it deepBreaks_env) with the following command:
+if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
+
+### Windows, Linux, Mac ###
+If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation instructions.  
+<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
+1) Create a new conda environment (let's call it deepBreaks_env) with the following command:
 ```
 conda create --name deepBreaks_env python=3.8
 ```
-* Then activate your conda environment:
+2) Activate your conda environment:
 ```commandline
 conda activate deepBreaks_env 
 ```
-* Finally, install *deepBreaks*:
-  * before running the following line you should change your directory to the same directory that you have cloned the 
-  deepBreaks repo:
-```commandline
-python -m pip install .
-```
-or you can directly install if from GitHub:
+3) Install *deepBreaks*:
+you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
+### Apple M1 MAC ###
+1) Update/install Xcode Command Line Tools
+  ```commandline
+  xcode-select --install
+  ```
+2) Install [Brew](https://brew.sh/index_fr)
+  ```commandline
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
+3) Install libraries for brew
+  ```commandline
+  brew install cmake libomp
+  ```
+4) Install miniforge
+  ```commandline
+  brew install miniforge
+  ```
+5) Close the current terminal and open a new terminal
+6) Create a new conda environment (let's call it deepBreaks_env) with the following command:
+  ```commandline
+  conda create --name deepBreaks_env python=3.8
+  ```
+7) Create conda environment
+```commandline
+conda create --name deepBreaks_env python=3.8
+```
+8) Activate the conda environment
+  ```commandline
+  conda activate deepBreaks_env
+  ```
+9) Install packages from Conda
+  ```commandline
+  conda install numpy scipy scikit-learn==0.23.2
+  ```
+  Then
+  ```commandline
+  conda install lightbgm
+  pip install xgboost
+  ```
+10) Finally, install *deepBreaks*:
+you can directly install if from GitHub:
+```commandline
+python -m pip install git+https://github.com/omicsEye/deepbreaks
+```
+
 ------------------------------------------------------------------------------------------------------------------------------
 
 # Getting Started with deepBreaks #
