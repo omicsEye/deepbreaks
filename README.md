@@ -8,7 +8,7 @@ using multi-alignment sequencing data from a population.
 **Citation:**
 
 
-Mahdi Baghbanzadeh, Ali Rahnavard (2022). **Prioritizing important regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
+Mahdi Baghbanzadeh, Tyson Dawson, Keith A. Crandall, Ali Rahnavard (2022+). **Prioritizing important regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
 
 ---
 # deepBreaks user manual
@@ -143,7 +143,7 @@ optional arguments:
   --meta_data META_DATA, -md META_DATA
                         files contains the meta data
   --metavar METAVAR, -mv METAVAR
-                        name of the meta var (response variable)
+                        name of the meta var (response variable). This is teh lable will be used as phenotype of interest to find genotypes related to it.
   --anatype {reg,cl}, -a {reg,cl}
                         type of analysis
   --fraction FRACTION, -fr FRACTION
