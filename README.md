@@ -18,7 +18,7 @@ Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard 
 * [deepBreaks](#deepBreaks)
     * [deepBreaks approach](#deepBreaks-approach)
     * [Installation](#installation)
-      * [Windows, Linux, Mac](#windows,-Linux,-Mac)
+      * [Windows Linux Mac](#Windows-Linux-Mac)
       * [Apple M1 MAC](#apple-m1-mac)
 * [Getting Started with deepBreaks](#getting-started-with-deepBreaks)
     * [Test deepBreaks](#test-omeClust)
@@ -57,7 +57,7 @@ conda 4.9.2
 <span style="color:#fc0335">if not, you must make *conda* available to your system for further steps.</span>
 if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
 
-### Windows, Linux, Mac ###
+### Windows Linux Mac ###
 If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation instructions.  
 <span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
 1) Create a new conda environment (let's call it deepBreaks_env) with the following command:
@@ -95,24 +95,20 @@ python -m pip install git+https://github.com/omicsEye/deepbreaks
   ```commandline
   conda create --name deepBreaks_env python=3.8
   ```
-7) Create conda environment
-```commandline
-conda create --name deepBreaks_env python=3.8
-```
-8) Activate the conda environment
+7) Activate the conda environment
   ```commandline
   conda activate deepBreaks_env
   ```
-9) Install packages from Conda
+8) Install packages from Conda
   ```commandline
   conda install numpy scipy scikit-learn==0.23.2
   ```
   Then
   ```commandline
-  conda install lightbgm
+  conda install lightgbm
   pip install xgboost
   ```
-10) Finally, install *deepBreaks*:
+9) Finally, install *deepBreaks*:
 you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks

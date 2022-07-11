@@ -17,8 +17,7 @@ def parse_arguments():
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
-    parser.add_argument('--fraction', '-fr', help="fraction of main data to run",
-                        type=float, required=False)
+    parser.add_argument('--fraction', '-fr', help="fraction of main data to run", type=float, required=False)
     return parser.parse_args()
 
 
@@ -102,7 +101,7 @@ def main():
 
     # model
     print('preparing env')
-    select_top = 5
+    select_top = 3
     top_models, train_cols, model_names = fit_models(dat=df_cleaned, meta_var=args.metavar,
                                                      model_type=args.anatype, models_to_select=select_top,
                                                      report_dir=report_dir)
