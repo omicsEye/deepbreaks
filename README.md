@@ -7,11 +7,10 @@ using multi-alignment sequencing data from a population.
 ---
 **Citation:**
 
-
 Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard (2022+). **Prioritizing important regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
 
 ---
-# deepBreaks user manual
+# deepBreaks user manual #
 
 ## Contents ##
 * [Features](#features)
