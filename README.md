@@ -1,5 +1,6 @@
 # deepBreaks: Prioritizing important regions of sequencing data for function prediction #
 
+---
 **deepBreaks** , a computational method, aims to identify important 
 changes in association with the phenotype of interest 
 using multi-alignment sequencing data from a population.
