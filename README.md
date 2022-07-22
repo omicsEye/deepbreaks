@@ -11,7 +11,6 @@ Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard 
 
 ---
 # deepBreaks user manual #
-
 ## Contents ##
 * [Features](#features)
 * [deepBreaks](#deepBreaks)
