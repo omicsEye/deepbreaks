@@ -1,17 +1,32 @@
-# deepBreaks: Prioritizing important regions of sequencing data for function prediction #
+# deepBreaks #
 
 ---
-**deepBreaks** , a computational method, aims to identify important 
-changes in association with the phenotype of interest 
+
+**deepBreaks** , a computational method, aims to identify important
+changes in association with the phenotype of interest
 using multi-alignment sequencing data from a population.
+Key features:
+
+* Generality, deepBreaks is a generic domain software that can be used for any application that deals sequencing data
+* Interpretation: Rather than checking all possible mutations (breaks), deepBreaks prioritizes only statistically
+  promising candidate mutations.
+* User-friendly software: one place to do all high-quality visualization and statistical
+* Computing optimization: since sequencing data can get large all modules have been written and benchmarked for
+  computing time.
+* Tutorial comes with a wide range of real-world applications
+
 ---
 **Citation:**
 
-Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard (2022+). **Prioritizing important regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
+Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard (2022+). **Prioritizing important
+regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
 
 ---
+
 # deepBreaks user manual #
+
 ## Contents ##
+
 * [Features](#features)
 * [deepBreaks](#deepBreaks)
     * [deepBreaks approach](#deepBreaks-approach)
