@@ -10,7 +10,7 @@ import csv
 
 # sample size and classes check
 def check_data(meta_data, feature, model_type):
-    if len(meta_dat) < 30:
+    if len(meta_data) < 30:
         raise Exception('Minimum sample size for a regression analysis is 30 samples, '
                         'you provided {} samples!'.format(len(meta_dat)))
     elif model_type == 'cl':
