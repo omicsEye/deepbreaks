@@ -80,6 +80,7 @@ def fimp_single(trained_model, model_name, train_cols, grouped_features, n_posit
 
     if grouped_features is not None:
         gf = grouped_features.copy()
+        gf['feature'] = gf['feature'].str.split('_').str[0]
         gf['feature'] = gf['feature'].str.split('p').str[1]
         gf['feature'] = gf['feature'].astype(int)
         tmp2 = tmp2.merge(gf, how='left')

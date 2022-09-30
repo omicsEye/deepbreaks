@@ -5,6 +5,8 @@ from itertools import combinations
 from scipy.stats import chi2_contingency
 from scipy.stats import mode
 from scipy.stats import kruskal
+from scipy.spatial.distance import pdist
+from scipy.spatial.distance import squareform
 import csv
 
 
@@ -356,6 +358,34 @@ def vec_nmi(dat, report_dir):
     return dat_temp
 
 
+# calculating distance
+def distance_calc(dat, dist_method='correlation'):
+    method_list = ['braycurtis', 'chebyshev', 'correlation',
+                   'cosine', 'dice', 'hamming', 'jaccard',
+                   'jensenshannon', 'matching', 'rogerstanimoto',
+                   'russellrao', 'sokalmichener', 'sokalsneath',
+                   'normalized_mutual_info_score',
+                   'adjusted_mutual_info_score', 'adjusted_rand_score']
+    err_msg = "Please choose a distance metric \
+    that produces values of |dist|<=1. You can choose any these metrics: {}".format(method_list)
+
+    assert dist_method in method_list, err_msg
+    cl_names = dat.columns
+    if dist_method == 'correlation':
+        dist = abs(abs(1 - squareform(pdist(dat.T, metric='correlation'))) - 1)
+    elif dist_method in method_list[-3:]:
+        exec('from sklearn.metrics import ' + dist_method)
+        dist = abs(squareform(pdist(dat.T, eval(dist_method))))
+        np.fill_diagonal(dist, 1)
+        dist = 1 - dist
+
+
+    else:
+        dist = abs(squareform(pdist(dat.T, metric=dist_method)))
+
+    return pd.DataFrame(dist, columns=cl_names, index=cl_names)
+
+
 # grouping features based on DBSCAN clustering algo
 def db_grouped(dat, report_dir, threshold=0.8, needs_pivot=False):
     from sklearn.cluster import DBSCAN
@@ -365,9 +395,9 @@ def db_grouped(dat, report_dir, threshold=0.8, needs_pivot=False):
         cr_mat.fillna(1, inplace=True)
     else:
         cr_mat = dat
-    cr_mat = (cr_mat - 1) ** 2
+#     cr_mat = (cr_mat) ** 2
 
-    db = DBSCAN(eps=(threshold - 1) ** 2, min_samples=2, metric='precomputed', n_jobs=-1)
+    db = DBSCAN(eps=(1-threshold), min_samples=2, metric='precomputed', n_jobs=-1)
     db.fit(cr_mat)
 
     dc_df = pd.DataFrame(cr_mat.index.tolist(), columns=['feature'])
