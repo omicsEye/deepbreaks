@@ -206,6 +206,12 @@ def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.1
     return dat.loc[:, cols]
 
 
+# get dummy variables
+def get_dummies(dat, drop_first=True):
+    dat = pd.get_dummies(dat, drop_first=drop_first)
+    return dat
+
+
 # function to calculate Cramer's V score
 def cramers_V(var1, var2):
     crosstab = np.array(pd.crosstab(var1, var2, rownames=None, colnames=None))  # Cross table building
@@ -359,7 +365,7 @@ def vec_nmi(dat, report_dir):
 
 
 # calculating distance
-def distance_calc(dat, dist_method='correlation'):
+def distance_calc(dat, dist_method='correlation', report_dir=None):
     method_list = ['braycurtis', 'chebyshev', 'correlation',
                    'cosine', 'dice', 'hamming', 'jaccard',
                    'jensenshannon', 'matching', 'rogerstanimoto',
@@ -378,12 +384,15 @@ def distance_calc(dat, dist_method='correlation'):
         dist = abs(squareform(pdist(dat.T, eval(dist_method))))
         np.fill_diagonal(dist, 1)
         dist = 1 - dist
-
-
     else:
         dist = abs(squareform(pdist(dat.T, metric=dist_method)))
 
-    return pd.DataFrame(dist, columns=cl_names, index=cl_names)
+    dist = pd.DataFrame(dist, columns=cl_names, index=cl_names)
+
+    if report_dir is not None:
+        dist.to_csv(str(report_dir + '/' + dist_method + '.csv'), index=True)
+
+    return dist
 
 
 # grouping features based on DBSCAN clustering algo

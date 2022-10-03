@@ -17,7 +17,28 @@ def parse_arguments():
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
+    parser.add_argument('--distance_metric', '-dm',
+                        help="distance metric (default is correlation)",
+                        choices=['braycurtis', 'chebyshev', 'correlation',
+                                 'cosine', 'dice', 'hamming', 'jaccard',
+                                 'jensenshannon', 'matching', 'rogerstanimoto',
+                                 'russellrao', 'sokalmichener', 'sokalsneath',
+                                 'normalized_mutual_info_score', 'adjusted_mutual_info_score', 'adjusted_rand_score'],
+                        type=str, default='correlation')
     parser.add_argument('--fraction', '-fr', help="fraction of main data to run", type=float, required=False)
+    parser.add_argument('--redundant_threshold', '-rt',
+                        help="threshold for the p-value of the statistical tests to drop redundant features",
+                        type=float, default=0.15)
+    parser.add_argument('--similarity_threshold', '-st',
+                        help="threshold for the similarity between positions to put them in clusters. "
+                             "features with similarities >= than the threshold will be grouped together ",
+                        type=float, default=0.7)
+    parser.add_argument('--top_models', '-tm',
+                        help="number of top models to consider for merging the results",
+                        type=int, default=3)
+    parser.add_argument("--plot", help="plot all the individual positions that are statistically significant."
+                                       "Depending on your data, this process may produce many plots.",
+                        action="store_true", default=False)
     return parser.parse_args()
 
 
@@ -78,14 +99,16 @@ def main():
 
     print('Statistical tests to drop redundant features')
     df_cleaned = redundant_drop(dat=df_cleaned, meta_dat=meta_data,
-                                feature=args.metavar, model_type=args.anatype, report_dir=report_dir)
+                                feature=args.metavar, model_type=args.anatype,
+                                report_dir=report_dir, threshold=args.redundant_threshold)
 
+    print('prepare dummy variables')
+    df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
     print('correlation analysis')
-    # cr = ham_dist(dat=df_cleaned, threshold=0.2)
-    # cr = dist_cols(dat=df_cleaned, score_func=adjusted_mutual_info_score)
-    cr = vec_nmi(dat=df_cleaned, report_dir=report_dir)
+    cr = distance_calc(dat=df_cleaned, dist_method=args.distance_metric, report_dir=report_dir)
     print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=0.9, needs_pivot=False)
+    dc_df = db_grouped(dat=cr, report_dir=report_dir,
+                       threshold=args.similarity_threshold, needs_pivot=False)
 
     print('grouping features')
     dc = group_features(dat=dc_df, report_dir=report_dir)
@@ -101,7 +124,7 @@ def main():
 
     # model
     print('preparing env')
-    select_top = 3
+    select_top = args.top_models
     top_models, train_cols, model_names = fit_models(dat=df_cleaned, meta_var=args.metavar,
                                                      model_type=args.anatype, models_to_select=select_top,
                                                      report_dir=report_dir)
@@ -121,9 +144,10 @@ def main():
                                n_positions=positions, report_dir=report_dir)
     dp_plot(dat=mean_imp, model_name='mean', imp_col='mean_imp', report_dir=report_dir)
 
-    # plot_imp_all(trained_models=top_models, dat=df_cleaned, train_cols=train_cols,
-    #              grouped_features=dc_df, meta_var=args.metavar, model_type=args.anatype,
-    #              n_positions=positions, report_dir=report_dir)
+    if args.plot:
+        plot_imp_all(trained_models=top_models, dat=df, train_cols=train_cols,
+                     grouped_features=dc_df, meta_var=args.metavar, model_type=args.anatype,
+                     n_positions=positions, report_dir=report_dir)
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')
     file_names = os.listdir(report_dir)
