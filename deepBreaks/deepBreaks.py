@@ -29,7 +29,7 @@ def parse_arguments():
     parser.add_argument('--redundant_threshold', '-rt',
                         help="threshold for the p-value of the statistical tests to drop redundant features",
                         type=float, default=0.15)
-    parser.add_argument('--similarity_threshold', '-st',
+    parser.add_argument('--similarity_threshold', '-sth',
                         help="threshold for the similarity between positions to put them in clusters. "
                              "features with similarities >= than the threshold will be grouped together ",
                         type=float, default=0.7)
