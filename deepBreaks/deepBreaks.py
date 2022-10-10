@@ -13,28 +13,28 @@ from zipfile import ZipFile
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seqfile', '-sf', help="files contains the sequences", type=str, required=True)
-    parser.add_argument('--seqtype', '-st', help="type of sequence: nuc, amino-acid", type=str, required=True, )
+    parser.add_argument('--seqtype', '-st', help="type of sequence: nuc or amino-acid", type=str, required=True, )
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
     parser.add_argument('--distance_metric', '-dm',
-                        help="distance metric (default is correlation)",
-                        choices=['braycurtis', 'chebyshev', 'correlation',
-                                 'cosine', 'dice', 'hamming', 'jaccard',
-                                 'jensenshannon', 'matching', 'rogerstanimoto',
-                                 'russellrao', 'sokalmichener', 'sokalsneath',
-                                 'normalized_mutual_info_score', 'adjusted_mutual_info_score', 'adjusted_rand_score'],
+                        help="distance metric. Default is correlation.",
+                        choices=['correlation', 'hamming', 'jaccard',
+                                 'normalized_mutual_info_score',
+                                 'adjusted_mutual_info_score', 'adjusted_rand_score'],
                         type=str, default='correlation')
     parser.add_argument('--fraction', '-fr', help="fraction of main data to run", type=float, required=False)
     parser.add_argument('--redundant_threshold', '-rt',
-                        help="threshold for the p-value of the statistical tests to drop redundant features",
-                        type=float, default=0.15)
-    parser.add_argument('--similarity_threshold', '-sth',
-                        help="threshold for the similarity between positions to put them in clusters. "
-                             "features with similarities >= than the threshold will be grouped together ",
-                        type=float, default=0.7)
+                        help="threshold for the p-value of the statistical tests to drop redundant features. Default"
+                             "value is 0.25",
+                        type=float, default=0.25)
+    parser.add_argument('--distance_threshold', '-dth',
+                        help="threshold for the distance between positions to put them in clusters. "
+                             "features with distances <= than the threshold will be grouped together. Default "
+                             "values is 0.3",
+                        type=float, default=0.3)
     parser.add_argument('--top_models', '-tm',
-                        help="number of top models to consider for merging the results",
+                        help="number of top models to consider for merging the results. Default value is 3",
                         type=int, default=3)
     parser.add_argument("--plot", help="plot all the individual positions that are statistically significant."
                                        "Depending on your data, this process may produce many plots.",
@@ -111,7 +111,7 @@ def main():
                        threshold=args.similarity_threshold, needs_pivot=False)
 
     print('grouping features')
-    dc = group_features(dat=dc_df, report_dir=report_dir)
+    dc = group_features(dat=df_cleaned, group_dat=dc_df, report_dir=report_dir)
 
     print('dropping correlated features')
     print('Shape of data before linearity care: ', df_cleaned.shape)

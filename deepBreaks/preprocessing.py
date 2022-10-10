@@ -366,10 +366,7 @@ def vec_nmi(dat, report_dir):
 
 # calculating distance
 def distance_calc(dat, dist_method='correlation', report_dir=None):
-    method_list = ['braycurtis', 'chebyshev', 'correlation',
-                   'cosine', 'dice', 'hamming', 'jaccard',
-                   'jensenshannon', 'matching', 'rogerstanimoto',
-                   'russellrao', 'sokalmichener', 'sokalsneath',
+    method_list = ['correlation', 'hamming', 'jaccard',
                    'normalized_mutual_info_score',
                    'adjusted_mutual_info_score', 'adjusted_rand_score']
     err_msg = "Please choose a distance metric \
@@ -396,7 +393,7 @@ def distance_calc(dat, dist_method='correlation', report_dir=None):
 
 
 # grouping features based on DBSCAN clustering algo
-def db_grouped(dat, report_dir, threshold=0.8, needs_pivot=False):
+def db_grouped(dat, report_dir, threshold=0.2, needs_pivot=False):
     from sklearn.cluster import DBSCAN
 
     if needs_pivot:
@@ -406,7 +403,7 @@ def db_grouped(dat, report_dir, threshold=0.8, needs_pivot=False):
         cr_mat = dat
 #     cr_mat = (cr_mat) ** 2
 
-    db = DBSCAN(eps=(1-threshold), min_samples=2, metric='precomputed', n_jobs=-1)
+    db = DBSCAN(eps=threshold, min_samples=2, metric='precomputed', n_jobs=-1)
     db.fit(cr_mat)
 
     dc_df = pd.DataFrame(cr_mat.index.tolist(), columns=['feature'])
@@ -435,13 +432,17 @@ def col_extract(dat, cl1='l0', cl2='l1'):
 
 
 # function for grouping features in saving them in a dictionary file
-def group_features(dat, report_dir):
+def group_features(dat, group_dat, report_dir):
     dc = {}
     if len(dat) > 0:
-        for name, gr in dat.groupby('group'):
-            tmp = dat.loc[dat['group'] == name, 'feature'].tolist()
-            dc[tmp[0]] = tmp[1:]
+        for name, gr in group_dat.groupby('group'):
+            tmp = group_dat.loc[group_dat['group'] == name, 'feature'].tolist()
+            meds = np.array(dat.loc[:, tmp].median(axis=1)).reshape((-1, 1))
+            min_s = ((dat.loc[:, tmp] - meds) ** 2).sum().argmin()
 
+            tmp_ar = [tmp[i] for i in range(len(tmp)) if i != min_s]
+
+            dc[tmp[min_s]] = tmp_ar
         dc_temp = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dc.items()]))
         dc_temp.to_csv(str(report_dir + '/' + 'correlated_positions.csv'), index=False)
     return dc
