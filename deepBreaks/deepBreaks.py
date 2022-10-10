@@ -108,7 +108,7 @@ def main():
     cr = distance_calc(dat=df_cleaned, dist_method=args.distance_metric, report_dir=report_dir)
     print('finding collinear groups')
     dc_df = db_grouped(dat=cr, report_dir=report_dir,
-                       threshold=args.similarity_threshold, needs_pivot=False)
+                       threshold=args.distance_threshold, needs_pivot=False)
 
     print('grouping features')
     dc = group_features(dat=df_cleaned, group_dat=dc_df, report_dir=report_dir)
