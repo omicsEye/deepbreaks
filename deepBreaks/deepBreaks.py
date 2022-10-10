@@ -117,7 +117,6 @@ def main():
     print('Shape of data before linearity care: ', df_cleaned.shape)
     df_cleaned = cor_remove(df_cleaned, dc)
     print('Shape of data after linearity care: ', df_cleaned.shape)
-
     # merge with meta data
     df = df.merge(meta_data[args.metavar], left_index=True, right_index=True)
     df_cleaned = df_cleaned.merge(meta_data[args.metavar], left_index=True, right_index=True)
