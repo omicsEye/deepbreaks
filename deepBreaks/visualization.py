@@ -25,34 +25,30 @@ def best_position(x, y, xlist, ylist):
 
 # lollipop plot of positions and their relative importance
 def dp_plot(dat, imp_col, model_name, report_dir,
-            figsize=(7.2, 3), dpi=350,
-            ylab='Relative Importance',
-            xlab='Positions',
-            title_fontsize=10,
-            xlab_fontsize=8,
-            ylab_fontsize=8,
-            xtick_fontsize=6,
-            ytick_fontsize=4
-            ):
+            figsize=(7.2, 3), dpi=350, ylab='Relative Importance', xlab='Positions',
+            title_fontsize=10, xlab_fontsize=8, ylab_fontsize=8,
+            xtick_fontsize=6, ytick_fontsize=4):
     pl_title = str("Important Positions - " + model_name)
 
     plt.figure(figsize=figsize, dpi=dpi)
-    plt.vlines(x=dat['feature'], ymin=0, ymax=dat[imp_col], color=dat['color'], linewidth=.7, alpha=0.8)
+    plt.vlines(x=dat['feature'], ymin=0,
+               ymax=dat[imp_col], color='black',
+               linewidth=.7, alpha=0.8)
 
     plt.title(pl_title, loc='center', fontsize=title_fontsize)
     plt.xlabel(xlab, fontsize=xlab_fontsize)
     plt.xticks(fontsize=xtick_fontsize)
     plt.ylabel(ylab, fontsize=ylab_fontsize)
     plt.ylim(0, 1.1)
+    plt.xlim(1, dat['feature'].max() + 10)
     plt.yticks(fontsize=ytick_fontsize)
     plt.grid(True, linewidth=.3)
 
-    black_patch = mpatches.Patch(color='black', label='No group', linewidth=0.1)
-    plt.legend(handles=[black_patch], loc='upper left', fontsize=4)
+    # black_patch = mpatches.Patch(color='black', label='No group', linewidth=0.1)
+    # plt.legend(handles=[black_patch], loc='upper left', fontsize=4)
 
     ##annotating top 4 positions
     features = dat.sort_values(by=imp_col, ascending=False).head(4)['feature'].tolist()
-    texts = []
     xtext_list = []
     ytext_list = []
     for n, ft in enumerate(features):
@@ -142,7 +138,8 @@ def plot_imp_model(dat, trained_model, model_name, train_cols, grouped_features,
 
 
 # All significant positions - individual box/bar plots
-def plot_imp_all(trained_models, dat, train_cols, grouped_features, meta_var, model_type, n_positions, report_dir):
+def plot_imp_all(trained_models, dat, train_cols, grouped_features,
+                 meta_var, model_type, n_positions, report_dir):
     plot_dir = str(report_dir + '/significant_positions_plots')
 
     if os.path.exists(plot_dir):

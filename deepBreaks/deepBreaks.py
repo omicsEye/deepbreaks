@@ -130,22 +130,21 @@ def main():
 
     for i in range(select_top):
         imp = fimp_single(trained_model=top_models[i], model_name=model_names[i],
-                          train_cols=train_cols, grouped_features=dc_df,
+                          train_cols=train_cols, grouped_features=dc,
                           n_positions=positions, report_dir=report_dir)
         dp_plot(dat=imp, model_name=model_names[i], imp_col='standard_value', report_dir=report_dir)
 
         plot_imp_model(dat=df, trained_model=top_models[i], model_name=model_names[i],
-                       train_cols=train_cols, grouped_features=dc_df,
+                       train_cols=train_cols, grouped_features=dc,
                        meta_var=args.metavar, n_positions=positions, model_type=args.anatype, report_dir=report_dir)
 
     mean_imp = fimp_top_models(trained_models=top_models, model_names=model_names, train_cols=train_cols,
-                               grouped_features=dc_df,
-                               n_positions=positions, report_dir=report_dir)
+                               grouped_features=dc, n_positions=positions, report_dir=report_dir)
     dp_plot(dat=mean_imp, model_name='mean', imp_col='mean_imp', report_dir=report_dir)
 
     if args.plot:
         plot_imp_all(trained_models=top_models, dat=df, train_cols=train_cols,
-                     grouped_features=dc_df, meta_var=args.metavar, model_type=args.anatype,
+                     grouped_features=dc, meta_var=args.metavar, model_type=args.anatype,
                      n_positions=positions, report_dir=report_dir)
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')

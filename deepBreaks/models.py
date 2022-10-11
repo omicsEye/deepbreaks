@@ -58,7 +58,62 @@ def fit_models(dat, meta_var, model_type, models_to_select, report_dir,
 
 
 # feature importance extractor
-def fimp_single(trained_model, model_name, train_cols, grouped_features, n_positions, report_dir, write=True):
+# def fimp_single(trained_model, model_name, train_cols, grouped_features, n_positions, report_dir, write=True):
+#     try:
+#         imp = trained_model.feature_importances_
+#     except:
+#         imp = trained_model.coef_
+#         if len(imp.shape) > 1:
+#             imp = abs(trained_model.coef_).sum(axis=0)
+#
+#     tmp = pd.DataFrame({'feature': train_cols,
+#                         'value': abs(imp)}).sort_values(by='value', ascending=False).reset_index(drop=True)
+#
+#     tmp['feature'] = tmp['feature'].str.split('_').str[0]
+#     tmp['feature'] = tmp['feature'].str.split('p').str[1].astype(int)
+#     tmp = tmp.groupby('feature')['value'].max().reset_index()
+#
+#     tmp2 = pd.DataFrame(range(n_positions), columns=['feature'])
+#     tmp2 = tmp2.merge(tmp, how='left')
+#     tmp2.fillna(0, inplace=True)
+#     tmp2['standard_value'] = tmp2['value'] / np.max(tmp2['value'])
+#
+#     if grouped_features is not None:
+#         gf = grouped_features.copy()
+#         gf['feature'] = gf['feature'].str.split('_').str[0]
+#         gf['feature'] = gf['feature'].str.split('p').str[1]
+#         gf['feature'] = gf['feature'].astype(int)
+#         tmp2 = tmp2.merge(gf, how='left')
+#         tmp2['group'].fillna('No_gr', inplace=True)
+#     else:
+#         tmp2['group'] = 'No_gr'
+#
+#     tmp2['color'] = None
+#
+#     np.random.seed(12)
+#     colors = np.random.randint(0, 0xFFFFFF, tmp2['group'].nunique())
+#     colors = ['#%06X' % i for i in colors]
+#
+#     cn = 0
+#     for name, group in tmp2.groupby('group'):
+#         if name != 'No_gr':
+#             tmp2.loc[tmp2['group'] == name, 'color'] = colors[cn]
+#             mx = tmp2.loc[tmp2['group'] == name, 'standard_value'].max()
+#             tmp2.loc[tmp2['group'] == name, 'standard_value'] = mx
+#         else:
+#             tmp2.loc[tmp2['group'] == name, 'color'] = '#000000'
+#         cn += 1
+#     if write:
+#         fname = str(report_dir + '/' + model_name + '_feature_importance.csv')
+#
+#         if os.path.isfile(fname):
+#             pass
+#         else:
+#             tmp2.to_csv(fname)
+#
+#     return tmp2
+def fimp_single(trained_model, model_name, train_cols,
+                grouped_features, n_positions, report_dir, write=True):
     try:
         imp = trained_model.feature_importances_
     except:
@@ -67,49 +122,34 @@ def fimp_single(trained_model, model_name, train_cols, grouped_features, n_posit
             imp = abs(trained_model.coef_).sum(axis=0)
 
     tmp = pd.DataFrame({'feature': train_cols,
-                        'value': abs(imp)}).sort_values(by='value', ascending=False).reset_index(drop=True)
+                        'value': abs(imp)}).sort_values(by='value',
+                                                        ascending=False).reset_index(drop=True)
+
+    for key in grouped_features:
+        try:
+            vl = tmp.loc[tmp.loc[:, 'feature'] == key, 'value'].values[0]
+        except:
+            vl = None
+        if vl is not None:
+            gr_tmp = pd.DataFrame(data=grouped_features[key], columns=['feature'])
+            gr_tmp.loc[:, 'value'] = vl
+            tmp = pd.concat([tmp, gr_tmp], axis=0, ignore_index=True)
 
     tmp['feature'] = tmp['feature'].str.split('_').str[0]
     tmp['feature'] = tmp['feature'].str.split('p').str[1].astype(int)
-    tmp = tmp.groupby('feature')['value'].max().reset_index()
+    tmp = tmp.groupby('feature')['value'].sum().reset_index()
 
-    tmp2 = pd.DataFrame(range(n_positions), columns=['feature'])
+    tmp2 = pd.DataFrame(range(1, n_positions), columns=['feature'])
     tmp2 = tmp2.merge(tmp, how='left')
     tmp2.fillna(0, inplace=True)
     tmp2['standard_value'] = tmp2['value'] / np.max(tmp2['value'])
 
-    if grouped_features is not None:
-        gf = grouped_features.copy()
-        gf['feature'] = gf['feature'].str.split('_').str[0]
-        gf['feature'] = gf['feature'].str.split('p').str[1]
-        gf['feature'] = gf['feature'].astype(int)
-        tmp2 = tmp2.merge(gf, how='left')
-        tmp2['group'].fillna('No_gr', inplace=True)
-    else:
-        tmp2['group'] = 'No_gr'
-
-    tmp2['color'] = None
-
-    np.random.seed(12)
-    colors = np.random.randint(0, 0xFFFFFF, tmp2['group'].nunique())
-    colors = ['#%06X' % i for i in colors]
-
-    cn = 0
-    for name, group in tmp2.groupby('group'):
-        if name != 'No_gr':
-            tmp2.loc[tmp2['group'] == name, 'color'] = colors[cn]
-            mx = tmp2.loc[tmp2['group'] == name, 'standard_value'].max()
-            tmp2.loc[tmp2['group'] == name, 'standard_value'] = mx
-        else:
-            tmp2.loc[tmp2['group'] == name, 'color'] = '#000000'
-        cn += 1
     if write:
-        fname = str(report_dir + '/' + model_name + '_feature_importance.csv')
-
-        if os.path.isfile(fname):
+        file_name = str(report_dir + '/' + model_name + '_feature_importance.csv')
+        if os.path.isfile(file_name):
             pass
         else:
-            tmp2.to_csv(fname)
+            tmp2.to_csv(file_name)
 
     return tmp2
 
@@ -123,7 +163,8 @@ def fimp_top_models(trained_models, model_names, train_cols, grouped_features, n
                            n_positions=n_positions, report_dir=report_dir, write=False)
 
         if i == 0:
-            final_imp = tmp2[['feature', 'standard_value', 'group', 'color']]
+            # final_imp = tmp2[['feature', 'standard_value', 'group', 'color']]
+            final_imp = tmp2[['feature', 'standard_value']]
             final_imp.rename(columns={"standard_value": model_names[i]}, inplace=True)
         else:
             final_imp = final_imp.merge(tmp2[['feature', 'standard_value']])
