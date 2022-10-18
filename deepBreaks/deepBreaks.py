@@ -85,38 +85,42 @@ def main():
 
     # taking care of missing data
     print('Shape of data before missing/constant care: ', df.shape)
-    df_cleaned = missing_constant_care(df)
-    print('Shape of data after missing/constant care: ', df_cleaned.shape)
+    df = missing_constant_care(df)
+    print('Shape of data after missing/constant care: ', df.shape)
 
-    print('Shape of data before imbalanced care: ', df_cleaned.shape)
-    df_cleaned = imb_care(dat=df_cleaned, imbalance_threshold=0.05)
-    print('Shape of data after imbalanced care: ', df_cleaned.shape)
+    print('Shape of data before imbalanced care: ', df.shape)
+    df = imb_care(dat=df, imbalance_threshold=0.05)
+    print('Shape of data after imbalanced care: ', df.shape)
 
     if args.fraction is not None:
-        print('number of columns of main data before: ', df_cleaned.shape[1])
-        df_cleaned = col_sampler(dat=df_cleaned, sample_frac=args.fraction)
-        print('number of columns of main data after: ', df_cleaned.shape[1])
+        print('number of columns of main data before: ', df.shape[1])
+        df = col_sampler(dat=df, sample_frac=args.fraction)
+        print('number of columns of main data after: ', df.shape[1])
 
     print('Statistical tests to drop redundant features')
-    df_cleaned = redundant_drop(dat=df_cleaned, meta_dat=meta_data,
+    df_cleaned = redundant_drop(dat=df, meta_dat=meta_data,
                                 feature=args.metavar, model_type=args.anatype,
                                 report_dir=report_dir, threshold=args.redundant_threshold)
-
+    print('Shape of data after dropping redundant columns: ', df_cleaned.shape)
     print('prepare dummy variables')
     df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
     print('correlation analysis')
-    cr = distance_calc(dat=df_cleaned, dist_method=args.distance_metric, report_dir=report_dir)
+    cr = distance_calc(dat=df_cleaned,
+                       dist_method=args.distance_metric,
+                       report_dir=report_dir)
     print('finding collinear groups')
     dc_df = db_grouped(dat=cr, report_dir=report_dir,
-                       threshold=args.distance_threshold, needs_pivot=False)
+                       threshold=args.distance_threshold,
+                       needs_pivot=False)
 
     print('grouping features')
     dc = group_features(dat=df_cleaned, group_dat=dc_df, report_dir=report_dir)
-
     print('dropping correlated features')
+
     print('Shape of data before linearity care: ', df_cleaned.shape)
     df_cleaned = cor_remove(df_cleaned, dc)
     print('Shape of data after linearity care: ', df_cleaned.shape)
+
     # merge with meta data
     df = df.merge(meta_data[args.metavar], left_index=True, right_index=True)
     df_cleaned = df_cleaned.merge(meta_data[args.metavar], left_index=True, right_index=True)

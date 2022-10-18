@@ -40,9 +40,9 @@ regions of sequencing data for function prediction**, https://github.com/omicsEy
     * [Input](#input)
     * [Output](#output)
     * [Demo](#demo)
-* [Tutorials for normalized mutual information calculation](#tutorials-for-normalized-mutual-information-calculation)
 * [Applications](#applications)
-  * [Coronaviruses](#coronaviruses)
+  * [Opsins](#opsins)
+  * [HMP](#hmp)
 * [Support](#Support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
@@ -73,7 +73,11 @@ if you have problems adding conda to PATH, you can find instructions [here](http
 
 ### Windows Linux Mac ###
 If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation instructions.  
-<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.
+<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.  
+If you are using windows, please make sure you have both git and Microsoft Visual C++ 14.0 or greater installed.
+install [git](https://gitforwindows.org/)
+[Microsoft C++ build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+In case you face issues with this step, [this link](https://github.com/pycaret/pycaret/issues/1254) may help you.
 1) Create a new conda environment (let's call it deepBreaks_env) with the following command:
 ```
 conda create --name deepBreaks_env python=3.8
@@ -174,6 +178,13 @@ $ deepBreaks -h
 5. `--anatype` or `-a` analysis type, options are `reg` for regression and `cl` for classification
 6. `--fraction` or `-fr` fraction of the main data (sequence positions) to run. it is optional, 
 but you can enter a value between 0 and 1 to sample from the main data set.
+7. `--redundant_threshold` or `-rt` threshold for the p-value of the statistical 
+tests to drop redundant features. Default value is 0.25.
+8. `--distance_threshold` or `-dth` threshold for the distance between positions to put them in clusters. 
+features with distances <= than the threshold will be grouped together. Default values is 0.3.
+9. `--top_models` or `-tm` number of top models to consider for merging the results. Default value is 3
+10. `--plot` plot all the individual positions that are statistically significant. 
+Depending on your data, this process may produce many plots.
 ## Output ##  
 1. correlated positions. We group all the collinear positions together.
 2. models summary. list of models and their performance metrics.
@@ -185,63 +196,15 @@ group of the position (we group all the collinear positions together)
 
 ## Demo ##
 ```commandline
-deepBreaks -sf D:/RahLab/deepBreaks/lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md D:/RahLab/deepBreaks/lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg
+deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md lite_mar/meta_RodOpsinLambdaMax.tsv -mv
+ LambdaMax -a reg  -dth 0.15 --plot
 ```
-# Tutorials for normalized mutual information calculation ##
-**vec_nmi(dat)** is the function for calculating *Normalize Mutual Information*. Rows of the `dat` file are 
-samples and columns are positions in a sequence:
-<center>
-
-| | position_1 | position_2 | ... | position_n |
-| -- | --------------- | --------------- | --------------- | ----------|
-|sample 1 | A | C | ... | G |
-|sample 2 | A | C | ... | G |
-|sample 3 | T | C | ... | G |
-
-</center>
-and the output of the function is a symmetric dataframe with rows and columns equal to positions and the value of the 
-intersection of each row and column is their normalazied mutual information:
-
-<center>
-
-| | position_1 | position_2 | ... | position_n |
-| -- | --------------- | --------------- | --------------- | ----------|
-|position_1 | 1 | 0.02 | ... | 0.64 |
-|position_2 | 0.02 | 1 | ... | 0.02 |
-|... | ... | ... | ... | ... |
-|position_n | 0.64 | 0.02 | ... | 1 |
-
-</center>
-
 # Applications #
-Here we try to use the **deepBreaks** on different datasets and elaborate on the results.  
-## Coronaviruses ##
-### Introduction ###
-In this study we have a dataset of multi-aligned sequenced coronaviruses that labeled as Bat, SARS-CoV-2, MERS, 
-SARS-related, and other. The initial size of the dataset was 1340 sequences with length of 42484. Our aim is to first, 
-train high-performing machine-learning models to predict the member of the coronavirus family based on its sequence, 
-and second, based on the top models, report the most discriminative positions in the sequence data that was 
-mostly informative to the models. Consequently, based on the positions, we can then find out which specific 
-parts that leads to a certain functionality is discriminative. The complete code for this example is 
-under [examples directory](https://github.com/omicsEye/deepbreaks/tree/master/examples).  
-After data preprocessing, the shape of the data reduced to 1239 sequences, 3 classes, and 2325 positions. It is worth 
-mentioning that during the preprocessing, we kept only the SNPs, and amon those SNPs, we clustered the highly correlated
-SNPs, and use only of the cluster members as the representative of that group.  
-### Results ###
-The results of the models that are fitted to the data with 10-fold crosse validation are as follows:  
-Below, is the confusion matrix resulted on the test data with the Random Forest Classifier:
-<p align="center">
-<img src="img/coronavirus_family/conf_matrix_corona.png" width=50% height=50%>
-</p>
-The important positions are as follows:  
-<p align="center">
-<img src="img/coronavirus_family/Light Gradient Boosting Machine_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/Random Forest Classifier_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/Ridge Classifier_350.png" width=50% height=50%>
-<img src="img/coronavirus_family/mean_350.png" width=50% height=50%>
-</p>
-Please note that the positions that are in same clusters (highly correlated positions) are presented in the same color. 
-The last plot with the tile "important Positions - mean", shows the average importance score of the top three models.
+Here we try to use the **deepBreaks** on different datasets and elaborate on the results.
+## Opsins ##
+[Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype.ipynb)
+## HMP ##
+[Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype.ipynb)
 
 # Support #
 
