@@ -42,13 +42,14 @@ def fasta_read(f_name):
     for line in lines:
         id_h = id_re.search(line)
         if id_h:
+            seq_l = None
             id = id_h.group(1)
         else:
-            seq_l = seq_re.search(line)
-            if id in tmp.keys():
-                print('id {} has duplicated values. We kept the first read!'.format(id))
+            if seq_l is None:
+                seq_l = seq_re.search(line).group(1)
             else:
-                tmp[id] = list(seq_l.group(1).upper())
+                seq_l = seq_l+seq_re.search(line).group(1)
+            tmp[id] = list(seq_l.upper())
     return pd.DataFrame.from_dict(tmp, orient='index')
 
 

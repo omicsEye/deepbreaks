@@ -111,7 +111,16 @@ def plot_imp_model(dat, trained_model, model_name, train_cols, grouped_features,
         plt.savefig(str(report_dir + '/' + model_name + '_positions_box_' + str(350) + '.png'), bbox_inches='tight')
 
     else:
-        color_dic = {'A': '#3837f7', 'C': '#f60002', 'G': '#009901', 'T': '#fed000'}
+        np.random.seed(123)
+        color_dic = {}
+        key_list = ['A', 'R', 'N', 'D', 'C',
+                    'E', 'Q', 'G', 'H', 'I',
+                    'L', 'K', 'M', 'F', 'P',
+                    'S', 'T', 'W', 'Y', 'V']
+        color_list = sns.color_palette("hls", 20)
+        for n, key in enumerate(key_list):
+            color_dic[key] = color_list[n]
+        color_dic['U'] = color_dic['T']
 
         plt.figure(figsize=(7.5, 7.5), dpi=350)
         plt.suptitle(meta_var + ' VS important positions (' + model_name + ')', fontsize=10)
@@ -123,16 +132,22 @@ def plot_imp_model(dat, trained_model, model_name, train_cols, grouped_features,
 
             # chi-square test
             chi2, p, dof, expected = stats.chi2_contingency(crosstb)
+            colors = []
+            for let in crosstb.columns.tolist():
+                if let in color_dic.keys():
+                    colors.append(color_dic[let.upper()])
+                else:
+                    color_dic[let.upper()] = 'gray'
+                    colors.append(color_dic[let.upper()])
 
-            colors = [color_dic[let.upper()] for let in crosstb.columns.tolist()]
-            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors)
+            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.4)
             # ax.title.set_text(cl + ', P-value of Chi-square test: ' + str(round(p, 3)))
             ax.set_title(cl + ', P-value of Chi-square test: ' + str(round(p, 3)), fontsize=8)
             plt.xlabel('')
             plt.xticks(fontsize=6, rotation=90)
             plt.ylabel('Counts', fontsize=8)
             plt.yticks(fontsize=6)
-            plt.legend(title=None)
+            plt.legend(title=None, fontsize=3)
         plt.savefig(str(report_dir + '/' + model_name + '_positions_box_' + str(350) + '.png'), bbox_inches='tight')
     return print(model_name, ' Done')
 
@@ -189,7 +204,16 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
 
                 else:
                     try:
-                        color_dic = {'A': '#3837f7', 'C': '#f60002', 'G': '#009901', 'T': '#fed000'}
+                        np.random.seed(123)
+                        color_dic = {}
+                        key_list = ['A', 'R', 'N', 'D', 'C',
+                                    'E', 'Q', 'G', 'H', 'I',
+                                    'L', 'K', 'M', 'F', 'P',
+                                    'S', 'T', 'W', 'Y', 'V']
+                        color_list = sns.color_palette("hls", 20)
+                        for n, key in enumerate(key_list):
+                            color_dic[key] = color_list[n]
+                        color_dic['U'] = color_dic['T']
                         # Creating crosstab
                         crosstb = pd.crosstab(dat[meta_var], dat[cl])
                         # chi-square test
@@ -198,13 +222,20 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
                         if p < 0.05:
                             feature_list.append(cl)
                             fig, ax = plt.subplots(figsize=(7.5, 7.5), dpi=350)
-                            colors = [color_dic[let.upper()] for let in crosstb.columns.tolist()]
-                            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors)
+                            colors = []
+                            for let in crosstb.columns.tolist():
+                                if let in color_dic.keys():
+                                    colors.append(color_dic[let.upper()])
+                                else:
+                                    color_dic[let.upper()] = 'gray'
+                                    colors.append(color_dic[let.upper()])
+                            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.3)
                             ax.set_title(cl + ', P-value of Chi-square test: ' + str(round(p, 3)), fontsize=8)
                             ax.set_xlabel('')
                             plt.xticks(fontsize=6, rotation=90)
                             plt.ylabel('Counts', fontsize=8)
                             plt.yticks(fontsize=6)
+                            plt.legend(title=None, fontsize=6)
                             plt.savefig(str(plot_dir + '/' + cl + '_stackedbarplot_' + str(350) + '.png'),
                                         bbox_inches='tight')
                     except:
