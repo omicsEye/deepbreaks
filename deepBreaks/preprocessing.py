@@ -55,14 +55,14 @@ def fasta_read(f_name):
 
 # read data function
 def read_data(file_path, seq_type=None, is_main=True):
-    #
+
     if file_path.endswith('.csv'):
         dat = pd.read_csv(file_path, sep=',', index_col=0)
     elif file_path.endswith('.tsv'):
         dat = pd.read_csv(file_path, sep='\t', index_col=0)
     elif file_path.endswith(('.xlsx', '.xls')):
         dat = pd.read_excel(file_path, sep='\t', index_col=0)
-    elif file_path.endswith('.fasta'):
+    elif any(file_path.endswith(s) for s in ['fasta', 'fas', 'fa']):
         # importing seq data
         dat = fasta_read(f_name=file_path)
     else:
@@ -83,6 +83,32 @@ def read_data(file_path, seq_type=None, is_main=True):
             # to_replace.append(vl.lower())
         dat.replace(to_replace, np.nan, inplace=True)
     return dat
+
+
+# write a pandas data frame to fasta file
+def write_fasta(dat, fasta_file, report_dir, wrap=80):
+    """Write data frame to a fasta file.
+
+    Parameters
+    ----------
+    dat : dat.loc[seq_id,:] -> seq
+        Sequences saved in a pandas dataframe in rows.
+    fasta_file : str
+        Path to write the sequences to.
+    wrap: int
+        Number of AA/NT before the line is wrapped.
+    report_dir: str
+        Path to the report directory
+    """
+    file_name = report_dir+'//'+fasta_file
+    with open(file_name, 'w') as f:
+        for ind in dat.index:
+            f.write('>{}\n'.format(ind))
+            seq = ''.join(dat.loc[ind,:].fillna('-'))
+            for i in range(0, len(seq), wrap):
+                f.write('{}\n'.format(seq[i:i + wrap]))
+        f.close()
+    return print(fasta_file + ' was saved successfully')
 
 
 # use top categories only:
@@ -200,11 +226,13 @@ def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.1
             writer.writerow(content)
     if np.sum(np.array(p_val) < threshold) > 0:
         cols = cols[np.array(p_val) < threshold]
+        dat = dat.loc[:, cols]
     else:
-        cols = cols[np.array(p_val) < np.median(np.array(p_val))]
-        print('None of the positions meet the p-value threshold. We selected top 50% positions!')
+        # cols = cols[np.array(p_val) < np.median(np.array(p_val))]
+        print('None of the positions meet the p-value threshold')
+        dat = None
 
-    return dat.loc[:, cols]
+    return dat
 
 
 # get dummy variables

@@ -101,6 +101,9 @@ def main():
     df_cleaned = redundant_drop(dat=df, meta_dat=meta_data,
                                 feature=args.metavar, model_type=args.anatype,
                                 report_dir=report_dir, threshold=args.redundant_threshold)
+    if df_cleaned is None:
+        exit()
+
     print('Shape of data after dropping redundant columns: ', df_cleaned.shape)
     print('prepare dummy variables')
     df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
