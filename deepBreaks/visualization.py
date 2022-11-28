@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
+import pickle
 import os
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
@@ -27,10 +27,10 @@ def best_position(x, y, xlist, ylist):
 def dp_plot(dat, imp_col, model_name, report_dir,
             figsize=(7.2, 3), dpi=350, ylab='Relative Importance', xlab='Positions',
             title_fontsize=10, xlab_fontsize=8, ylab_fontsize=8,
-            xtick_fontsize=6, ytick_fontsize=4):
+            xtick_fontsize=6, ytick_fontsize=6):
     pl_title = str("Important Positions - " + model_name)
 
-    plt.figure(figsize=figsize, dpi=dpi)
+    fig = plt.figure(figsize=figsize, dpi=dpi)
     plt.vlines(x=dat['feature'], ymin=0,
                ymax=dat[imp_col], color='black',
                linewidth=.7, alpha=0.8)
@@ -44,8 +44,6 @@ def dp_plot(dat, imp_col, model_name, report_dir,
     plt.yticks(fontsize=ytick_fontsize)
     plt.grid(True, linewidth=.3)
 
-    # black_patch = mpatches.Patch(color='black', label='No group', linewidth=0.1)
-    # plt.legend(handles=[black_patch], loc='upper left', fontsize=4)
 
     ##annotating top 4 positions
     features = dat.sort_values(by=imp_col, ascending=False).head(4)['feature'].tolist()
@@ -54,7 +52,6 @@ def dp_plot(dat, imp_col, model_name, report_dir,
     for n, ft in enumerate(features):
         x = int(ft)
         y = dat.loc[dat['feature'] == ft, imp_col].tolist()[0]
-        text = str(ft)
         if n > 0:
             xtext, ytext = best_position(x, y + .1, xlist=xtext_list, ylist=ytext_list)
         else:
@@ -70,16 +67,16 @@ def dp_plot(dat, imp_col, model_name, report_dir,
 
         plt.annotate(text=x,
                      xy=(x, y),
-                     xytext=(xtext, ytext), fontsize=4,
+                     xytext=(xtext, ytext), fontsize=5,
                      arrowprops=dict(arrowstyle='->',
                                      color='green',
                                      lw=1,
                                      ls='-'))
 
-    plt.savefig(str(report_dir + '/' + model_name + '_' + str(dpi) + '.png'), bbox_inches='tight')
-    # show the graph
-    #     plt.show()
-    return print(str(report_dir + '/' + model_name + '_' + str(dpi) + '.png'))
+    plt.savefig(str(report_dir + '/' + model_name + '_' + str(dpi) + '.pdf'), bbox_inches='tight')
+    with open(str(report_dir + '/' + model_name + '_' + str(dpi) + '.pickle'), 'wb') as handle:
+        pickle.dump(fig, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return print(model_name + 'Done')
 
 
 ### top 4 important features for each model
@@ -124,7 +121,7 @@ def plot_imp_model(dat, trained_model, model_name, train_cols, grouped_features,
 
         plt.figure(figsize=(7.5, 7.5), dpi=350)
         plt.suptitle(meta_var + ' VS important positions (' + model_name + ')', fontsize=10)
-        plt.subplots_adjust(hspace=0.5, wspace=0.5)
+        plt.subplots_adjust(wspace=0.3)
         for nm, cl in enumerate(features):
             ax = plt.subplot(2, 2, nm + 1)
             # Creating crosstab
@@ -140,21 +137,21 @@ def plot_imp_model(dat, trained_model, model_name, train_cols, grouped_features,
                     color_dic[let.upper()] = 'gray'
                     colors.append(color_dic[let.upper()])
 
-            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.4)
+            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.3)
             # ax.title.set_text(cl + ', P-value of Chi-square test: ' + str(round(p, 3)))
             ax.set_title(cl + ', P-value of Chi-square test: ' + str(round(p, 3)), fontsize=8)
             plt.xlabel('')
-            plt.xticks(fontsize=6, rotation=90)
+            plt.xticks(fontsize=8, rotation=90)
             plt.ylabel('Counts', fontsize=8)
             plt.yticks(fontsize=6)
-            plt.legend(title=None, fontsize=3)
-        plt.savefig(str(report_dir + '/' + model_name + '_positions_box_' + str(350) + '.png'), bbox_inches='tight')
+            plt.legend(title=None, fontsize=6)
+        plt.savefig(str(report_dir + '/' + model_name + 'top_positions' + str(350) + '.pdf'), bbox_inches='tight')
     return print(model_name, ' Done')
 
 
 # All significant positions - individual box/bar plots
 def plot_imp_all(trained_models, dat, train_cols, grouped_features,
-                 meta_var, model_type, n_positions, report_dir):
+                 meta_var, model_type, n_positions, report_dir, max_plots=100):
     plot_dir = str(report_dir + '/significant_positions_plots')
 
     if os.path.exists(plot_dir):
@@ -167,6 +164,7 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
 
     os.makedirs(plot_dir)
     feature_list = []
+    plots = {}
 
     for i in range(len(trained_models)):
         tmp2 = fimp_single(trained_model=trained_models[i], model_name='AAA',
@@ -181,9 +179,7 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
         cn = 0
         check = 0
 
-        while p < 0.05 or check < 10:
-            if cn > len(features):
-                break
+        while (p < 0.05 or check < 10) and (cn < min(len(features), max_plots)):
             cl = features[cn]
             cn += 1
             if cl not in feature_list:
@@ -192,13 +188,16 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
                         k, p = stats.kruskal(*[group[meta_var].values for name, group in dat.groupby(cl)])
                         if p < 0.05:
                             feature_list.append(cl)
-                            fig, ax = plt.subplots(figsize=(7.5, 7.5), dpi=350)
+                            fig, ax = plt.subplots(figsize=(4, 4), dpi=350)
                             ax = sns.boxplot(x=cl, y=meta_var, data=dat, linewidth=1)
                             ax = sns.stripplot(x=cl, y=meta_var, data=dat, size=5, alpha=0.3, linewidth=1)
 
                             ax.set_title(cl + ', P-value of KW test: ' + str(round(p, 3)), fontsize=8)
                             ax.set_xlabel('')
-                            plt.savefig(str(plot_dir + '/' + cl + '_boxplot_' + str(350) + '.png'), bbox_inches='tight')
+
+                            plt.savefig(str(plot_dir + '/' + cl + '_boxplot_' + str(350) + '.pdf'),
+                                        bbox_inches='tight')
+                            plots[cl] = fig, ax
                     except:
                         pass
 
@@ -221,7 +220,7 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
 
                         if p < 0.05:
                             feature_list.append(cl)
-                            fig, ax = plt.subplots(figsize=(7.5, 7.5), dpi=350)
+                            fig, ax = plt.subplots(figsize=(2, 3), dpi=350)
                             colors = []
                             for let in crosstb.columns.tolist():
                                 if let in color_dic.keys():
@@ -230,16 +229,21 @@ def plot_imp_all(trained_models, dat, train_cols, grouped_features,
                                     color_dic[let.upper()] = 'gray'
                                     colors.append(color_dic[let.upper()])
                             crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.3)
-                            ax.set_title(cl + ', P-value of Chi-square test: ' + str(round(p, 3)), fontsize=8)
+                            ax.set_title(cl + ', P-value: ' + str(round(p, 3)), fontsize=8)
                             ax.set_xlabel('')
-                            plt.xticks(fontsize=6, rotation=90)
+                            plt.xticks(fontsize=8, rotation=90)
                             plt.ylabel('Counts', fontsize=8)
                             plt.yticks(fontsize=6)
                             plt.legend(title=None, fontsize=6)
-                            plt.savefig(str(plot_dir + '/' + cl + '_stackedbarplot_' + str(350) + '.png'),
+                            plt.tight_layout()
+
+                            plt.savefig(str(plot_dir + '/' + cl + '_stackedbarplot_' + str(350) + '.pdf'),
                                         bbox_inches='tight')
+                            plots[cl] = fig, ax
                     except:
                         pass
             if p >= 0.05:
                 check += 1
-        print('Model ', i, ' Done')
+    with open(str(plot_dir + '/plots.pickle'), 'wb') as handle:
+        pickle.dump(plots, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return plots
