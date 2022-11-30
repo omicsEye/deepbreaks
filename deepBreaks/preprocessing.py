@@ -34,6 +34,7 @@ def check_data(meta_data, feature, model_type):
 def fasta_read(f_name):
     f = open(f_name, 'r')
     lines = f.readlines()
+    lines = [l for l in lines if l != '\n']
     id_re = re.compile(r'>(\S+)')
     seq_re = re.compile(r'^(\S+)$')
 
