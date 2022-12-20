@@ -1,0 +1,3 @@
+,n_samples,n_features,n_informative
+data0,1000,1000,10
+data1,1000,2000,20
