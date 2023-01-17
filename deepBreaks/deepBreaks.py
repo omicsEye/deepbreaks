@@ -2,7 +2,6 @@
 from deepBreaks.preprocessing import *
 from deepBreaks.models import *
 from deepBreaks.visualization import *
-from sklearn.metrics import adjusted_mutual_info_score
 import os
 import datetime
 import argparse
@@ -13,7 +12,8 @@ from zipfile import ZipFile
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seqfile', '-sf', help="files contains the sequences", type=str, required=True)
-    parser.add_argument('--seqtype', '-st', help="type of sequence: nuc or amino-acid", type=str, required=True, )
+    parser.add_argument('--seqtype', '-st', help="type of sequence: 'nu' for nucleotides or 'aa' for amino-acid",
+                        type=str, required=True, )
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
@@ -34,8 +34,8 @@ def parse_arguments():
                              "values is 0.3",
                         type=float, default=0.3)
     parser.add_argument('--top_models', '-tm',
-                        help="number of top models to consider for merging the results. Default value is 3",
-                        type=int, default=3)
+                        help="number of top models to consider for merging the results. Default value is 5",
+                        type=int, default=5)
     parser.add_argument("--plot", help="plot all the individual positions that are statistically significant."
                                        "Depending on your data, this process may produce many plots.",
                         action="store_true", default=False)
@@ -49,8 +49,8 @@ def main():
 
     args = parse_arguments()
     print(args)  # printing Namespace
-    if args.seqtype not in ['nu', 'amino-acid']:
-        print('For sequence data type, please enter "nu" or "amino-acid" only')
+    if args.seqtype not in ['nu', 'aa']:
+        print('For sequence data type, please enter "nu" for nucleotide or "aa" for amino-acid sequences.')
         exit()
 
     if args.anatype not in ['reg', 'cl']:
@@ -98,8 +98,7 @@ def main():
         print('number of columns of main data after: ', df.shape[1])
 
     print('Statistical tests to drop redundant features')
-    df_cleaned = redundant_drop(dat=df, meta_dat=meta_data,
-                                feature=args.metavar, model_type=args.anatype,
+    df_cleaned = redundant_drop(dat=df, meta_dat=meta_data, feature=args.metavar, model_type=args.anatype,
                                 report_dir=report_dir, threshold=args.redundant_threshold)
     if df_cleaned is None:
         exit()
@@ -108,18 +107,12 @@ def main():
     print('prepare dummy variables')
     df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
     print('correlation analysis')
-    cr = distance_calc(dat=df_cleaned,
-                       dist_method=args.distance_metric,
-                       report_dir=report_dir)
+    cr = distance_calc(dat=df_cleaned, dist_method=args.distance_metric, report_dir=report_dir)
     print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir,
-                       threshold=args.distance_threshold,
-                       needs_pivot=False)
-
+    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=args.distance_threshold)
     print('grouping features')
     dc = group_features(dat=df_cleaned, group_dat=dc_df, report_dir=report_dir)
     print('dropping correlated features')
-
     print('Shape of data before linearity care: ', df_cleaned.shape)
     df_cleaned = cor_remove(df_cleaned, dc)
     print('Shape of data after linearity care: ', df_cleaned.shape)
@@ -129,30 +122,28 @@ def main():
     df_cleaned = df_cleaned.merge(meta_data[args.metavar], left_index=True, right_index=True)
 
     # model
-    print('preparing env')
+    print('Training the models...')
     select_top = args.top_models
-    top_models, train_cols, model_names = fit_models(dat=df_cleaned, meta_var=args.metavar,
-                                                     model_type=args.anatype, models_to_select=select_top,
-                                                     report_dir=report_dir)
+    trained_models = model_compare(X_train=df_cleaned.loc[:, df_cleaned.columns != args.metavar],
+                                   y_train=df_cleaned.loc[:, args.metavar], n_positions=positions,
+                                   grouped_features=dc, report_dir=report_dir, ana_type=args.anatype,
+                                   select_top=select_top)
 
-    for i in range(select_top):
-        imp = fimp_single(trained_model=top_models[i], model_name=model_names[i],
-                          train_cols=train_cols, grouped_features=dc,
-                          n_positions=positions, report_dir=report_dir)
-        dp_plot(dat=imp, model_name=model_names[i], imp_col='standard_value', report_dir=report_dir)
-
-        plot_imp_model(dat=df, trained_model=top_models[i], model_name=model_names[i],
-                       train_cols=train_cols, grouped_features=dc,
-                       meta_var=args.metavar, n_positions=positions, model_type=args.anatype, report_dir=report_dir)
-
-    mean_imp = fimp_top_models(trained_models=top_models, model_names=model_names, train_cols=train_cols,
-                               grouped_features=dc, n_positions=positions, report_dir=report_dir)
-    dp_plot(dat=mean_imp, model_name='mean', imp_col='mean_imp', report_dir=report_dir)
+    print('Visualizing the results...')
+    for key in trained_models.keys():
+        if key == 'mean':
+            dp_plot(importance=trained_models[key], imp_col='mean', model_name=key, annotate=2, report_dir=report_dir)
+        else:
+            dp_plot(importance=trained_models[key]['importance'], imp_col='standard_value',
+                    model_name=key, annotate=2, report_dir=report_dir)
+            plot_imp_model(importance=trained_models[key]['importance'],
+                           X_train=df.loc[:, df.columns != args.metavar], y_train=df.loc[:, args.metavar],
+                           meta_var=args.metavar, model_type=args.anatype, model_name=key, report_dir=report_dir)
 
     if args.plot:
-        plot_imp_all(trained_models=top_models, dat=df, train_cols=train_cols,
-                     grouped_features=dc, meta_var=args.metavar, model_type=args.anatype,
-                     n_positions=positions, report_dir=report_dir)
+        plot_imp_all(trained_models=trained_models,
+                     X_train=df.loc[:, df.columns != args.metavar], y_train=df.loc[:, args.metavar],
+                     meta_var=args.metavar, model_type=args.anatype, report_dir=report_dir, max_plots=100)
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')
     file_names = os.listdir(report_dir)

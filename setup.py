@@ -34,7 +34,7 @@ except ImportError:
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 
-VERSION = "1.1.1"
+VERSION = "1.0.0"
 AUTHOR = "Mahdi Baghbanzadeh"
 AUTHOR_EMAIL = "mbagh@gwu.edu"
 MAINTAINER = "Mahdi Baghbanzadeh"

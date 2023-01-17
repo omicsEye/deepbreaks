@@ -1,9 +1,8 @@
 import re
 import numpy as np
+import pandas
 import pandas as pd
-from itertools import combinations
 from scipy.stats import chi2_contingency
-from scipy.stats import mode
 from scipy.stats import kruskal
 from scipy.spatial.distance import pdist
 from scipy.spatial.distance import squareform
@@ -14,13 +13,13 @@ import csv
 def check_data(meta_data, feature, model_type):
     if len(meta_data) < 30:
         raise Exception('Minimum sample size for a regression analysis is 30 samples, '
-                        'you provided {} samples!'.format(len(meta_dat)))
+                        'you provided {} samples!'.format(len(meta_data)))
     elif model_type == 'cl':
         vl = meta_data[feature].value_counts() / meta_data.shape[0]
         if len(vl) == 1:
             raise Exception(
                 'Minimum categories for a classification analysis is 2 classes, you provided {}'.format(len(vl)))
-        elif vl[1] < 1/(len(vl)*2):
+        elif vl[1] < 1 / (len(vl) * 2):
             raise Exception('Provided sample is highly im-balanced, we need more data for the minority group.')
         else:
             message = "let's start the analysis"
@@ -32,9 +31,14 @@ def check_data(meta_data, feature, model_type):
 
 # read fasta file
 def fasta_read(f_name):
+    """
+    Reads a fasta file and returns a pandas dataframe with rows as IDs and columns as positions in the sequences
+    :param f_name: str, path to file
+    :return: pandas.DataFrame
+    """
     f = open(f_name, 'r')
     lines = f.readlines()
-    lines = [l for l in lines if l != '\n']
+    lines = [line for line in lines if line != '\n']
     id_re = re.compile(r'>(\S+)')
     seq_re = re.compile(r'^(\S+)$')
 
@@ -44,19 +48,54 @@ def fasta_read(f_name):
         id_h = id_re.search(line)
         if id_h:
             seq_l = None
-            id = id_h.group(1)
+            seq_id = id_h.group(1)
         else:
             if seq_l is None:
                 seq_l = seq_re.search(line).group(1)
             else:
-                seq_l = seq_l+seq_re.search(line).group(1)
-            tmp[id] = list(seq_l.upper())
+                seq_l = seq_l + seq_re.search(line).group(1)
+            tmp[seq_id] = list(seq_l.upper())
     return pd.DataFrame.from_dict(tmp, orient='index')
 
 
-# read data function
-def read_data(file_path, seq_type=None, is_main=True):
+# write a pandas data frame to fasta file
+def write_fasta(dat, fasta_file, report_dir, wrap=80):
+    """
+    Writes a Pandas.DataFrame to a fasta file.
 
+    Parameters
+    ----------
+    dat : importance.loc[seq_id,:] -> seq
+        Sequences saved in a pandas dataframe in rows.
+    fasta_file : str
+        Path to write the sequences to.
+    report_dir: str
+        Path to the report directory.
+    wrap: int
+        Number of AA/NT before the line is wrapped.
+    """
+    file_name = report_dir + '//' + fasta_file
+    with open(file_name, 'w') as f:
+        for ind in dat.index:
+            f.write('>{}\n'.format(ind))
+            seq = ''.join(dat.loc[ind, :].fillna('-'))
+            for i in range(0, len(seq), wrap):
+                f.write('{}\n'.format(seq[i:i + wrap]))
+        f.close()
+    return print(fasta_file + ' was saved successfully')
+
+
+# read data function
+def read_data(file_path, seq_type=None, is_main=True, gap_threshold=0.8) -> pandas.DataFrame:
+    """
+    Reads data file from tsv, csv, xlsx, xls, fas, fa, and fasta formats and returns a Pandas.DataFrame
+    :param file_path: str, path to file
+    :param seq_type: str, 'nu' for nucleotides and 'aa' for 'amino-acid' sequences
+    :param is_main: bool, True means that this is the MSA file
+    :param gap_threshold: float, columns with missing values over the gap_threshold% will be dropped and
+     eliminate from the analysis.
+    :return: pandas.DataFrame
+    """
     if file_path.endswith('.csv'):
         dat = pd.read_csv(file_path, sep=',', index_col=0)
     elif file_path.endswith('.tsv'):
@@ -71,8 +110,6 @@ def read_data(file_path, seq_type=None, is_main=True):
         exit()
 
     if is_main:
-        # naming each position as p + its rank
-        dat.columns = [str('p' + str(i)) for i in range(1, dat.shape[1] + 1)]
         # replacing unwanted characters with nan
         if seq_type == 'nu':
             na_values = ['-', 'r', 'y', 'k', 'm', 's', 'w', 'b', 'd', 'h', 'v', 'n']
@@ -81,39 +118,36 @@ def read_data(file_path, seq_type=None, is_main=True):
         to_replace = []
         for vl in na_values:
             to_replace.append(vl.upper())
-            # to_replace.append(vl.lower())
         dat.replace(to_replace, np.nan, inplace=True)
+        if gap_threshold > 0:
+            col_to_drop = dat.columns[dat.isnull().sum() > (gap_threshold * dat.shape[0])]
+            dat.drop(col_to_drop, axis=1, inplace=True)
+
+        # naming each position as p + its rank
+        dat.columns = [str('p' + str(i)) for i in range(1, dat.shape[1] + 1)]
     return dat
-
-
-# write a pandas data frame to fasta file
-def write_fasta(dat, fasta_file, report_dir, wrap=80):
-    """Write data frame to a fasta file.
-
-    Parameters
-    ----------
-    dat : dat.loc[seq_id,:] -> seq
-        Sequences saved in a pandas dataframe in rows.
-    fasta_file : str
-        Path to write the sequences to.
-    wrap: int
-        Number of AA/NT before the line is wrapped.
-    report_dir: str
-        Path to the report directory
-    """
-    file_name = report_dir+'//'+fasta_file
-    with open(file_name, 'w') as f:
-        for ind in dat.index:
-            f.write('>{}\n'.format(ind))
-            seq = ''.join(dat.loc[ind,:].fillna('-'))
-            for i in range(0, len(seq), wrap):
-                f.write('{}\n'.format(seq[i:i + wrap]))
-        f.close()
-    return print(fasta_file + ' was saved successfully')
 
 
 # use top categories only:
 def balanced_classes(dat, meta_dat, feature):
+    """
+    Drops samples from the MSA file that are associated with rare cases. (Used only for classification cases)
+        :param dat: pandas.DataFrame, MSA file
+        :param meta_dat: pandas.DataFrame, meta-data
+        :param feature: str, meta-variable (phenotype)
+        :return: pandas.DataFrame
+
+
+    Example:
+    ----------
+    >>> print('Shape of data is: ', df.shape)
+    Shape of data is:  (1111, 49839)
+
+    # selecting only the classes with enough number of samples
+    >>> df = balanced_classes(importance=df, meta_dat=metaData, feature='mt')
+    >>> print('Shape of data is: ', df.shape)
+    Shape of data is:  (1006, 49839)
+    """
     tmp = dat.merge(meta_dat[feature], left_index=True, right_index=True)
     vl = tmp[feature].value_counts() / tmp.shape[0]
     categories_to_keep = vl[vl > 1 / len(vl) / 2].index.tolist()
@@ -124,27 +158,45 @@ def balanced_classes(dat, meta_dat, feature):
 
 # taking care of missing and constant columns
 def missing_constant_care(dat, missing_threshold=0.05):
+    """
+    Cleans the columns of a pandas.DataFrame by imputing the missing values. For columns that have missing values
+    over the `missing_threshold`, it replaces them with 'GAP' and for columns that have missing values less than
+    `missing_threshold`, it uses the `mode` of that column to impute the missing values.
+
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        MSA file
+    missing_threshold : float
+        threshold to impute the `GAP`s
+
+    Returns
+    -------
+    pandas.DataFrame
+        data frame with no missing value
+
+    Examples
+    --------
+    # taking care of missing data
+    >>> print('Shape of data before missing/constant care: ', df.shape)
+    >>> df = missing_constant_care(df)
+    >>> print('Shape of data after missing/constant care: ', df.shape)
+    Shape of data before missing/constant care:  (1006, 49839)
+    Shape of data after missing/constant care:  (1006, 21705)
+    """
+
     tmp = dat.copy()
     threshold = tmp.shape[0] * missing_threshold
     cl = tmp.columns[tmp.isna().sum() > threshold]
-    tmp.drop(cl, axis=1, inplace=True)
+    tmp.loc[:, cl] = tmp.loc[:, cl].fillna('GAP')
 
-    cl = tmp.columns[tmp.isnull().sum() > 0]
-    tmp2 = tmp[cl]
-    tmp.drop(cl, axis=1, inplace=True)
-    md = mode(tmp2)[0]
-
-    tmp2 = np.where(pd.isna(tmp2), md, tmp2)
-    tmp2 = pd.DataFrame(tmp2, columns=cl, index=tmp.index)
-    tmp = pd.concat([tmp, tmp2], axis=1)
+    tmp.fillna(tmp.mode().loc[0, :], inplace=True)
 
     tmp = tmp.loc[:, tmp.nunique() != 1]
 
     return tmp
 
 
-# mode = tmp.filter(tmp.columns).mode().iloc[0]  # mode of all the columns
-# tmp = tmp.fillna(mode)  # replacing NA values with the mode of each column
 # a function which check if one character in a certain column is below a threshold or not
 # and replace that character with the mode of that column of merge the rare cases together
 def colCleaner_column(dat, column, threshold=0.015):
@@ -170,7 +222,7 @@ def imb_care(dat, imbalance_threshold=0.05):
     return tmp
 
 
-# function to sample from features 
+# function to sample from features
 def col_sampler(dat, sample_frac=1):
     if sample_frac < 1:
         samples = int(dat.shape[1] * sample_frac)
@@ -181,19 +233,38 @@ def col_sampler(dat, sample_frac=1):
 
 
 # statistical tests to drop redundant positions
-def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.15):
+def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.25) -> pandas.DataFrame:
     """
-    This function gets the following variables and performs statistical tests (chi-square or Kruskal–Wallis)
-    and based on the p-values and the given threshold, drops redundant positions. A report of all calculated p-values
-    will be saved into the given report directory under name of p_values.csv.
+    This function performs statistical tests (chi-square or Kruskal–Wallis) on each column of `importance` against the
+    values of `meta_dat['feature']` and based on the p-values and the given threshold, drops redundant positions. A
+    report of all calculated p-values will be saved into the given report directory under name of `p_values.csv`.
 
-    :param dat:
-    :param meta_dat:
-    :param feature:
-    :param model_type:
-    :param report_dir:
-    :param threshold:
-    :return:
+    Parameters
+    ----------
+    dat : pandas.DataFrame, MSA file
+    meta_dat : pandas.DataFrame, dataframe containing the metadata
+    feature : str, the name of the feature under study (phenotype)
+    model_type : str, 'reg' for regression and 'cl' for classification
+    report_dir : str, path to the directory to write the `p_values.csv` file
+    threshold : float, default = 0.25, threshold for p-vaule. columns that have results in
+                p-values higher than this will be dropped from the analysis
+
+    Returns
+    -------
+    pandas.DataFrame, a reduced dataframe with only significant positions
+
+    Example
+    --------
+    # Use statistical tests to drop redundant features.
+    >>> print('number of columns of main data before: ', df.shape[1])
+    >>> df_cleaned = redundant_drop(importance=df, meta_dat=metaData,
+    ...                                 feature='mt', model_type='reg',
+    ...                                 threshold=0.25,
+    ...                                 report_dir='.')
+    >>> print('number of columns of main data after: ', df_cleaned.shape[1])
+
+    number of columns of main data befor:  194
+    number of columns of main data after:  102
     """
 
     def chisq_test(dat_main, col_list, resp_feature):
@@ -238,164 +309,57 @@ def redundant_drop(dat, meta_dat, feature, model_type, report_dir, threshold=0.1
 
 # get dummy variables
 def get_dummies(dat, drop_first=True):
+    """
+    Create dummy variables.
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        MSA file
+    drop_first : bool
+        True for dropping the first dummy variable
+
+    Returns
+    -------
+    pandas.DataFrame
+        a dataframe with all binary variables instead of strings
+    """
     dat = pd.get_dummies(dat, drop_first=drop_first)
     return dat
 
 
-# function to calculate Cramer's V score
-def cramers_V(var1, var2):
-    crosstab = np.array(pd.crosstab(var1, var2, rownames=None, colnames=None))  # Cross table building
-    stat = chi2_contingency(crosstab)[0]  # Keeping of the test statistic of the Chi2 test
-    obs = np.sum(crosstab)  # Number of observations
-    mini = min(crosstab.shape) - 1  # Take the minimum value between the columns and the rows of the cross table
-    return (stat / (obs * mini))
-
-
-# function for creating correlation data frame and just report those which are above a treashold
-def cor_cal(dat, report_dir, threshold=0.8):
-    print('expected_calculations: ', dat.shape[1] * (dat.shape[1] - 1) / 2)
-    cn = 0
-    cr = pd.DataFrame(columns=['l0', 'l1', 'cor'])
-    col_check = []
-    for cl in combinations(dat.columns, 2):  # all paired combinations of df columns
-        cn += 1
-        if cn % 5000 == 0:  # show each 5000 steps
-            print(cn)
-        cv = cramers_V(dat[cl[0]], dat[cl[1]])
-        cr.loc[len(cr)] = [cl[0], cl[1], cv]
-        cr.loc[len(cr)] = [cl[1], cl[0], cv]
-
-    cr.to_csv(str(report_dir + '/' + 'correlation_matrix.csv'), index=False)
-
-    return cr  # [cr['cor'] >= threshold]
-
-
-# a function to calculate adjusted mutual information for all the paired combinations of the dat dataset
-def dist_cols(dat, score_func):
-    # creating empty dataFrame to keep the results
-    cn = 0
-    cr = pd.DataFrame(columns=['l0', 'l1', 'cor'])
-
-    for cl in combinations(dat.columns, 2):  # all paired combinations of dat columns
-
-        score = score_func(dat[cl[0]], dat[cl[1]])
-        cr.loc[len(cr)] = [cl[0], cl[1], score]
-        cr.loc[len(cr)] = [cl[1], cl[0], score]
-
-    cr.loc[cr['cor'] < 0, 'cor'] = 0
-    return cr
-
-
-# create dummy vars, drop those which are below a certain threshold,
-# then calculate the similarity between these remaining columns
-def ham_dist(dat, threshold=0.2):
-    import gc
-
-    # make dummy vars and keep all of them
-    tmp1 = pd.get_dummies(dat, drop_first=False)
-
-    # drop rare cases
-    cl = tmp1.columns[(tmp1.sum() / dat.shape[0] > threshold)]
-    tmp1 = tmp1[cl]
-
-    # creating empty dataFrame to keep the results
-    r_nam = tmp1.columns.tolist()
-    dis = pd.DataFrame(columns=r_nam, index=r_nam)
-
-    tmp1 = np.array(tmp1).T
-
-    last = range(tmp1.shape[0])
-    for i in last:
-        dist_vec = (tmp1[0, :] == tmp1).sum(axis=1)
-
-        dis.iloc[i, i:] = dist_vec
-        dis.iloc[i:, i] = dist_vec
-        tmp1 = np.delete(tmp1, 0, 0)
-        if i % 1000 == 0:
-            gc.collect()
-    gc.collect()
-    gc.collect()
-    dis = dis / dat.shape[0]
-    print('Reset indexes')
-    dis.reset_index(inplace=True)
-    print('reshaping')
-    dis = dis.melt(id_vars='index')
-    dis['index'] = dis['index'].str.split('_').str[0]
-    dis['variable'] = dis['variable'].str.split('_').str[0]
-    gc.collect()
-    gc.collect()
-    dis = dis[dis['index'] != dis['variable']]
-    print('Selecting max values')
-    dis = dis.groupby(['index', 'variable']).max().reset_index()
-    dis.columns = ['l0', 'l1', 'cor']
-    return dis
-
-
-# calculate vectorized normalized mutual information
-def vec_nmi(dat, report_dir):
-    # get the sample size
-    N = dat.shape[0]
-    # create empty dataframe
-    dat_temp = pd.DataFrame(columns=dat.columns, index=dat.columns)
-
-    # transpose main dataframe
-    df_dum = pd.get_dummies(dat).T.reset_index()
-    df_dum[['position', 'char']] = df_dum['index'].str.split("_", expand=True)
-    df_dum.drop(['index'], axis=1, inplace=True)
-
-    # total samples within each position with specific character
-    col_sum = df_dum.iloc[:, :-2].sum(axis=1)
-
-    # array of all data
-    my_array = np.array(df_dum.iloc[:, :-2])
-
-    for name, gr in df_dum.groupby(['position']):
-        mu_list = []
-        char_list = list(set(df_dum.loc[df_dum.loc[:, 'position'] == name, 'char']))
-        temp = df_dum.loc[:, ['position', 'char']]
-
-        for ch in char_list:
-            temp.loc[:, 'inter' + ch] = None
-            temp.loc[:, 'ui_vi'] = None
-            temp.loc[:, 'mui' + ch] = None
-
-            intersects = my_array[(df_dum.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch)]
-            intersects = intersects + my_array
-            intersects = intersects == 2
-
-            temp.loc[:, 'inter' + ch] = intersects.sum(axis=1)
-
-            temp.loc[:, 'ui_vi'] = temp.loc[(temp.loc[:, 'position'] == name) & (df_dum.loc[:, 'char'] == ch),
-                                     'inter' + ch].values * col_sum
-            temp.loc[:, 'mui' + ch] = (temp.loc[:, 'inter' + ch] / N) * (
-                np.log(N * (temp.loc[:, 'inter' + ch]) / temp.loc[:, 'ui_vi']))
-
-            mu_list.append('mui' + ch)
-
-        # sum over all entropies
-        temp = temp.groupby('position')[mu_list].sum().sum(axis=1)
-
-        # insert into dataframe
-        dat_temp[name] = temp
-
-    dat_temp.fillna(0, inplace=True)
-
-    # calculate average entropies
-    entropies = np.diag(dat_temp)
-    m_entropies = np.tile(entropies, reps=[len(entropies), 1])
-    avg_entropies = (entropies.reshape(len(entropies), 1) + m_entropies) / 2
-
-    # calculate normalized mutual information
-    dat_temp = dat_temp / avg_entropies
-    dat_temp.fillna(0, inplace=True)
-
-    dat_temp.to_csv(str(report_dir + '/' + 'nmi.csv'), index=True)
-
-    return dat_temp
-
-
 # calculating distance
-def distance_calc(dat, dist_method='correlation', report_dir=None):
+def distance_calc(dat, dist_method='correlation', report_dir=None) -> pd.DataFrame:
+    """
+    calculates the distance matrix for the columns of the provided `importance`.
+
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        a numeric dataframe
+    dist_method : str
+        method for calculating the distances. Available options are: 'correlation', 'hamming', 'jaccard',
+                   'normalized_mutual_info_score', 'adjusted_mutual_info_score', 'adjusted_rand_score'
+    report_dir : str
+        path to directory to save the distance matrix
+
+    Returns
+    -------
+    pandas.DataFrame
+        a distance matrix of class pandas.DataFrame
+
+    Example
+    --------
+    >>> print('calculating the distance matrix')
+    >>> cr = distance_calc(importance=df_cleaned,
+    ...                        dist_method='correlation',
+    ...                        report_dir='.')
+    >>> print(cr.shape)
+
+    calculating the distance matrix
+
+    (15252, 15252)
+
+    """
     method_list = ['correlation', 'hamming', 'jaccard',
                    'normalized_mutual_info_score',
                    'adjusted_mutual_info_score', 'adjusted_rand_score']
@@ -423,15 +387,36 @@ def distance_calc(dat, dist_method='correlation', report_dir=None):
 
 
 # grouping features based on DBSCAN clustering algo
-def db_grouped(dat, report_dir, threshold=0.2, needs_pivot=False):
+def db_grouped(dat, report_dir, threshold=0.2) -> pandas.DataFrame:
+    """
+    This function clusters the columns of a dataframe based on a given distance matrix by using the `DBSCAN` algorithm.
+
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        symmetric distance matrix
+    report_dir : str
+        path to write the csv file of the clusters.
+    threshold : float
+        distance threshold for variables to be considered in clusters (eps in the DBSCAN algorithm)
+
+    Returns
+    -------
+    pandas.DataFrame
+        a two column dataframe. first column contains the features and the secod column contains the cluster labels
+
+    Example
+    -------
+    # calculaing the distance matrix
+    >>> cr = distance_calc(importance=df_cleaned,
+    ...                dist_method='correlation',
+    ...                report_dir='.')
+    # clustering
+    >>> dc_df = db_grouped(importance = cr, report_dir=report_dir, threshold=.25)
+    """
     from sklearn.cluster import DBSCAN
 
-    if needs_pivot:
-        cr_mat = dat.pivot(index='l0', columns='l1', values='cor')
-        cr_mat.fillna(1, inplace=True)
-    else:
-        cr_mat = dat
-#     cr_mat = (cr_mat) ** 2
+    cr_mat = dat
 
     db = DBSCAN(eps=threshold, min_samples=2, metric='precomputed', n_jobs=-1)
     db.fit(cr_mat)
@@ -454,15 +439,28 @@ def db_grouped(dat, report_dir, threshold=0.2, needs_pivot=False):
     return dc_df
 
 
-def col_extract(dat, cl1='l0', cl2='l1'):
-    ft_list = dat[cl1].tolist()
-    ft_list.extend(dat[cl2].tolist())
-    ft_list = list(set(ft_list))
-    return ft_list
-
-
 # function for grouping features in saving them in a dictionary file
-def group_features(dat, group_dat, report_dir):
+def group_features(dat, group_dat, report_dir) -> dict:
+    """
+    Gets a two column dataframe of names and labels. Then for each label, creates a dictionary that the key is the
+    representative of the group and the members are the rest of names with the same label. Representative id the closes
+    to the center of the cluster
+
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        numeric data frame
+    group_dat : pandas.DataFrame
+        a two column dataframe containing names and labels of clusters
+    report_dir : str
+        path to write the dictionary file
+
+    Returns
+    -------
+    dict
+    a dictionary of representatives and the rest of the members of the groups
+
+    """
     dc = {}
     if len(dat) > 0:
         for name, gr in group_dat.groupby('group'):
@@ -478,22 +476,24 @@ def group_features(dat, group_dat, report_dir):
     return dc
 
 
-# function that gets the grouped dictionary and returns a dataframe of grouped features
-def group_extend(dic):
-    dc_df = pd.DataFrame(columns=['feature', 'group'])
-    for n, k in enumerate(dic.keys()):
-        ft = dic[k].copy()
-        ft.append(k)
-        col = [str('g' + str(n))] * len(ft)
-        tmp = pd.DataFrame(list(zip(ft, col)), columns=['feature', 'group'])
-        dc_df = dc_df.append(tmp, ignore_index=True)
-    dc_df['feature'] = dc_df['feature'].str.split('p').str[1]
-    dc_df['feature'] = dc_df['feature'].astype(int)
-    return dc_df
+def cor_remove(dat, dic) -> pandas.DataFrame:
+    """
+    Reduce the columns of the `importance` by dropping the correlated features and keep only one feature
+    per group of correlated features.
 
+    Parameters
+    ----------
+    dat : pandas.DataFrame
+        MSA file
+    dic : dict
+        dictionary of all groups of correlated features
 
-# function for removing the correlated features from the main dataframe
-def cor_remove(dat, dic):
+    Returns
+    -------
+    pandas.DataFrame
+        a reduced `importance` dataframe
+     """
+
     for k in dic.keys():
         dat.drop(dic[k], axis=1, inplace=True)
     return dat
