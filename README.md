@@ -41,10 +41,10 @@ regions of sequencing data for function prediction**, https://github.com/omicsEy
     * [Output](#output)
     * [Demo](#demo)
 * [Applications](#applications)
-  * [*deepBreaks* identifies amino acids associated with color sensitivity](#deepBreaksidentifiesaminoacidsassociatedwithcolorsensitivity)
-  * [Novel insights of niche associations in the oral microbiome](#Novelinsightsofnicheassociationsintheoralmicrobiome)
-  * [*deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants](deepBreaksrevealsimportantSARS-CoV-2regionsassociatedwithAlphaandDeltavariants)
-  * [*deepBreaks* identifies HIV regions with potentially important functions](deepBreaksidentifiesHIVregionswithpotentiallyimportantfunctions)
+  * [*deepBreaks* identifies amino acids associated with color sensitivity](#opsin)
+  * [Novel insights of niche associations in the oral microbiome](#hmp)
+  * [*deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants](#covid)
+  * [*deepBreaks* identifies HIV regions with potentially important functions](#hiv)
 * [Support](#Support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
@@ -205,7 +205,11 @@ deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md lite_mar/
 ```
 # Applications #
 Here we try to use the **deepBreaks** on different datasets and elaborate on the results.
-## *deepBreaks* identifies amino acids associated with color sensitivity ##
+
+<h2 id="opsin">
+<i>deepBreaks</i> identifies amino acids associated with color sensitivity
+</h2>
+
 ![Opsins](img/lite_mar/figure.png)  
 
 Opsins are genes involved in light sensitivity and vision, and when coupled with a light-reactive chromophore, the
@@ -220,7 +224,11 @@ dataset to find the most important sites contributing to the variations of λmax
 This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype.ipynb) 
 illustrates the steps.
 
-## Novel insights of niche associations in the oral microbiome ##
+
+<h2 id="hmp">
+Novel insights of niche associations in the oral microbiome
+</h2>
+
 ![hmp](img/hmp/hmp.png)  
 Microbial species tend to adapt at the genome level to the niche in which they live. We hypothesize 
 that genes with essential functions change based on where microbial species live. Here we use microbial strain 
@@ -231,7 +239,11 @@ with 1006 rows, each a representative strain of a specific microbial species, he
 This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype.ipynb)
 illustrates the steps.
 
-## *deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants ##
+
+<h2 id="covid">
+<i>deepBreaks</i> reveals important SARS-CoV-2 regions associated with Alpha and Delta variants
+</h2>
+
 ![sarscov2](img/sars_cov2/sarscov2.png)
 Variants occur with new mutations in the virus genome. Most mutations in the SARS-CoV-2 genome do not affect the
 functioning of the virus. However, mutations in the spike protein of SARS-CoV-2, which binds to receptors on cells 
@@ -245,7 +257,11 @@ This
 [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype_SARS_Cov2_variants.ipynb) 
 illustrates the steps.
 
-## *deepBreaks* identifies HIV regions with potentially important functions ##
+
+<h2 id="hiv">
+<i>deepBreaks</i> identifies HIV regions with potentially important functions
+</h2>
+
 ![sarscov2](img/HIV/HIV3.png)
 Subtypes of the human immunodeficiency virus type 1 (HIV-1) group M are different in the envelope (Env) glycoproteins 
 of the virus. These parts of the virus are displayed on the surface of the virion and are targets for both neutralizing
@@ -259,7 +275,6 @@ the V3 sequences V3 to subtypes B and C. We used the [Los Alamos HIV Database](w
 nucleotide sequences of the V3 loop of subtypes B and C. 
 This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype_HIV.ipynb) 
 illustrates the steps.
-
 
 # Support #
 
