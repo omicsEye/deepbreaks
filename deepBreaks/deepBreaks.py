@@ -13,9 +13,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--seqfile', '-sf', help="files contains the sequences", type=str, required=True)
     parser.add_argument('--seqtype', '-st', help="type of sequence: 'nu' for nucleotides or 'aa' for amino-acid",
-                        type=str, required=True, )
+                        type=str, required=True)
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
+    parser.add_argument('--gap', '-gp', help="Threshold to drop positions that have GAPs above this proportion."
+                                             " Default value is 0.7 and it means that the positions that 70% or more "
+                                             "GAPs will be dropped from the analysis.",
+                        type=float, default=0.7)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
     parser.add_argument('--distance_metric', '-dm',
                         help="distance metric. Default is correlation.",
@@ -39,6 +43,12 @@ def parse_arguments():
     parser.add_argument("--plot", help="plot all the individual positions that are statistically significant."
                                        "Depending on your data, this process may produce many plots.",
                         action="store_true", default=False)
+    parser.add_argument("--write", help="During reading the fasta file we delete the positions that have GAPs over a "
+                                        "certain threshold that can be changed in the `gap_threshold` argument"
+                                        "in the `read_data` function. As this may change the whole FASTA file, you may"
+                                        "want to save the FASTA file after this cleaning step.",
+                        action="store_true", default=False)
+
     return parser.parse_args()
 
 
@@ -73,7 +83,11 @@ def main():
 
     # importing seq data
     print('reading fasta file')
-    df = read_data(args.seqfile, seq_type=args.seqtype, is_main=True)
+    df = read_data(args.seqfile, seq_type=args.seqtype, gap_threshold=args.gap, is_main=True)
+
+    if args.write:
+        print('Writing cleaned FASTA file')
+        write_fasta(dat=df, fasta_file=seq_file_name+'_clean.fasta', report_dir=report_dir)
 
     positions = df.shape[1]
     print('Done')

@@ -68,7 +68,7 @@ def write_fasta(dat, fasta_file, report_dir, wrap=80):
     dat : importance.loc[seq_id,:] -> seq
         Sequences saved in a pandas dataframe in rows.
     fasta_file : str
-        Path to write the sequences to.
+        Output FASTA file name.
     report_dir: str
         Path to the report directory.
     wrap: int
@@ -86,7 +86,7 @@ def write_fasta(dat, fasta_file, report_dir, wrap=80):
 
 
 # read data function
-def read_data(file_path, seq_type=None, is_main=True, gap_threshold=0.8) -> pandas.DataFrame:
+def read_data(file_path, seq_type=None, is_main=True, gap_threshold=0.7) -> pandas.DataFrame:
     """
     Reads data file from tsv, csv, xlsx, xls, fas, fa, and fasta formats and returns a Pandas.DataFrame
     :param file_path: str, path to file

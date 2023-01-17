@@ -80,7 +80,7 @@ install [git](https://gitforwindows.org/)
 In case you face issues with this step, [this link](https://github.com/pycaret/pycaret/issues/1254) may help you.
 1) Create a new conda environment (let's call it deepBreaks_env) with the following command:
 ```
-conda create --name deepBreaks_env python=3.8
+conda create --name deepBreaks_env python=3.9
 ```
 2) Activate your conda environment:
 ```commandline
@@ -118,10 +118,6 @@ python -m pip install git+https://github.com/omicsEye/deepbreaks
   conda activate deepBreaks_env
   ```
 8) Install packages from Conda
-  ```commandline
-  conda install numpy scipy scikit-learn==0.23.2
-  ```
-  Then
   ```commandline
   conda install lightgbm
   pip install xgboost
@@ -201,10 +197,61 @@ deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md lite_mar/
 ```
 # Applications #
 Here we try to use the **deepBreaks** on different datasets and elaborate on the results.
-## Opsins ##
-[Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype.ipynb)
-## HMP ##
-[Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype.ipynb)
+## *deepBreaks* identifies amino acids associated with color sensitivity ##
+![Opsins](img/lite_mar/figure.png)  
+
+Opsins are genes involved in light sensitivity and vision, and when coupled with a light-reactive chromophore, the
+absorbance of the resulting photopigment dictates physiological phenotypes like color sensitivity. We analyzed the 
+amino acid sequence of rod opsins because previously published mutagenesis work established mechanistic connections
+between 12 specific amino acid sites and phenotypes [Yokoyama et al. (2008)](https://doi.org/10.1073/pnas.0802426105). 
+Therefore, we hypothesized that machine learning approaches could predict known associations between amino acid sites 
+and absorbance phenotypes. We identified opsins expressed in
+rod cells of vertebrates (mainly marine fishes) with absorption spectra measurements (λmax, the wavelength with the
+highest absorption). The dataset contains 175 samples of opsin sequences. We next applied deepBreaks on this
+dataset to find the most important sites contributing to the variations of λmax. 
+This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype.ipynb) 
+illustrates the steps.
+
+## Novel insights of niche associations in the oral microbiome ##
+![hmp](img/hmp/hmp.png)  
+Microbial species tend to adapt at the genome level to the niche in which they live. We hypothesize 
+that genes with essential functions change based on where microbial species live. Here we use microbial strain 
+representatives from stool metagenomics data of healthy adults from the
+[Human Microbiome Project](https://doi.org/10.1038/nature11234). The input for deepBreaks consists of 1) an MSA file
+with 1006 rows, each a representative strain of a specific microbial species, here Haemophilus parainfluenzae, with
+49839 lengths; and 2) labels for deepBreaks prediction are body sites from which samples were collected. 
+This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype.ipynb)
+illustrates the steps.
+
+## *deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants ##
+![sarscov2](img/sars_cov2/sarscov2.png)
+Variants occur with new mutations in the virus genome. Most mutations in the SARS-CoV-2 genome do not affect the
+functioning of the virus. However, mutations in the spike protein of SARS-CoV-2, which binds to receptors on cells 
+lining the inside of the human nose, may make the virus easier to spread or affect how well vaccines protect people. 
+We are going to study the mutations in the spike protein of the sequences of Alpha (B.1.1.7): the first variant of 
+concern described in the United Kingdom (UK) in late December 2020 and Delta (B.1.617.2): first reported in India in
+December 2020. We used the publicly available data from the [GSAID](https://gisaid.org/) and obtained 900 sequences
+of spike protein region of Alpha (450 samples) and Delta (450 samples) variants. Then, we used deepBreaks to analyze 
+the data and find the most important (predictive) positions in these sequences in terms of classifying the variants. 
+This
+[Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype_SARS_Cov2_variants.ipynb) 
+illustrates the steps.
+
+## *deepBreaks* identifies HIV regions with potentially important functions ##
+![sarscov2](img/HIV/HIV3.png)
+Subtypes of the human immunodeficiency virus type 1 (HIV-1) group M are different in the envelope (Env) glycoproteins 
+of the virus. These parts of the virus are displayed on the surface of the virion and are targets for both neutralizing
+antibody and cell-mediated immune responses. The third hypervariable domain (V3) of HIV-1 gp120 is a cysteine-bounded
+loop structure usually composed of 105 nucleotides and labeled as the base (nu 1:26 and 75:105), stem
+(nu 27:44 and 54:74), and turn (nu 45:53) regions [Lynch et al. (2009)](https://doi.org/10.1089%2Faid.2008.0219) .
+Among all of the hyper-variable regions in gp120 (V1-V5), V3 is playing the main role in the virus infectivity
+[Felsövályi et al. (2006)](https://doi.org/10.1089%2Faid.2006.22.703). 
+Here we useare using deepBreaks to identify important regions in the V3 loop that are important in terms of associating
+the V3 sequences V3 to subtypes B and C. We used the [Los Alamos HIV Database](www.hiv.lanl.gov) to gather the 
+nucleotide sequences of the V3 loop of subtypes B and C. 
+This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype_HIV.ipynb) 
+illustrates the steps.
+
 
 # Support #
 
