@@ -41,8 +41,10 @@ regions of sequencing data for function prediction**, https://github.com/omicsEy
     * [Output](#output)
     * [Demo](#demo)
 * [Applications](#applications)
-  * [Opsins](#opsins)
-  * [HMP](#hmp)
+  * [*deepBreaks* identifies amino acids associated with color sensitivity](#deepBreaksidentifiesaminoacidsassociatedwithcolorsensitivity)
+  * [Novel insights of niche associations in the oral microbiome](#Novelinsightsofnicheassociationsintheoralmicrobiome)
+  * [*deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants](deepBreaksrevealsimportantSARS-CoV-2regionsassociatedwithAlphaandDeltavariants)
+  * [*deepBreaks* identifies HIV regions with potentially important functions](deepBreaksidentifiesHIVregionswithpotentiallyimportantfunctions)
 * [Support](#Support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
@@ -111,7 +113,7 @@ python -m pip install git+https://github.com/omicsEye/deepbreaks
 5) Close the current terminal and open a new terminal
 6) Create a new conda environment (let's call it deepBreaks_env) with the following command:
   ```commandline
-  conda create --name deepBreaks_env python=3.8
+  conda create --name deepBreaks_env python=3.9
   ```
 7) Activate the conda environment
   ```commandline
@@ -181,6 +183,12 @@ features with distances <= than the threshold will be grouped together. Default 
 9. `--top_models` or `-tm` number of top models to consider for merging the results. Default value is 3
 10. `--plot` plot all the individual positions that are statistically significant. 
 Depending on your data, this process may produce many plots.
+11. `--gap` or `-gp` Threshold to drop positions that have GAPs above this proportion. 
+Default value is 0.7, and it means that the positions that 70% or more GAPs will be dropped from the analysis.
+12. `--write` During reading the fasta file we delete the positions that have GAPs over a  certain threshold that can 
+be changed in the `gap_threshold` argument in the `read_data` function. As this may change the whole FASTA file,
+you may want to save the FASTA file after this cleaning step.
+
 ## Output ##  
 1. correlated positions. We group all the collinear positions together.
 2. models summary. list of models and their performance metrics.
