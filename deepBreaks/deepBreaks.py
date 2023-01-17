@@ -20,6 +20,11 @@ def parse_arguments():
                                              " Default value is 0.7 and it means that the positions that 70%% or more "
                                              "GAPs will be dropped from the analysis.",
                         type=float, default=0.7)
+    parser.add_argument('--miss_gap', '-mgp', help="Threshold to impute missing values with GAP. Gaps"
+                                                   "in positions that have missing values (gaps) above this proportion"
+                                                   "are replaced with the term 'GAP'. the rest of the missing values"
+                                                   "are replaced by the mode of each position.",
+                        type=float, default=0.15)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
     parser.add_argument('--distance_metric', '-dm',
                         help="distance metric. Default is correlation.",
@@ -99,7 +104,7 @@ def main():
 
     # taking care of missing data
     print('Shape of data before missing/constant care: ', df.shape)
-    df = missing_constant_care(df)
+    df = missing_constant_care(df, missing_threshold=args.miss_gap)
     print('Shape of data after missing/constant care: ', df.shape)
 
     print('Shape of data before imbalanced care: ', df.shape)

@@ -143,23 +143,49 @@ deepBreaks -h
 ```
 Which yields deepBreaks command line options.
 ```commandline
-usage: deepBreaks -h 
---seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar METAVAR --anatype {reg,cl} [--fraction FRACTION]
+usage: deepBreaks [-h] --seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar
+                  METAVAR [--gap GAP] --anatype {reg,cl}
+                  [--distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}]
+                  [--fraction FRACTION] [--redundant_threshold REDUNDANT_THRESHOLD]
+                  [--distance_threshold DISTANCE_THRESHOLD] [--top_models TOP_MODELS] [--plot]
+                  [--write]
 
 optional arguments:
   -h, --help            show this help message and exit
   --seqfile SEQFILE, -sf SEQFILE
                         files contains the sequences
   --seqtype SEQTYPE, -st SEQTYPE
-                        type of sequence: nuc, amino-acid
+                        type of sequence: 'nu' for nucleotides or 'aa' for amino-acid
   --meta_data META_DATA, -md META_DATA
                         files contains the meta data
   --metavar METAVAR, -mv METAVAR
-                        name of the meta var (response variable). This is teh lable will be used as phenotype of interest to find genotypes related to it.
+                        name of the meta var (response variable)
+  --gap GAP, -gp GAP    Threshold to drop positions that have GAPs above this proportion.
+                        Default value is 0.7 and it means that the positions that 70% or more
+                        GAPs will be dropped from the analysis.
   --anatype {reg,cl}, -a {reg,cl}
                         type of analysis
+  --distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}, -dm {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}
+                        distance metric. Default is correlation.
   --fraction FRACTION, -fr FRACTION
                         fraction of main data to run
+  --redundant_threshold REDUNDANT_THRESHOLD, -rt REDUNDANT_THRESHOLD
+                        threshold for the p-value of the statistical tests to drop redundant
+                        features. Defaultvalue is 0.25
+  --distance_threshold DISTANCE_THRESHOLD, -dth DISTANCE_THRESHOLD
+                        threshold for the distance between positions to put them in clusters.
+                        features with distances <= than the threshold will be grouped together.
+                        Default values is 0.3
+  --top_models TOP_MODELS, -tm TOP_MODELS
+                        number of top models to consider for merging the results. Default value
+                        is 5
+  --plot                plot all the individual positions that are statistically
+                        significant.Depending on your data, this process may produce many
+                        plots.
+  --write               During reading the fasta file we delete the positions that have GAPs
+                        over a certain threshold that can be changed in the `gap_threshold`
+                        argumentin the `read_data` function. As this may change the whole FASTA
+                        file, you maywant to save the FASTA file after this cleaning step.
 ```
 
 
