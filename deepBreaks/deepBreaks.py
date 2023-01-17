@@ -17,7 +17,7 @@ def parse_arguments():
     parser.add_argument('--meta_data', '-md', help="files contains the meta data", type=str, required=True)
     parser.add_argument('--metavar', '-mv', help="name of the meta var (response variable)", type=str, required=True)
     parser.add_argument('--gap', '-gp', help="Threshold to drop positions that have GAPs above this proportion."
-                                             " Default value is 0.7 and it means that the positions that 70% or more "
+                                             " Default value is 0.7 and it means that the positions that 70%% or more "
                                              "GAPs will be dropped from the analysis.",
                         type=float, default=0.7)
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
