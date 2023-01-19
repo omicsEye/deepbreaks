@@ -2,25 +2,31 @@
 
 ---
 
-**deepBreaks** , a computational method, aims to identify important
+***deepBreaks*** , a computational method, aims to identify important
 changes in association with the phenotype of interest
 using multi-alignment sequencing data from a population.
 
 **Key features:**
 
-* Generality, deepBreaks is a generic domain software that can be used for any application that deals sequencing data.
-* Interpretation: Rather than checking all possible mutations (breaks), deepBreaks prioritizes only statistically
+* **Generality:** *deepBreaks* is a new computational tool for identifying genomic regions and genetic variants
+significantly associated with phenotypes of interest.
+* **Validation:** A comprehensive evaluation of deepBreaks performance using synthetic 
+data generation with known ground truth for genotype-phenotype association testing.
+* **Interpretation:** Rather than checking all possible mutations (breaks), _deepBreaks_ prioritizes only statistically
   promising candidate mutations.
-* User-friendly software: one place to do all high-quality visualization and statistical.
-* Computing optimization: since sequencing data can get large all modules have been written and benchmarked for
-  computing time.
-* Tutorial comes with a wide range of real-world applications.
+* **Elegance:** User-friendly, open-source software allowing for high-quality visualization
+and statistical tests. 
+* **Optimization:** Since sequence data are often very high volume (next-generation DNA sequencing reads typically 
+in the millions), all modules have been written and benchmarked for computing time.
+* **Documentation:** Open-source GitHub repository of code complete with tutorials and a wide range of
+real-world applications.
 
 ---
 **Citation:**
 
-Mahdi Baghbanzadeh, Tyson Dawson, Todd Oakley, Keith A. Crandall, Ali Rahnavard (2022+). **Prioritizing important
-regions of sequencing data for function prediction**, https://github.com/omicsEye/deeBreaks/.
+Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crandall, Ali Rahnavard (2023).
+**_deepBreaks_: a machine learning tool for identifying and prioritizing genotype-phenotype associations**
+, https://github.com/omicsEye/deeBreaks/.
 
 ---
 
@@ -40,12 +46,13 @@ regions of sequencing data for function prediction**, https://github.com/omicsEy
     * [Input](#input)
     * [Output](#output)
     * [Demo](#demo)
+    * [Tutorial](#tutorial)
 * [Applications](#applications)
   * [*deepBreaks* identifies amino acids associated with color sensitivity](#opsin)
   * [Novel insights of niche associations in the oral microbiome](#hmp)
   * [*deepBreaks* reveals important SARS-CoV-2 regions associated with Alpha and Delta variants](#covid)
   * [*deepBreaks* identifies HIV regions with potentially important functions](#hiv)
-* [Support](#Support)
+* [Support](#support)
 ------------------------------------------------------------------------------------------------------------------------------
 # Features #
 1. Generic software that can handle any kind of sequencing data and phenotypes
@@ -57,10 +64,10 @@ regions of sequencing data for function prediction**, https://github.com/omicsEy
 ## deepBreaks approach ##
 ![deepBreaks Workflow overview](img/fig1_overview.png)
 
-## INSTALLATION ##
+## Installation ##
 * First install *conda*  
 Go to the [Anaconda website](https://www.anaconda.com/) and download the latest version for your operating system.  
-* For Windows users: DO NOT FORGET TO ADD CONDA TO your system PATH*
+* For Windows users: do not forget to add `conda` to your system `path`
 * Second is to check for conda availability  
 open a terminal (or command line for Windows users) and run:
 ```
@@ -70,12 +77,14 @@ it should out put something like:
 ```
 conda 4.9.2
 ```
-<span style="color:#fc0335">if not, you must make *conda* available to your system for further steps.</span>
-if you have problems adding conda to PATH, you can find instructions [here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
+if not, you must make *conda* available to your system for further steps.
+if you have problems adding conda to PATH, you can find instructions
+[here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
 
 ### Windows Linux Mac ###
-If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation instructions.  
-<span style="color:#033C5A">*If you have a working conda on your system, you can safely skip to step three*</span>.  
+If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation
+instructions.  
+If you have a working conda on your system, you can safely skip to step three.  
 If you are using windows, please make sure you have both git and Microsoft Visual C++ 14.0 or greater installed.
 install [git](https://gitforwindows.org/)
 [Microsoft C++ build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
@@ -89,7 +98,11 @@ conda create --name deepBreaks_env python=3.9
 conda activate deepBreaks_env 
 ```
 3) Install *deepBreaks*:
-you can directly install if from GitHub:
+install with pip:
+```commandline
+pip install deepBreaks
+```
+or you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
@@ -125,12 +138,15 @@ python -m pip install git+https://github.com/omicsEye/deepbreaks
   pip install xgboost
   ```
 9) Finally, install *deepBreaks*:
-you can directly install if from GitHub:
+install with pip:
+```commandline
+pip install deepBreaks
+```
+or you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
-
-------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------
 
 # Getting Started with deepBreaks #
 
@@ -216,21 +232,171 @@ be changed in the `gap_threshold` argument in the `read_data` function. As this 
 you may want to save the FASTA file after this cleaning step.
 
 ## Output ##  
-1. correlated positions. We group all the collinear positions together.
+1. correlated positions. We group all the colinear positions together.
 2. models summary. list of models and their performance metrics.
 3. plot of the feature importance of the top models in *modelName_dpi.png* format.
 4. csv files of feature importance based on top models containing, feature, importance, relative importance, 
-group of the position (we group all the collinear positions together)
+group of the position (we group all the colinear positions together)
 5. plots and csv file of average of feature importance of top models.
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
+7. pickle files of the plots
 
 ## Demo ##
 ```commandline
-deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st amino-acid -md lite_mar/meta_RodOpsinLambdaMax.tsv -mv
- LambdaMax -a reg  -dth 0.15 --plot
+deepBreaks -sf PATH_TO_SEQUENCE.FASTA -st aa -md PATH_TO_META_DATA.tsv -mv
+ META_VARIABLE_NAME -a reg  -dth 0.15 --plot --write
 ```
+
+## Tutorial ##
+Multiple detailed jupyter notebook of _deepBreaks_ implementation are available in the
+[examples](https://github.com/omicsEye/deepbreaks/tree/master/examples) and the
+required data for the examples are also available in the
+[data](https://github.com/omicsEye/deepbreaks/tree/master/data) directory.  
+
+For the `deepBreaks.models.model_compare` function, these are the available models by default:
+* Regression:
+```python
+models = {
+            'rf': RandomForestRegressor(n_jobs=-1, random_state=123),
+            'Adaboost': AdaBoostRegressor(random_state=123),
+            'et': ExtraTreesRegressor(n_jobs=-1, random_state=123),
+            'gbc': GradientBoostingRegressor(random_state=123),
+            'dt': DecisionTreeRegressor(random_state=123),
+            'lr': LinearRegression(n_jobs=-1),
+            'Lasso': Lasso(random_state=123),
+            'LassoLars': LassoLars(random_state=123),
+            'BayesianRidge': BayesianRidge(),
+            'HubR': HuberRegressor(),
+            'xgb': XGBRegressor(n_jobs=-1, random_state=123),
+            'lgbm': LGBMRegressor(n_jobs=-1, random_state=123)
+        }
+```
+ * Classification:
+```python
+models = {
+            'rf': RandomForestClassifier(n_jobs=-1, random_state=123),
+            'Adaboost': AdaBoostClassifier(random_state=123),
+            'et': ExtraTreesClassifier(n_jobs=-1, random_state=123),
+            'lg': LogisticRegression(n_jobs=-1, random_state=123),
+            'gbc': GradientBoostingClassifier(random_state=123),
+            'dt': DecisionTreeClassifier(random_state=123),
+            'xgb': XGBClassifier(n_jobs=-1, random_state=123),
+            'lgbm': LGBMClassifier(n_jobs=-1, random_state=123)
+        }
+```
+The default metrics for evaluation are:
+* Regression:
+```python
+scores = {'R2': 'r2',
+          'MAE': 'neg_mean_absolute_error',
+          'MSE': 'neg_mean_squared_error',
+          'RMSE': 'neg_root_mean_squared_error',
+          'MAPE': 'neg_mean_absolute_percentage_error'
+          }
+```
+ * Classification:
+```python
+scores = {'Accuracy': 'accuracy',
+          'AUC': 'roc_auc_ovr',
+          'F1': 'f1_macro',
+          'Recall': 'recall_macro',
+          'Precision': 'precision_macro'
+          }
+```
+To get the ful list of available metrics, you can use:
+```python
+from sklearn import metrics
+print(metrics.SCORERS.keys())
+```
+The default search parameters for the models are:
+```python
+params = {
+        'rf': {
+            'max_depth': [4, 6, 8],
+            'n_estimators': [500, 1000]
+        },
+        'Adaboost': {
+            'learning_rate': [0.01, 0.05],
+            'n_estimators': [50, 100]
+        },
+        'et': {
+            'max_depth': [4, 6, 8],
+            'n_estimators': [500, 1000]
+        },
+        'dt': {
+            'max_depth': [4, 6, 8]
+        },
+        'Lasso': {
+            'alpha': [0.5, 1, 3]
+        },
+        'LassoLars': {
+            'alpha': [0.5, 1, 3]
+        }
+    }
+```
+**Attention:** The names of models in the provided `dict` are the same with the names in the `dict` provided 
+for the `params`. If the name from the models `dict` does not match, the default `sklearn` parameters for that model
+is then used.  For example, `model_compare` uses the `xgboost` with default hyperparameters.  
+
+To use the `deepBreaks.models.model_compare` function with default parameters:
+```python
+import deepBreaks.models as ml
+ana_type = 'reg'  # assume that we are running a regression analysis
+trained_models = ml.model_compare(X_train, y_train, ana_type,
+                  cv=10, select_top=5,
+                  models=None, scores=None,
+                  params=None, sort_by=None,
+                  n_positions=None,
+                  grouped_features=None,
+                  report_dir='.')
+```
+To use a new set of `models`, `params`, or `metrics` you can define them in a `dict`:
+```python
+import deepBreaks.models as ml
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
+from sklearn.ensemble import ExtraTreesRegressor
+        
+ana_type = 'reg'  # assume that we are running a regression analysis
+
+# define a new set of models
+models = {'rf': RandomForestRegressor(n_jobs=-1, random_state=123),
+          'Adaboost': AdaBoostRegressor(random_state=123),
+          'et': ExtraTreesRegressor(n_jobs=-1, random_state=123)
+          }
+
+# define a new set of params.
+params = {
+        'rf': {
+            'max_depth': [3, 5],
+            'n_estimators': [100]
+        },
+        'Adaboost': {
+            'learning_rate': [0.01, 0.05, 0.1],
+            'n_estimators': [50]
+        }
+    }
+
+'''
+Since we do not define a set of parameters for the model "et", it will fit with
+default parameters
+'''
+# change the set of metrics
+scores = {'R2': 'r2',
+          'MAE': 'neg_mean_absolute_error',
+          'MSE': 'neg_mean_squared_error'
+          }
+
+trained_models = ml.model_compare(X_train, y_train, ana_type,
+                  cv=10, select_top=5,
+                  models=models, scores=scores,
+                  params=params, sort_by='MAE', # sort the models by "MAE" values
+                  n_positions=None,
+                  grouped_features=None,
+                  report_dir='.')
+```
+
 # Applications #
-Here we try to use the **deepBreaks** on different datasets and elaborate on the results.
+Here we try to use the **_deepBreaks_** on different datasets and elaborate on the results.
 
 <h2 id="opsin">
 <i>deepBreaks</i> identifies amino acids associated with color sensitivity
@@ -304,4 +470,5 @@ illustrates the steps.
 
 # Support #
 
-* Please submit your questions or issues with the software at [Issues tracker](https://github.com/omicsEye/deepBreaks/issues).
+* Please submit your questions or issues with the software at
+[Issues tracker](https://github.com/omicsEye/deepBreaks/issues).
