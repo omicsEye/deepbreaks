@@ -39,7 +39,7 @@ Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crand
     * [deepBreaks approach](#deepBreaks-approach)
     * [Installation](#installation)
       * [Windows Linux Mac](#Windows-Linux-Mac)
-      * [Apple M1 MAC](#apple-m1-mac)
+      * [Apple M1/M2 MAC](#apple-m1-m2-mac)
 * [Getting Started with deepBreaks](#getting-started-with-deepBreaks)
     * [Test deepBreaks](#test-omeClust)
     * [Options](#options) 
@@ -82,7 +82,7 @@ if you have problems adding conda to PATH, you can find instructions
 [here](https://docs.anaconda.com/anaconda/user-guide/faq/).  
 
 ### Windows Linux Mac ###
-If you are **NOT** using an **Apple M1 MAC** please go to the [Apple M1 MAC](#apple-m1-mac) for installation
+If you are using an **Apple M1/M2 MAC** please go to the [Apple M1/M2 MAC](#apple-m1-m2-mac) for installation
 instructions.  
 If you have a working conda on your system, you can safely skip to step three.  
 If you are using windows, please make sure you have both git and Microsoft Visual C++ 14.0 or greater installed.
@@ -106,7 +106,7 @@ or you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
-### Apple M1 MAC ###
+### Apple M1/M2 MAC ###
 1) Update/install Xcode Command Line Tools
   ```commandline
   xcode-select --install
