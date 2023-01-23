@@ -16,7 +16,7 @@ try:
         "Operating System :: MacOS",
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 except ImportError:
@@ -30,11 +30,11 @@ except ImportError:
         "Operating System :: Unix",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ]
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 AUTHOR = "Mahdi Baghbanzadeh"
 AUTHOR_EMAIL = "mbagh@gwu.edu"
 MAINTAINER = "Mahdi Baghbanzadeh"
@@ -54,6 +54,11 @@ if not os.path.isfile(counter_file):
     except EnvironmentError:
         print("Unable to download counter")
 
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
@@ -63,9 +68,9 @@ setup(
     author_email=AUTHOR_EMAIL,
     version=VERSION,
     license="MIT",
-    description="deepBreaks: Prioritizing important regions of sequencing data for function prediction",
-    long_description="deepBreaks provides a generic method to identify important changes in association with the " + \
-                     "phenotype of interest using multi-alignment sequencing data from a population.",
+    description="deepBreaks: a machine learning tool for identifying and prioritizing genotype-phenotype associations",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="http://github.com/omicsEye/deepBreaks",
     keywords=['machine learning', 'genomics', 'sequencing data'],
     platforms=['Linux', 'MacOS', "Windows"],
