@@ -1,5 +1,5 @@
 # deepBreaks #
-
+![](https://github.com/omicsEye/deepbreaks/blob/master/img/fig1_overview.png?raw=True)
 ---
 
 ***deepBreaks*** , a computational method, aims to identify important
@@ -36,7 +36,6 @@ Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crand
 
 * [Features](#features)
 * [deepBreaks](#deepBreaks)
-    * [deepBreaks approach](#deepBreaks-approach)
     * [Installation](#installation)
       * [Windows Linux Mac](#Windows-Linux-Mac)
       * [Apple M1/M2 MAC](#apple-m1m2-mac)
@@ -61,8 +60,6 @@ Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crand
 4. User-friendly software
 5. Provides a predictive power of most discriminative positions in a sequencing data
 # DeepBreaks #
-## deepBreaks approach ##
-![deepBreaks Workflow overview](img/fig1_overview.png)
 
 ## Installation ##
 * First install *conda*  
@@ -402,7 +399,7 @@ Here we try to use the **_deepBreaks_** on different datasets and elaborate on t
 <i>deepBreaks</i> identifies amino acids associated with color sensitivity
 </h2>
 
-![Opsins](img/lite_mar/figure.png)  
+![Opsins](https://github.com/omicsEye/deepbreaks/blob/master/img/lite_mar/figure.png?raw=True)  
 
 Opsins are genes involved in light sensitivity and vision, and when coupled with a light-reactive chromophore, the
 absorbance of the resulting photopigment dictates physiological phenotypes like color sensitivity. We analyzed the 
@@ -421,7 +418,7 @@ illustrates the steps.
 Novel insights of niche associations in the oral microbiome
 </h2>
 
-![hmp](img/hmp/hmp.png)  
+![hmp](https://github.com/omicsEye/deepbreaks/blob/master/img/hmp/hmp.png?raw=True)  
 Microbial species tend to adapt at the genome level to the niche in which they live. We hypothesize 
 that genes with essential functions change based on where microbial species live. Here we use microbial strain 
 representatives from stool metagenomics data of healthy adults from the
@@ -436,7 +433,7 @@ illustrates the steps.
 <i>deepBreaks</i> reveals important SARS-CoV-2 regions associated with Alpha and Delta variants
 </h2>
 
-![sarscov2](img/sars_cov2/sarscov2.png)
+![sarscov2](https://github.com/omicsEye/deepbreaks/blob/master/img/sars_cov2/sarscov2.png?raw=True)
 Variants occur with new mutations in the virus genome. Most mutations in the SARS-CoV-2 genome do not affect the
 functioning of the virus. However, mutations in the spike protein of SARS-CoV-2, which binds to receptors on cells 
 lining the inside of the human nose, may make the virus easier to spread or affect how well vaccines protect people. 
@@ -454,7 +451,7 @@ illustrates the steps.
 <i>deepBreaks</i> identifies HIV regions with potentially important functions
 </h2>
 
-![sarscov2](img/HIV/HIV3.png)
+![sarscov2](https://github.com/omicsEye/deepbreaks/blob/master/img/HIV/HIV3.png?raw=True)
 Subtypes of the human immunodeficiency virus type 1 (HIV-1) group M are different in the envelope (Env) glycoproteins 
 of the virus. These parts of the virus are displayed on the surface of the virion and are targets for both neutralizing
 antibody and cell-mediated immune responses. The third hypervariable domain (V3) of HIV-1 gp120 is a cysteine-bounded
