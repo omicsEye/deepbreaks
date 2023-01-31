@@ -6,6 +6,7 @@ import os
 import datetime
 import argparse
 import warnings
+import logging
 from zipfile import ZipFile
 
 
@@ -79,6 +80,10 @@ def main():
     report_dir = str(seq_file_name + '_' + args.metavar + '_' + dt_label)
     os.makedirs(report_dir)
 
+    logging.basicConfig(filename=report_dir+"/log.txt", level=logging.DEBUG,
+                        format="%(asctime)s %(message)s")
+
+    logging.info("The parameters are{}".format(args))
     print('reading meta-data')
     meta_data = read_data(args.meta_data, seq_type=None, is_main=False)
     print('meta_data:', meta_data.shape)
@@ -97,7 +102,7 @@ def main():
     positions = df.shape[1]
     print('Done')
     print('Shape of data is: ', df.shape)
-
+    logging.info("Shape of data is {}".format(df.shape))
     # selecting only more frequent classes
     if args.anatype == 'cl':
         df = balanced_classes(dat=df, meta_dat=meta_data, feature=args.metavar)
@@ -106,10 +111,12 @@ def main():
     print('Shape of data before missing/constant care: ', df.shape)
     df = missing_constant_care(df, missing_threshold=args.miss_gap)
     print('Shape of data after missing/constant care: ', df.shape)
+    logging.info("Shape of data after missing/constant care: {}".format(df.shape))
 
     print('Shape of data before imbalanced care: ', df.shape)
     df = imb_care(dat=df, imbalance_threshold=0.05)
     print('Shape of data after imbalanced care: ', df.shape)
+    logging.info("Shape of data after imbalanced care care: {}".format(df.shape))
 
     if args.fraction is not None:
         print('number of columns of main data before: ', df.shape[1])
@@ -123,6 +130,8 @@ def main():
         exit()
 
     print('Shape of data after dropping redundant columns: ', df_cleaned.shape)
+    logging.info("Shape of data after dropping redundant columns: {}".format(df_cleaned.shape))
+
     print('prepare dummy variables')
     df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
     print('correlation analysis')
@@ -135,13 +144,15 @@ def main():
     print('Shape of data before linearity care: ', df_cleaned.shape)
     df_cleaned = cor_remove(df_cleaned, dc)
     print('Shape of data after linearity care: ', df_cleaned.shape)
-
+    logging.info("Shape of data after linearity care: {}".format(df_cleaned.shape))
     # merge with meta data
     df = df.merge(meta_data[args.metavar], left_index=True, right_index=True)
     df_cleaned = df_cleaned.merge(meta_data[args.metavar], left_index=True, right_index=True)
+    logging.info("Shape of data after joining with meta_data: {}".format(df_cleaned.shape))
 
     # model
     print('Training the models...')
+    logging.info("Training the models...")
     select_top = args.top_models
     trained_models = model_compare(X_train=df_cleaned.loc[:, df_cleaned.columns != args.metavar],
                                    y_train=df_cleaned.loc[:, args.metavar], n_positions=positions,
@@ -149,6 +160,7 @@ def main():
                                    select_top=select_top)
 
     print('Visualizing the results...')
+    logging.info("Visualizing the results...")
     for key in trained_models.keys():
         if key == 'mean':
             dp_plot(importance=trained_models[key], imp_col='mean', model_name=key, annotate=2, report_dir=report_dir)
@@ -169,7 +181,7 @@ def main():
     for file in file_names:
         if not file.endswith('.zip'):
             zip_obj.write(str(report_dir + '/' + file))
-
+    logging.info("done!")
     return print('done!')
 
 
