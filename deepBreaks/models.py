@@ -65,7 +65,7 @@ def _model_report(summary, scores, sort_by):
     tm.sort_values(by=sort_by, ascending=False, inplace=True)
     for cl in tm.columns:
         if cl != 'Model' and cl != 'R2':
-            tm.iloc[:, cl] = tm.iloc[:, cl].abs()
+            tm.loc[:, cl] = tm.loc[:, cl].abs()
     return tm
 
 
