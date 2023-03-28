@@ -62,10 +62,10 @@ def _model_report(summary, scores, sort_by):
         tm[key] = [str_clean(summary[key]['model'])] + summary[key]['metrics']
     tm = pd.DataFrame.from_dict(tm, orient='index',
                                 columns=['Model'] + list(scores.keys()))
-    if 'R2' in tm.columns:
-        tm = tm.loc[tm.loc[:, 'R2'] <= 1, :]
     tm.sort_values(by=sort_by, ascending=False, inplace=True)
-    tm.iloc[:, 1:] = tm.iloc[:, 1:].abs()
+    for cl in tm.columns:
+        if cl != 'Model' and cl != 'R2':
+            tm.iloc[:, cl] = tm.iloc[:, cl].abs()
     return tm
 
 
