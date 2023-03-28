@@ -161,7 +161,7 @@ def _get_params():
 
 
 def model_compare(X_train, y_train, ana_type,
-                  cv=10, select_top=5,
+                  cv=5, select_top=5,
                   models=None, scores=None,
                   params=None, sort_by=None,
                   n_positions=None,
