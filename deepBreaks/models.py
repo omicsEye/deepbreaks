@@ -260,8 +260,9 @@ def model_compare(X_train, y_train, ana_type,
         if sort_by is None:
             sort_by = 'F1'
 
-    le = preprocessing.LabelEncoder()
-    y_train = le.fit_transform(y_train)
+    if ana_type == 'cl':
+        le = preprocessing.LabelEncoder()
+        y_train = le.fit_transform(y_train)
 
     summary = {}
     for model in models.keys():
