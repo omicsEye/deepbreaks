@@ -4,7 +4,7 @@ import re
 from sklearn import preprocessing
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import ParameterGrid
-
+from sklearn.model_selection import KFold
 
 def str_clean(x):
     x = str(x).split('(')[0]
@@ -161,12 +161,13 @@ def _get_params():
 
 
 def model_compare(X_train, y_train, ana_type,
-                  cv=5, select_top=5,
+                  cv=10, select_top=5,
                   models=None, scores=None,
                   params=None, sort_by=None,
                   n_positions=None,
                   grouped_features=None,
-                  report_dir='.'):
+                  report_dir='.',
+                  random_state = 123):
     """
     Fits multiple models to the data and compare them based on the cross-validation score. Then returns the top models,
     their feature importance, and also calculates the `mean` of feature importance for all the features across the
@@ -265,6 +266,9 @@ def model_compare(X_train, y_train, ana_type,
     if ana_type == 'cl':
         le = preprocessing.LabelEncoder()
         y_train = le.fit_transform(y_train)
+
+    # create the KFold object with shuffling
+    cv = KFold(n_splits=cv, shuffle=True, random_state=random_state)
 
     summary = {}
     for model in models.keys():
