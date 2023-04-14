@@ -26,7 +26,7 @@ real-world applications.
 
 Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crandall, Ali Rahnavard (2023).
 **_deepBreaks_: a machine learning tool for identifying and prioritizing genotype-phenotype associations**
-, https://github.com/omicsEye/deeBreaks/.
+, https://github.com/omicsEye/deepBreaks/.
 
 ---
 
@@ -468,4 +468,5 @@ illustrates the steps.
 # Support #
 
 * Please submit your questions or issues with the software at
-[Issues tracker](https://github.com/omicsEye/deepBreaks/issues).
+[Issues tracker](https://github.com/omicsEye/deepBreaks/issues).  
+* For community discussions, questions, and issue reporting, please visit our forum [here](https://forum.omicseye.org/c/omics-downstream-analysis/deepbreaks/12)
