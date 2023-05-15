@@ -155,15 +155,23 @@ To test if deepBreaks is installed correctly, you may run the following command 
 deepBreaks -h
 ```
 Which yields deepBreaks command line options.
-```commandline
-usage: deepBreaks [-h] --seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar
-                  METAVAR [--gap GAP] --anatype {reg,cl}
-                  [--distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}]
-                  [--fraction FRACTION] [--redundant_threshold REDUNDANT_THRESHOLD]
-                  [--distance_threshold DISTANCE_THRESHOLD] [--top_models TOP_MODELS] [--plot]
-                  [--write]
 
-optional arguments:
+
+
+## Options ##
+
+```
+$ deepBreaks -h
+```
+## Input ##
+```commandline
+usage: deepBreaks [-h] --seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar METAVAR [--gap GAP] [--miss_gap MISS_GAP]
+                  [--ult_rare ULT_RARE] --anatype {reg,cl}
+                  [--distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}]
+                  [--fraction FRACTION] [--redundant_threshold REDUNDANT_THRESHOLD] [--distance_threshold DISTANCE_THRESHOLD]
+                  [--top_models TOP_MODELS] [--cv CV] [--separate_cv] [--tune] [--plot] [--write]
+
+options:
   -h, --help            show this help message and exit
   --seqfile SEQFILE, -sf SEQFILE
                         files contains the sequences
@@ -173,9 +181,13 @@ optional arguments:
                         files contains the meta data
   --metavar METAVAR, -mv METAVAR
                         name of the meta var (response variable)
-  --gap GAP, -gp GAP    Threshold to drop positions that have GAPs above this proportion.
-                        Default value is 0.7 and it means that the positions that 70% or more
-                        GAPs will be dropped from the analysis.
+  --gap GAP, -gp GAP    Threshold to drop positions that have GAPs above this proportion. Default value is 0.7 and it means that the positions that
+                        70% or more GAPs will be dropped from the analysis.
+  --miss_gap MISS_GAP, -mgp MISS_GAP
+                        Threshold to impute missing values with GAP. Gapsin positions that have missing values (gaps) above this proportionare
+                        replaced with the term 'GAP'. the rest of the missing valuesare replaced by the mode of each position.
+  --ult_rare ULT_RARE, -u ULT_RARE
+                        Threshold to modify the ultra rare cases in each position.
   --anatype {reg,cl}, -a {reg,cl}
                         type of analysis
   --distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}, -dm {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}
@@ -183,50 +195,23 @@ optional arguments:
   --fraction FRACTION, -fr FRACTION
                         fraction of main data to run
   --redundant_threshold REDUNDANT_THRESHOLD, -rt REDUNDANT_THRESHOLD
-                        threshold for the p-value of the statistical tests to drop redundant
-                        features. Defaultvalue is 0.25
+                        threshold for the p-value of the statistical tests to drop redundant features. Defaultvalue is 0.25
   --distance_threshold DISTANCE_THRESHOLD, -dth DISTANCE_THRESHOLD
-                        threshold for the distance between positions to put them in clusters.
-                        features with distances <= than the threshold will be grouped together.
-                        Default values is 0.3
+                        threshold for the distance between positions to put them in clusters. features with distances <= than the threshold will be
+                        grouped together. Default values is 0.3
   --top_models TOP_MODELS, -tm TOP_MODELS
-                        number of top models to consider for merging the results. Default value
-                        is 5
-  --plot                plot all the individual positions that are statistically
-                        significant.Depending on your data, this process may produce many
+                        number of top models to consider for merging the results. Default value is 5
+  --cv CV, -cv CV       number of folds for cross validation. Default is 10. If the given number is less than 1,
+                        then instead of CV, a train/test split approach will be used with --cv being the test size. 
+  
+  --tune                After running the 10-fold cross validations, should the top selected models be tuned and finalize, or finalized only?
+  --plot                plot all the individual positions that are statistically significant.Depending on your data, this process may produce many
                         plots.
-  --write               During reading the fasta file we delete the positions that have GAPs
-                        over a certain threshold that can be changed in the `gap_threshold`
-                        argumentin the `read_data` function. As this may change the whole FASTA
-                        file, you maywant to save the FASTA file after this cleaning step.
-```
-
-
-## Options ##
+  --write               During reading the fasta file we delete the positions that have GAPs over a certain threshold that can be changed in the
+                        `gap_threshold` argumentin the `read_data` function. As this may change the whole FASTA file, you maywant to save the FASTA
+                        file after this cleaning step.
 
 ```
-$ deepBreaks -h
-```
-## Input ##
-1. `--seqfile` or `-sf` PATH to a sequence data file
-2. `--seqtype` or `-st` sequence type, values are `amino-acid` and `nu` for nucleotides
-3. `--meta_data` or `-md` PATH to metadata file
-4. `--metavar` or `-mv` name of the meta variable
-5. `--anatype` or `-a` analysis type, options are `reg` for regression and `cl` for classification
-6. `--fraction` or `-fr` fraction of the main data (sequence positions) to run. it is optional, 
-but you can enter a value between 0 and 1 to sample from the main data set.
-7. `--redundant_threshold` or `-rt` threshold for the p-value of the statistical 
-tests to drop redundant features. Default value is 0.25.
-8. `--distance_threshold` or `-dth` threshold for the distance between positions to put them in clusters. 
-features with distances <= than the threshold will be grouped together. Default values is 0.3.
-9. `--top_models` or `-tm` number of top models to consider for merging the results. Default value is 3
-10. `--plot` plot all the individual positions that are statistically significant. 
-Depending on your data, this process may produce many plots.
-11. `--gap` or `-gp` Threshold to drop positions that have GAPs above this proportion. 
-Default value is 0.7, and it means that the positions that 70% or more GAPs will be dropped from the analysis.
-12. `--write` During reading the fasta file we delete the positions that have GAPs over a  certain threshold that can 
-be changed in the `gap_threshold` argument in the `read_data` function. As this may change the whole FASTA file,
-you may want to save the FASTA file after this cleaning step.
 
 ## Output ##  
 1. correlated positions. We group all the colinear positions together.
@@ -236,7 +221,8 @@ you may want to save the FASTA file after this cleaning step.
 group of the position (we group all the colinear positions together)
 5. plots and csv file of average of feature importance of top models.
 6. box plot (regression) or stacked bar plot (classification) for top positions of each model.
-7. pickle files of the plots
+7. pickle files of the plots and final models
+8. p-values of all the variables used in training of the final model
 
 ## Demo ##
 ```commandline
@@ -307,71 +293,86 @@ print(metrics.SCORERS.keys())
 ```
 The default search parameters for the models are:
 ```python
+import numpy as np
 params = {
-        'rf': {
-            'max_depth': [4, 6, 8],
-            'n_estimators': [500, 1000]
-        },
-        'Adaboost': {
-            'learning_rate': [0.01, 0.05],
-            'n_estimators': [50, 100]
-        },
-        'et': {
-            'max_depth': [4, 6, 8],
-            'n_estimators': [500, 1000]
-        },
-        'dt': {
-            'max_depth': [4, 6, 8]
-        },
-        'Lasso': {
-            'alpha': [0.5, 1, 3]
-        },
-        'LassoLars': {
-            'alpha': [0.5, 1, 3]
-        }
+        'rf': {'rf__max_features': ["sqrt", "log2"]},
+        'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
+                     'Adaboost__n_estimators': [100, 200]},
+        'gbc': {'gbc__max_depth': range(3, 6),
+                'gbc__max_features': ['sqrt', 'log2'],
+                'gbc__n_estimators': [200, 500, 800],
+                'gbc__learning_rate': np.linspace(0.001, 0.1, num=2)},
+        'et': {'et__max_depth': [4, 6, 8],
+               'et__n_estimators': [500, 1000]},
+        'dt': {'dt__max_depth': [4, 6, 8]},
+        'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
+        'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)}
     }
 ```
 **Attention:** The names of models in the provided `dict` are the same with the names in the `dict` provided 
 for the `params`. If the name from the models `dict` does not match, the default `sklearn` parameters for that model
-is then used.  For example, `model_compare` uses the `xgboost` with default hyperparameters.  
+is then used.  For example, `model_compare_cv` uses the `xgboost` with default hyperparameters.  
 
-To use the `deepBreaks.models.model_compare` function with default parameters:
+To use the `deepBreaks.models.model_compare_cv` function with default parameters:
 ```python
-import deepBreaks.models as ml
+from deepBreaks.models import model_compare_cv
+from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder
+from deepBreaks.preprocessing import FeatureSelection, CollinearCare
+from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline
+
 ana_type = 'reg'  # assume that we are running a regression analysis
-trained_models = ml.model_compare(X_train, y_train, ana_type,
-                  cv=10, select_top=5,
-                  models=None, scores=None,
-                  params=None, sort_by=None,
-                  n_positions=None,
-                  grouped_features=None,
-                  report_dir='.')
+report_dir = 'PATH/TO/A/DIRECTORY' # to save the reports
+prep_pipeline = make_pipeline(cache_dir=None,
+    steps=[
+        ('mc', MisCare(missing_threshold=0.25)),
+        ('cc', ConstantCare()),
+        ('ur', URareCare(threshold=0.05)),
+        ('cc2', ConstantCare()),
+        ('one_hot', CustomOneHotEncoder()),
+        ('feature_selection', FeatureSelection(model_type=ana_type, alpha=0.25)),
+        ('collinear_care', CollinearCare(dist_method='correlation', threshold=0.25))
+    ])
+report, top = model_compare_cv(X=tr, y=y, preprocess_pipe=prep_pipeline,
+                               models_dict=get_models(ana_type=ana_type),
+                               scoring=get_scores(ana_type=ana_type),
+                               report_dir=report_dir,
+                               cv=10, ana_type=ana_type, cache_dir=None)
+
 ```
 To use a new set of `models`, `params`, or `metrics` you can define them in a `dict`:
 ```python
 import deepBreaks.models as ml
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
 from sklearn.ensemble import ExtraTreesRegressor
-        
-ana_type = 'reg'  # assume that we are running a regression analysis
+from deepBreaks.models import model_compare_cv
+from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder
+from deepBreaks.preprocessing import FeatureSelection, CollinearCare
+from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline
 
+ana_type = 'reg'  # assume that we are running a regression analysis
+report_dir = 'PATH/TO/A/DIRECTORY' # to save the reports
 # define a new set of models
 models = {'rf': RandomForestRegressor(n_jobs=-1, random_state=123),
           'Adaboost': AdaBoostRegressor(random_state=123),
           'et': ExtraTreesRegressor(n_jobs=-1, random_state=123)
           }
 
-# define a new set of params.
-params = {
-        'rf': {
-            'max_depth': [3, 5],
-            'n_estimators': [100]
-        },
-        'Adaboost': {
-            'learning_rate': [0.01, 0.05, 0.1],
-            'n_estimators': [50]
-        }
-    }
+
+prep_pipeline = make_pipeline(cache_dir=None,
+    steps=[
+        ('mc', MisCare(missing_threshold=0.25)),
+        ('cc', ConstantCare()),
+        ('ur', URareCare(threshold=0.05)),
+        ('cc2', ConstantCare()),
+        ('one_hot', CustomOneHotEncoder()),
+        ('feature_selection', FeatureSelection(model_type=ana_type, alpha=0.25)),
+        ('collinear_care', CollinearCare(dist_method='correlation', threshold=0.25))
+    ])
+report, top = model_compare_cv(X=tr, y=y, preprocess_pipe=prep_pipeline,
+                               models_dict=models,
+                               scoring=get_scores(ana_type=ana_type),
+                               report_dir=report_dir,
+                               cv=10, ana_type=ana_type, cache_dir=None)
 
 '''
 Since we do not define a set of parameters for the model "et", it will fit with
@@ -383,13 +384,11 @@ scores = {'R2': 'r2',
           'MSE': 'neg_mean_squared_error'
           }
 
-trained_models = ml.model_compare(X_train, y_train, ana_type,
-                  cv=10, select_top=5,
-                  models=models, scores=scores,
-                  params=params, sort_by='MAE', # sort the models by "MAE" values
-                  n_positions=None,
-                  grouped_features=None,
-                  report_dir='.')
+report, top = model_compare_cv(X=tr, y=y, preprocess_pipe=prep_pipeline,
+                               models_dict=models,
+                               scoring=scores,
+                               report_dir=report_dir,
+                               cv=10, ana_type=ana_type, cache_dir=None)
 ```
 
 # Applications #

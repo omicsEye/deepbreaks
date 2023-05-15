@@ -1,7 +1,14 @@
 # importing libraries
-from deepBreaks.preprocessing import *
-from deepBreaks.models import *
-from deepBreaks.visualization import *
+# from deepBreaks.preprocessing import *
+# from deepBreaks.models import *
+# from deepBreaks.visualization import *
+from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline
+from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
+    CollinearCare
+from deepBreaks.preprocessing import read_data, check_data, write_fasta, balanced_classes
+from deepBreaks.models import model_compare_cv, finalize_top, importance_from_pipe, mean_importance, summarize_results
+from deepBreaks.visualization import plot_scatter, dp_plot, plot_imp_model, plot_imp_all
+from sklearn.preprocessing import LabelEncoder
 import os
 import datetime
 import argparse
@@ -26,6 +33,9 @@ def parse_arguments():
                                                    "are replaced with the term 'GAP'. the rest of the missing values"
                                                    "are replaced by the mode of each position.",
                         type=float, default=0.15)
+    parser.add_argument('--ult_rare', '-u', help="Threshold to modify the ultra rare cases in each position.",
+                        type=float, default=0.025)
+
     parser.add_argument('--anatype', '-a', help="type of analysis", choices=['reg', 'cl'], type=str, required=True)
     parser.add_argument('--distance_metric', '-dm',
                         help="distance metric. Default is correlation.",
@@ -45,7 +55,16 @@ def parse_arguments():
                         type=float, default=0.3)
     parser.add_argument('--top_models', '-tm',
                         help="number of top models to consider for merging the results. Default value is 5",
-                        type=int, default=5)
+                        type=int, default=3)
+    parser.add_argument('--cv', '-cv',
+                        help="number of folds for cross validation. Default is 10. If the given number is less than 1,"
+                             " then instead of CV, a train/test split approach will be used with "
+                             "cv being the test size.",
+                        type=float, default=10)
+
+    parser.add_argument("--tune", help="After running the 10-fold cross validations, should the top selected models be"
+                                       " tuned and finalize, or finalized only?",
+                        action="store_true", default=False)
     parser.add_argument("--plot", help="plot all the individual positions that are statistically significant."
                                        "Depending on your data, this process may produce many plots.",
                         action="store_true", default=False)
@@ -66,11 +85,14 @@ def main():
     args = parse_arguments()
     print(args)  # printing Namespace
     if args.seqtype not in ['nu', 'aa']:
-        print('For sequence data type, please enter "nu" for nucleotide or "aa" for amino-acid sequences.')
+        raise Exception('For sequence data type, please enter "nu" for nucleotide or "aa" for amino-acid sequences.')
         exit()
 
     if args.anatype not in ['reg', 'cl']:
-        print('For analysis type, please enter "reg" for regression or "cl" for classification only')
+        raise Exception('For analysis type, please enter "reg" for regression or "cl" for classification only')
+        exit()
+    if args.cv == 1:
+        raise Exception('cv can not be equal to 1')
         exit()
     # making directory
     print('directory preparation')
@@ -80,7 +102,7 @@ def main():
     report_dir = str(seq_file_name + '_' + args.metavar + '_' + dt_label)
     os.makedirs(report_dir)
 
-    logging.basicConfig(filename=report_dir+"/log.txt", level=logging.DEBUG,
+    logging.basicConfig(filename=report_dir + "/log.txt", level=logging.DEBUG,
                         format="%(asctime)s %(message)s")
 
     logging.info("The parameters are{}".format(args))
@@ -97,7 +119,7 @@ def main():
 
     if args.write:
         print('Writing cleaned FASTA file')
-        write_fasta(dat=df, fasta_file=seq_file_name+'_clean.fasta', report_dir=report_dir)
+        write_fasta(dat=df, fasta_file=seq_file_name + '_clean.fasta', report_dir=report_dir)
 
     positions = df.shape[1]
     print('Done')
@@ -107,74 +129,101 @@ def main():
     if args.anatype == 'cl':
         df = balanced_classes(dat=df, meta_dat=meta_data, feature=args.metavar)
 
-    # taking care of missing data
-    print('Shape of data before missing/constant care: ', df.shape)
-    df = missing_constant_care(df, missing_threshold=args.miss_gap)
-    print('Shape of data after missing/constant care: ', df.shape)
-    logging.info("Shape of data after missing/constant care: {}".format(df.shape))
+    df = df.merge(meta_data.loc[:, args.metavar], left_index=True, right_index=True)
+    y = df.loc[:, args.metavar].values
+    df.drop(args.metavar, axis=1, inplace=True)
 
-    print('Shape of data before imbalanced care: ', df.shape)
-    df = imb_care(dat=df, imbalance_threshold=0.05)
-    print('Shape of data after imbalanced care: ', df.shape)
-    logging.info("Shape of data after imbalanced care care: {}".format(df.shape))
+    if args.anatype == 'cl':
+        le = LabelEncoder()
+        y = le.fit_transform(y)
 
-    if args.fraction is not None:
-        print('number of columns of main data before: ', df.shape[1])
-        df = col_sampler(dat=df, sample_frac=args.fraction)
-        print('number of columns of main data after: ', df.shape[1])
+    if args.cv > 1:
+        args.cv = int(args.cv)
+        print(f'Running a {args.cv}-fold cross-validation.')
+    else:
+        print(f'Performing a {args.cv*100}% train-test split.')
 
-    print('Statistical tests to drop redundant features')
-    df_cleaned = redundant_drop(dat=df, meta_dat=meta_data, feature=args.metavar, model_type=args.anatype,
-                                report_dir=report_dir, threshold=args.redundant_threshold)
-    if df_cleaned is None:
-        exit()
+    prep_pipeline = make_pipeline(
+        steps=[
+            ('mc', MisCare(missing_threshold=args.miss_gap)),
+            ('cc', ConstantCare()),
+            ('ur', URareCare(threshold=args.ult_rare)),
+            ('cc2', ConstantCare()),
+            ('one_hot', CustomOneHotEncoder()),
+            ('feature_selection', FeatureSelection(model_type=args.anatype, alpha=args.redundant_threshold)),
+            ('collinear_care', CollinearCare(dist_method=args.distance_metric, threshold=args.distance_threshold))
+        ])
 
-    print('Shape of data after dropping redundant columns: ', df_cleaned.shape)
-    logging.info("Shape of data after dropping redundant columns: {}".format(df_cleaned.shape))
+    # fit and compare models
+    report, top = model_compare_cv(X=df, y=y, preprocess_pipe=prep_pipeline,
+                                   models_dict=get_models(ana_type=args.anatype),
+                                   scoring=get_scores(ana_type=args.anatype),
+                                   report_dir=report_dir,
+                                   cv=args.cv, ana_type=args.anatype, cache_dir=None)
 
-    print('prepare dummy variables')
-    df_cleaned = get_dummies(dat=df_cleaned, drop_first=True)
-    print('correlation analysis')
-    cr = distance_calc(dat=df_cleaned, dist_method=args.distance_metric, report_dir=report_dir)
-    print('finding collinear groups')
-    dc_df = db_grouped(dat=cr, report_dir=report_dir, threshold=args.distance_threshold)
-    print('grouping features')
-    dc = group_features(dat=df_cleaned, group_dat=dc_df, report_dir=report_dir)
-    print('dropping correlated features')
-    print('Shape of data before linearity care: ', df_cleaned.shape)
-    df_cleaned = cor_remove(df_cleaned, dc)
-    print('Shape of data after linearity care: ', df_cleaned.shape)
-    logging.info("Shape of data after linearity care: {}".format(df_cleaned.shape))
-    # merge with meta data
-    df = df.merge(meta_data[args.metavar], left_index=True, right_index=True)
-    df_cleaned = df_cleaned.merge(meta_data[args.metavar], left_index=True, right_index=True)
-    logging.info("Shape of data after joining with meta_data: {}".format(df_cleaned.shape))
+    prep_pipeline = make_pipeline(
+        steps=[
+            ('mc', MisCare(missing_threshold=args.miss_gap)),
+            ('cc', ConstantCare()),
+            ('ur', URareCare(threshold=args.ult_rare)),
+            ('cc2', ConstantCare()),
+            ('one_hot', CustomOneHotEncoder()),
+            ('feature_selection', FeatureSelection(model_type=args.anatype,
+                                                   alpha=args.redundant_threshold, keep=True)),
+            ('collinear_care', CollinearCare(dist_method=args.distance_metric,
+                                             threshold=args.distance_threshold, keep=True))
+        ])
 
-    # model
-    print('Training the models...')
-    logging.info("Training the models...")
-    select_top = args.top_models
-    trained_models = model_compare(X_train=df_cleaned.loc[:, df_cleaned.columns != args.metavar],
-                                   y_train=df_cleaned.loc[:, args.metavar], n_positions=positions,
-                                   grouped_features=dc, report_dir=report_dir, ana_type=args.anatype,
-                                   select_top=select_top)
+    modified_top = []
+    for model in top:
+        modified_top.append(make_pipeline(steps=[('prep', prep_pipeline), model.steps[-1]]))
+
+    if args.tune:
+        top = finalize_top(X=df, y=y, top_models=modified_top, grid_param=get_params(),
+                           report_dir=report_dir, cv=args.cv)
+    else:
+        top = finalize_top(X=df, y=y, top_models=modified_top, grid_param={},
+                           report_dir=report_dir, cv=args.cv)
+
+    n_positions = None
+    grouped_features = None
+    p_values = None
+    corr_mat = None
+
+    sr = summarize_results(top_models=top, grouped_features=grouped_features,
+                           p_values=p_values, cor_mat=corr_mat, report_dir=report_dir)
+    mean_imp = mean_importance(top_models=top, n_positions=n_positions,
+                               grouped_features=grouped_features, report_dir=report_dir)
 
     print('Visualizing the results...')
     logging.info("Visualizing the results...")
-    for key in trained_models.keys():
-        if key == 'mean':
-            dp_plot(importance=trained_models[key], imp_col='mean', model_name=key, annotate=2, report_dir=report_dir)
-        else:
-            dp_plot(importance=trained_models[key]['importance'], imp_col='standard_value',
-                    model_name=key, annotate=2, report_dir=report_dir)
-            plot_imp_model(importance=trained_models[key]['importance'],
-                           X_train=df.loc[:, df.columns != args.metavar], y_train=df.loc[:, args.metavar],
-                           meta_var=args.metavar, model_type=args.anatype, model_name=key, report_dir=report_dir)
+
+    scatter_plot = plot_scatter(summary_result=sr, report_dir=report_dir)
+    dp_plot(importance=mean_imp, imp_col='mean', model_name='mean', report_dir=report_dir)
+
+    df = prep_pipeline[:4].fit_transform(df)
+    if args.anatype == 'cl':
+        y = le.inverse_transform(y)
+
+    for model in top:
+        model_name = model.steps[-1][0]
+        dp_plot(importance=importance_from_pipe(model=model, grouped_features=grouped_features,
+                                                n_positions=n_positions),
+                imp_col='standard_value',
+                model_name=model_name, report_dir=report_dir)
+
+        plot_imp_model(importance=importance_from_pipe(model=model, grouped_features=grouped_features,
+                                                       n_positions=n_positions),
+                       X_train=df, y_train=y, model_name=model_name,
+                       meta_var=args.metavar, model_type=args.anatype, report_dir=report_dir)
 
     if args.plot:
-        plot_imp_all(trained_models=trained_models,
-                     X_train=df.loc[:, df.columns != args.metavar], y_train=df.loc[:, args.metavar],
-                     meta_var=args.metavar, model_type=args.anatype, report_dir=report_dir, max_plots=100)
+        plot_imp_all(final_models=top,
+                     X_train=df, y_train=y,
+                     meta_var=args.metavar, model_type=args.anatype,
+                     n_positions=n_positions, grouped_features=grouped_features,
+                     report_dir=report_dir, max_plots=100,
+                     figsize=(1.85, 3))
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')
     file_names = os.listdir(report_dir)

@@ -3,12 +3,53 @@ import pandas as pd
 import pickle
 import os
 import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy import stats
+from deepBreaks.models import importance_from_pipe
+from deepBreaks.utils import stacked_barplot, box_plot
 
 
-def _importance_to_df(imp_dic):
-    return pd.DataFrame.from_dict(imp_dic)
+def plot_scatter(summary_result, report_dir):
+    """
+    Plots a scatter plot with -log of (p-value) column as the x-axis and the values of the other columns (start at 3) as
+    the points color by each column name.
+
+    :param report_dir: str, path to save the figure
+    :param summary_result: pandas.DataFrame object that contains feature, p_value, score, and dynamic columns.
+    :return: matplotlib.pyplot object that displays the scatter plot.
+    """
+    # Define the columns to plot
+    cols_to_plot = list(summary_result.columns)[3:]
+
+    if len(cols_to_plot) <= 7:
+        color_list = ['#E69F00', '#56B4E9', '#cc79a7', '#009E73', '#0072b2', '#F0E449', '#d55e00']
+    else:
+        n = len(cols_to_plot)
+        cmap = plt.get_cmap('viridis')
+        cmap_max = cmap.N
+        color_list = [cmap(int(k * cmap_max / (n - 1))) for k in range(n)]
+
+    if summary_result['p_value'].min() == 0:
+        min_value = min(summary_result.loc[summary_result['p_value'] > 0, 'p_value'].min()/10, 1e-300)
+        summary_result.loc[summary_result['p_value'] == 0, 'p_value'] = min_value
+
+    # Create the plot
+    fig, ax = plt.subplots(1, 1, figsize=(3.2, 3.2), dpi=300)
+    for i, col in enumerate(cols_to_plot):
+        # Plot each column's values
+        ax.scatter(-1 * np.log10(summary_result['p_value']), summary_result[col],
+                   c=color_list[i], label=col, alpha=0.5, edgecolor='black', linewidth=0.1)
+
+    # Add legend and labels
+    ax.legend(fontsize='xx-small', loc='upper left', bbox_to_anchor=(0, 1.02), ncol=2)
+    ax.set_xlabel('-log(p_value)', fontsize=8)
+    ax.set_ylabel('Relative Importance', fontsize=8)
+    ax.xaxis.set_tick_params(labelsize=6)
+    ax.yaxis.set_tick_params(labelsize=6)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    plt.savefig(report_dir + '/pvalue_importance_scatter.pdf', bbox_inches='tight')
+    # plt.show()
+    return fig, ax
 
 
 # function to fix the position of annotations
@@ -36,7 +77,6 @@ def dp_plot(importance, imp_col, model_name,
             report_dir='.'):
     """
     Plots the importance bar plot. x-axis is the positions and y-axis is the importance values.
-
     Parameters
     ----------
     importance : dict or pandas.DataFrame
@@ -59,7 +99,6 @@ def dp_plot(importance, imp_col, model_name,
         number of top positions to annotate
     report_dir : str
         path to directory to save the plots
-
     Returns
     -------
     str
@@ -68,7 +107,7 @@ def dp_plot(importance, imp_col, model_name,
     pl_title = "Important Positions - " + model_name
 
     if type(importance) is dict:
-        importance = _importance_to_df(importance)
+        importance = pd.DataFrame.from_dict(importance)
 
     assert isinstance(importance, pd.DataFrame), 'Please provide a dictionary or a dataframe for importance values'
 
@@ -130,7 +169,6 @@ def plot_imp_model(importance, X_train, y_train, model_name,
     """
     Plots the top 4 positions of a model. For regression (`model_type='reg'`), it plots box-plot and for classification
     (`model_type='cl'`) it plots stacked bar plot.
-
     Parameters
     ----------
     importance : dict or pandas.DataFrame
@@ -147,7 +185,6 @@ def plot_imp_model(importance, X_train, y_train, model_name,
         'reg' for regression and 'cl' for classification
     report_dir : str
         path to directory to save the plots
-
     Returns
     -------
     str
@@ -157,7 +194,7 @@ def plot_imp_model(importance, X_train, y_train, model_name,
     dat.loc[:, meta_var] = y_train
 
     if type(importance) is dict:
-        temp = _importance_to_df(importance)
+        temp = pd.DataFrame.from_dict(importance)
     else:
         temp = importance
 
@@ -167,121 +204,57 @@ def plot_imp_model(importance, X_train, y_train, model_name,
 
     if model_type == 'reg':
 
-        fig, ax = plt.subplots(figsize=(7.5, 7.5), dpi=350, constrained_layout=True)
+        fig, axes = plt.subplots(figsize=(7.5, 7.5), dpi=350, constrained_layout=True, nrows=2, ncols=2)
+        axes = axes.ravel()
         fig.suptitle(meta_var + ' VS important positions', fontsize=10)
         for nm, cl in enumerate(features):
-            k, p = stats.kruskal(*[group[meta_var].values for name, group in dat.groupby(cl)])
-
-            color_dic = {}
-            key_list = ['A', 'C', 'G', 'R',
-                        'T', 'N', 'D', 'E',
-                        'Q', 'H', 'I', 'L',
-                        'K', 'M', 'F', 'P',
-                        'S', 'W', 'Y', 'V', 'GAP']
-            color_list = ['#0273b3', '#de8f07', '#029e73', '#d55e00',
-                          '#cc78bc', '#ca9161', '#fbafe4', '#ece133',
-                          '#56b4e9', '#bcbd21', '#aec7e8', '#ff7f0e',
-                          '#ffbb78', '#98df8a', '#d62728', '#ff9896',
-                          '#9467bd', '#c5b0d5', '#8c564b', '#c49c94',
-                          '#dbdb8d']  # sns.color_palette('husl', 21)
-            for n, key in enumerate(key_list):
-                color_dic[key] = color_list[n]
-            color_dic['U'] = color_dic['T']
-            # add gray to pallet for mixed combinations
-            for let in set(dat.loc[:, cl]):
-                if let not in color_dic:
-                    color_dic[let] = '#808080'  # hex code for gray color
-
-            ax = plt.subplot(2, 2, nm + 1)
-            ax.grid(color='gray', linestyle='-', linewidth=0.2, axis='y')
-            ax.set_axisbelow(True)
-
-            ax = sns.boxplot(x=cl, y=meta_var, data=dat, showfliers=False,
-                             width=.6, linewidth=.6, palette=color_dic)
-            sns.despine(ax=ax)
-            ax = sns.stripplot(x=cl, y=meta_var, data=dat, size=5,
-                               alpha=0.3, linewidth=.5, palette=color_dic)
-
-            ax.set_title(cl + ', P-value of KW test: ' + str(round(p, 3)), fontsize=8)
-            ax.set_xlabel('')
+            ax = axes[nm]
+            box_plot(data=dat, group_col=cl, response_var=meta_var, ax=ax)
 
         plt.savefig(str(report_dir + '/' + model_name + '_positions_box_' + str(350) + '.pdf'), bbox_inches='tight')
 
     else:
-        np.random.seed(123)
-        color_dic = {}
-        key_list = ['A', 'C', 'G', 'R',
-                    'T', 'N', 'D', 'E',
-                    'Q', 'H', 'I', 'L',
-                    'K', 'M', 'F', 'P',
-                    'S', 'W', 'Y', 'V', 'GAP']
-        color_list = ['#0273b3', '#de8f07', '#029e73', '#d55e00',
-                      '#cc78bc', '#ca9161', '#fbafe4', '#ece133',
-                      '#56b4e9', '#bcbd21', '#aec7e8', '#ff7f0e',
-                      '#ffbb78', '#98df8a', '#d62728', '#ff9896',
-                      '#9467bd', '#c5b0d5', '#8c564b', '#c49c94',
-                      '#dbdb8d']  # sns.color_palette('husl', 21)
-        for n, key in enumerate(key_list):
-            color_dic[key] = color_list[n]
-        color_dic['U'] = color_dic['T']
 
-        plt.figure(figsize=(7.5, 7.5), dpi=350)
+        fig, axes = plt.subplots(figsize=(7.5, 7.5), dpi=350, constrained_layout=True, nrows=2, ncols=2)
+        axes = axes.ravel()
         plt.suptitle(meta_var + ' VS important positions', fontsize=10)
-        plt.subplots_adjust(wspace=0.3)
+        #         plt.subplots_adjust(wspace=0.3)
         for nm, cl in enumerate(features):
-            ax = plt.subplot(2, 2, nm + 1)
-            # Creating crosstab
-            crosstb = pd.crosstab(dat[meta_var], dat[cl])
-
-            # chi-square test
-            chi2, p, dof, expected = stats.chi2_contingency(crosstb)
-            colors = []
-            for let in crosstb.columns.tolist():
-                if let in color_dic.keys():
-                    colors.append(color_dic[let.upper()])
-                else:
-                    color_dic[let.upper()] = '#808080'
-                    colors.append(color_dic[let.upper()])
-
-            crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.3)
-            # ax.title.set_text(cl + ', P-value of Chi-square test: ' + str(round(p, 3)))
-            ax.set_title(cl + ', P-value of Chi-square test: ' + str(round(p, 3)), fontsize=8)
-            plt.xlabel('')
-            plt.xticks(fontsize=8, rotation=90)
-            plt.ylabel('Counts', fontsize=8)
-            plt.yticks(fontsize=6)
-            plt.legend(title=None, fontsize=6)
-            plt.savefig(str(report_dir + '/' + model_name + 'top_positions' + str(350) + '.pdf'), bbox_inches='tight')
+            ax = axes[nm]
+            stacked_barplot(data=dat, group_col=cl, response_var=meta_var, ax=ax)
+        plt.savefig(str(report_dir + '/' + model_name + '_top_positions' + str(350) + '.pdf'), bbox_inches='tight')
     return print(model_name, ' Done')
 
 
-# All significant positions - individual box/bar plots
-def plot_imp_all(trained_models, X_train, y_train,
-                 meta_var, model_type, report_dir, max_plots=100,
+def plot_imp_all(final_models, X_train, y_train,
+                 model_type, report_dir,
+                 meta_var = 'meta_var', n_positions=None, grouped_features=None,
+                 max_plots=100,
                  figsize=(3, 3)):
     """
     plots all the important position across all the top selected models (up to `max_plots`).
     Parameters
     ----------
-    trained_models : dict
-        a nested dictionary. The first layer of the keys are the name of the models and each of them
-        is a dictionary with keys ['metrics', 'importance', 'model']. For example, evaluation values can be accessed
-        as: `dict['model']['metrics']`
+    final_models : list
+        a list of sklearn model objects. Can also be a pipeline that the last layer is a model.
     X_train : pandas.DataFrame
         a numeric dataframe
     y_train : 1D array
         an 1D array of values of the response variable (phenotype)
-    meta_var : str
-        the name of the feature under study (phenotype)
     model_type :  str
         'reg' for regression and 'cl' for classification
     report_dir : str
         path to directory to save the plots
+    n_positions : int
+        Number of positions in the initial sequence file. Only needed when the model object
+         does not have a preprocessing step.
+    grouped_features : dict
+        a dictionary that has information of the clusters of the positions. Only needed when the model object
+         does not have a preprocessing step.
     max_plots : int
         maximum number of plots to create
     figsize : tuple
         a tuple for the size of the plot
-
     Returns
     -------
     dict
@@ -306,116 +279,56 @@ def plot_imp_all(trained_models, X_train, y_train,
     plots = {}
     cn_p = 0  # plot counter
 
-    for key in trained_models.keys():
-        if key != 'mean':
-            tmp2 = pd.DataFrame.from_dict(trained_models[key]['importance'])
-            temp = tmp2.loc[:, ['feature', 'standard_value']]
-            features = temp.sort_values(by='standard_value', ascending=False)['feature'].tolist()
-            features = ['p' + str(f) for f in features]
+    for model in final_models:
 
-            p = 0
-            cn_f = 0  # feature counter
-            check = 0
+        tmp2 = pd.DataFrame.from_dict(importance_from_pipe(model, n_positions=n_positions,
+                                                           grouped_features=grouped_features))
+        temp = tmp2.loc[:, ['feature', 'standard_value']]
+        features = temp.sort_values(by='standard_value', ascending=False)['feature'].tolist()
+        features = ['p' + str(f) for f in features]
 
-            while (p < 0.05 or check < 10) and (cn_f <= len(features)) and (cn_p < max_plots):
-                cl = features[cn_f]
-                cn_f += 1
-                cn_p += 1
-                if cl not in feature_list:
-                    if model_type == 'reg':
-                        try:
-                            k, p = stats.kruskal(*[group[meta_var].values for name, group in dat.groupby(cl)])
-                            if p < 0.05:
-                                feature_list.append(cl)
-                                color_dic = {}
-                                key_list = ['A', 'C', 'G', 'R',
-                                            'T', 'N', 'D', 'E',
-                                            'Q', 'H', 'I', 'L',
-                                            'K', 'M', 'F', 'P',
-                                            'S', 'W', 'Y', 'V', 'GAP']
-                                color_list = ['#0273b3', '#de8f07', '#029e73', '#d55e00',
-                                              '#cc78bc', '#ca9161', '#fbafe4', '#ece133',
-                                              '#56b4e9', '#bcbd21', '#aec7e8', '#ff7f0e',
-                                              '#ffbb78', '#98df8a', '#d62728', '#ff9896',
-                                              '#9467bd', '#c5b0d5', '#8c564b', '#c49c94',
-                                              '#dbdb8d']  # sns.color_palette('husl', 21)
-                                for n, let in enumerate(key_list):
-                                    color_dic[let] = color_list[n]
-                                color_dic['U'] = color_dic['T']
+        p = 0
+        cn_f = 0  # feature counter
+        check = 0
 
-                                # add gray to pallet for mixed combinations
-                                for let in set(dat.loc[:, cl]):
-                                    if let not in color_dic:
-                                        color_dic[let] = '#808080'  # hex code for gray color
+        while (p < 0.05 or check < 10) and (cn_f < len(features)) and (cn_p < max_plots):
 
-                                fig, ax = plt.subplots(figsize=figsize, dpi=350)
-                                ax.grid(color='gray', linestyle='-', linewidth=0.2, axis='y')
-                                ax.set_axisbelow(True)
-                                ax = sns.boxplot(x=cl, y=meta_var, data=dat, showfliers=False,
-                                                 width=.6, linewidth=.6, palette=color_dic)
-                                sns.despine(ax=ax)
-                                ax = sns.stripplot(x=cl, y=meta_var, data=dat, size=3,
-                                                   alpha=0.3, linewidth=0.3, palette=color_dic)
+            cl = features[cn_f]
+            cn_f += 1
+            cn_p += 1
+            if cl not in feature_list:
+                if model_type == 'reg':
+                    try:
+                        k, p = stats.kruskal(*[group[meta_var].values for name, group in dat.groupby(cl)])
+                        if p < 0.05:
+                            feature_list.append(cl)
+                            fig, ax = plt.subplots(figsize=figsize, dpi=350)
+                            box_plot(data=dat, group_col=cl, response_var=meta_var, ax=ax, p=p)
+                            plt.savefig(str(plot_dir + '/' + cl + '_boxplot_' + str(350) + '.pdf'),
+                                        bbox_inches='tight')
+                            plots[cl] = fig, ax
+                    except:
+                        pass
 
-                                ax.set_title(cl + ', P-value of KW test: ' + str(round(p, 3)), fontsize=8)
-                                ax.set_xlabel('')
+                else:
+                    try:
 
-                                plt.savefig(str(plot_dir + '/' + cl + '_boxplot_' + str(350) + '.pdf'),
-                                            bbox_inches='tight')
-                                plots[cl] = fig, ax
-                        except:
-                            pass
+                        cross_tb = pd.crosstab(dat[meta_var], dat[cl])
 
-                    else:
-                        try:
-                            np.random.seed(123)
-                            color_dic = {}
-                            key_list = ['A', 'C', 'G', 'R',
-                                        'T', 'N', 'D', 'E',
-                                        'Q', 'H', 'I', 'L',
-                                        'K', 'M', 'F', 'P',
-                                        'S', 'W', 'Y', 'V', 'GAP']
-                            color_list = ['#0273b3', '#de8f07', '#029e73', '#d55e00',
-                                          '#cc78bc', '#ca9161', '#fbafe4', '#ece133',
-                                          '#56b4e9', '#bcbd21', '#aec7e8', '#ff7f0e',
-                                          '#ffbb78', '#98df8a', '#d62728', '#ff9896',
-                                          '#9467bd', '#c5b0d5', '#8c564b', '#c49c94',
-                                          '#dbdb8d']  # sns.color_palette('husl', 21)
-                            for n, let in enumerate(key_list):
-                                color_dic[let] = color_list[n]
-                            color_dic['U'] = color_dic['T']
-                            # Creating crosstab
-                            crosstb = pd.crosstab(dat[meta_var], dat[cl])
+                        # chi-square test
+                        chi2, p, dof, expected = stats.chi2_contingency(cross_tb)
 
-                            # chi-square test
-                            chi2, p, dof, expected = stats.chi2_contingency(crosstb)
-
-                            if p < 0.05:
-                                feature_list.append(cl)
-                                fig, ax = plt.subplots(figsize=figsize, dpi=350)
-                                colors = []
-                                for let in crosstb.columns.tolist():
-                                    if let in color_dic.keys():
-                                        colors.append(color_dic[let.upper()])
-                                    else:
-                                        color_dic[let.upper()] = '#808080'  # hex code for gray color
-                                        colors.append(color_dic[let.upper()])
-                                crosstb.plot(kind="bar", stacked=True, rot=0, ax=ax, color=colors, width=.3)
-                                ax.set_title(cl + ', P-value: ' + str(round(p, 3)), fontsize=8)
-                                ax.set_xlabel('')
-                                plt.xticks(fontsize=8, rotation=90)
-                                plt.ylabel('Counts', fontsize=8)
-                                plt.yticks(fontsize=6)
-                                plt.legend(title=None, fontsize=6)
-                                plt.tight_layout()
-
-                                plt.savefig(str(plot_dir + '/' + cl + '_stackedbarplot_' + str(350) + '.pdf'),
-                                            bbox_inches='tight')
-                                plots[cl] = fig, ax
-                        except:
-                            pass
-                if p >= 0.05:
-                    check += 1
+                        if p < 0.05:
+                            feature_list.append(cl)
+                            fig, ax = plt.subplots(figsize=figsize, dpi=350)
+                            stacked_barplot(cross_table=cross_tb, group_col=cl, ax=ax)
+                            plt.savefig(str(plot_dir + '/' + cl + '_stacked_barplot_' + str(350) + '.pdf'),
+                                        bbox_inches='tight')
+                            plots[cl] = fig, ax
+                    except:
+                        pass
+            if p >= 0.05:
+                check += 1
     with open(str(plot_dir + '/plots.pickle'), 'wb') as handle:
         pickle.dump(plots, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return plots

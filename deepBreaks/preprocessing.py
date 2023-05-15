@@ -7,6 +7,8 @@ from scipy.stats import kruskal
 from scipy.spatial.distance import pdist
 from scipy.spatial.distance import squareform
 import csv
+from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.feature_selection import SelectFdr, chi2, f_regression
 
 
 # sample size and classes check
@@ -387,7 +389,7 @@ def distance_calc(dat, dist_method='correlation', report_dir=None) -> pd.DataFra
 
 
 # grouping features based on DBSCAN clustering algo
-def db_grouped(dat, report_dir, threshold=0.2) -> pandas.DataFrame:
+def db_grouped(dat, report_dir=None, threshold=0.2) -> pandas.DataFrame:
     """
     This function clusters the columns of a dataframe based on a given distance matrix by using the `DBSCAN` algorithm.
 
@@ -434,13 +436,13 @@ def db_grouped(dat, report_dir, threshold=0.2) -> pandas.DataFrame:
         dc_df = dc_df[dc_df['group'] != 'No_gr']
     except:
         dc_df = pd.DataFrame(columns=['feature', 'group'])
-
-    dc_df.to_csv(str(report_dir + '/' + 'correlated_positions_DBSCAN.csv'), index=False)
+    if report_dir is not None:
+        dc_df.to_csv(str(report_dir + '/' + 'correlated_positions_DBSCAN.csv'), index=False)
     return dc_df
 
 
 # function for grouping features in saving them in a dictionary file
-def group_features(dat, group_dat, report_dir) -> dict:
+def group_features(dat, group_dat, report_dir=None) -> dict:
     """
     Gets a two column dataframe of names and labels. Then for each label, creates a dictionary that the key is the
     representative of the group and the members are the rest of names with the same label. Representative id the closes
@@ -452,7 +454,7 @@ def group_features(dat, group_dat, report_dir) -> dict:
         numeric data frame
     group_dat : pandas.DataFrame
         a two column dataframe containing names and labels of clusters
-    report_dir : str
+    report_dir : str/None
         path to write the dictionary file
 
     Returns
@@ -472,7 +474,8 @@ def group_features(dat, group_dat, report_dir) -> dict:
 
             dc[tmp[min_s]] = tmp_ar
         dc_temp = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dc.items()]))
-        dc_temp.to_csv(str(report_dir + '/' + 'correlated_positions.csv'), index=False)
+        if report_dir is not None:
+            dc_temp.to_csv(str(report_dir + '/' + 'correlated_positions.csv'), index=False)
     return dc
 
 
@@ -497,3 +500,190 @@ def cor_remove(dat, dic) -> pandas.DataFrame:
     for k in dic.keys():
         dat.drop(dic[k], axis=1, inplace=True)
     return dat
+
+
+# here _mis_constant_care
+class MisCare(BaseEstimator, TransformerMixin):
+    def __init__(self, missing_threshold):
+        self.mode_ = None
+        self.columns_with_gap_ = None
+        self.n_features_in_ = None
+        self.missing_threshold = missing_threshold
+
+    def fit(self, X, y=None):
+        self.n_features_in_ = X.shape[1]
+        self.columns_with_gap_ = X.columns[X.isna().sum() > int(self.missing_threshold * X.shape[0])]
+        self.mode_ = X.mode().loc[0, :]
+        return self
+
+    def transform(self, X, y=None):
+        tmp = X.copy()
+        tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
+        tmp.fillna(self.mode_, inplace=True)
+        return tmp
+
+    def get_n_features_in(self):
+        return self.n_features_in_
+
+    def get_columns_with_gap(self):
+        return self.columns_with_gap_
+
+    def get_columns_mode(self):
+        return self.mode_
+
+
+# here _mis_constant_care
+class ConstantCare(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.columns_to_keep_ = None
+
+    def fit(self, X, y=None):
+        # Store the columns with non-constant values during the fitting stage
+        self.columns_to_keep_ = X.loc[:, X.nunique() != 1].columns
+        return self
+
+    def transform(self, X, y=None):
+        # Keep only the non-constant columns in the input data
+        return X.loc[:, self.columns_to_keep_]
+
+    def get_columns_to_keep(self):
+        return self.columns_to_keep_
+
+
+# here rare_case_care
+class URareCare(BaseEstimator, TransformerMixin):
+    def __init__(self, threshold):
+        self.replace_dict = None
+        self.threshold = threshold
+
+    def fit(self, X, y=None):
+        # Store the columns with non-constant values during the fitting stage
+        replace_dict = {}
+        for cl in X.columns:
+            vl = X.loc[:, cl].value_counts()
+            ls = (vl / X.shape[0]) < self.threshold
+            ls = ls.index[ls == True].tolist()
+            if len(ls) > 0:
+                replace_dict[cl] = {}
+                if (vl[ls].sum() / X.shape[0]) < self.threshold:
+                    md = vl.index[0]
+                    for letter in ls:
+                        replace_dict[cl][letter] = md
+                else:
+                    for letter in ls:
+                        replace_dict[cl][letter] = ''.join(ls)
+
+        self.replace_dict = replace_dict
+        return self
+
+    def transform(self, X, y=None):
+        # Keep only the non-constant columns in the input data
+        return X.replace(self.replace_dict)
+
+    def get_replace_dict(self):
+        return self.replace_dict
+
+
+# oneHot
+class CustomOneHotEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.feature_names_out_ = None
+
+    def fit(self, X, y=None):
+        tmp = pd.get_dummies(X, drop_first=True)
+        self.feature_names_out_ = tmp.columns
+        return self
+
+    def transform(self, X, y=None):
+        transformed_X = pd.get_dummies(X, drop_first=False)
+        feature_names = self.feature_names_out_
+        cols_to_add = feature_names.difference(transformed_X.columns)
+        if len(cols_to_add) == 0:
+            transformed_X = transformed_X.loc[:, feature_names]
+        else:
+            tmp = np.zeros((transformed_X.shape[0], len(cols_to_add)))
+            tmp = pd.DataFrame(tmp, columns=cols_to_add, index=transformed_X.index)
+            transformed_X = pd.concat([transformed_X, tmp], axis=1)
+            transformed_X = transformed_X.loc[:, feature_names]
+        return transformed_X
+
+    def get_feature_names_out(self):
+        return self.feature_names_out_
+
+    def fit_transform(self, X, y=None):
+        self.fit(X, y)
+        return self.transform(X)
+
+
+class FeatureSelection(BaseEstimator, TransformerMixin):
+    def __init__(self, model_type, alpha, keep=False):
+        self.p_values_ = None
+        self.names_out_ = None
+        self.model_type = model_type
+        self.alpha = alpha
+        self.keep = keep
+
+    def fit(self, X, y=None):
+        if self.model_type == 'reg':
+            s_fdr = SelectFdr(f_regression, alpha=self.alpha)
+        else:
+            s_fdr = SelectFdr(chi2, alpha=self.alpha)
+        s_fdr.fit(X, y)
+
+        self.names_out_ = s_fdr.get_feature_names_out()
+        if self.keep:
+            self.p_values_ = list(zip(s_fdr.feature_names_in_, s_fdr.pvalues_, s_fdr.scores_))
+        return self
+
+    def transform(self, X, y=None):
+        # Keep only the non-constant columns in the input data
+        return X.loc[:, self.names_out_]
+
+    def get_p_values(self):
+        return pd.DataFrame(self.p_values_, columns=['feature', 'p_value', 'score'])
+
+    def get_names_out(self):
+        return self.names_out_
+
+
+# clustering
+class CollinearCare(BaseEstimator, TransformerMixin):
+    def __init__(self, dist_method, threshold, keep=False):
+        self.cr = None
+        self.shape_out = None
+        self.feature_names_out_ = None
+        self.feature_grouped_dict_ = None
+        self.dist_method = dist_method
+        self.threshold = threshold
+        self.keep = keep
+
+    def fit(self, X, y=None):
+        cr = distance_calc(dat=X, dist_method=self.dist_method)
+        dc_df = db_grouped(dat=cr, report_dir=None,
+                           threshold=self.threshold)
+        dc = group_features(dat=X, group_dat=dc_df)
+
+        self.feature_grouped_dict_ = dc
+        if self.keep:
+            self.cr = cr
+
+        return self
+
+    def transform(self, X, y=None):
+        transfomed_X = cor_remove(X, self.feature_grouped_dict_)
+        if self.keep:
+            self.feature_names_out_ = transfomed_X.columns
+            self.shape_out = transfomed_X.shape
+        return transfomed_X
+
+    def get_feature_grouped_dict(self):
+        return self.feature_grouped_dict_
+
+    def get_corr(self):
+        return self.cr
+
+    def get_names_out(self):
+        return self.feature_names_out_
+
+    def get_shape_out(self):
+        return self.shape_out
