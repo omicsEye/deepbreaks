@@ -77,7 +77,7 @@ setup(
     platforms=['Linux', 'MacOS', "Windows"],
     classifiers=classifiers,
     # long_description=open('readme.md').read(),
-
+    data_files=[('.', ['requirements.txt'])],
     install_requires=required,
     packages=find_packages(),
     entry_points={
