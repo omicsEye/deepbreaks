@@ -15,7 +15,7 @@ def get_models(ana_type):
         from sklearn.tree import DecisionTreeRegressor
         from sklearn.linear_model import LinearRegression, Lasso, BayesianRidge, HuberRegressor, LassoLars
         from xgboost import XGBRegressor
-        # from lightgbm import LGBMRegressor
+        from lightgbm import LGBMRegressor
 
         models = {
             'rf': RandomForestRegressor(n_jobs=-1, random_state=123),
@@ -28,7 +28,7 @@ def get_models(ana_type):
             'LassoLars': LassoLars(random_state=123),
             'BayesianRidge': BayesianRidge(),
             'HubR': HuberRegressor(max_iter=2000, tol=1e-4),
-            # 'lgbm': LGBMRegressor(n_jobs=-1, random_state=123),
+            'lgbm': LGBMRegressor(n_jobs=-1, random_state=123),
             'xgb': XGBRegressor(n_jobs=-1, random_state=123)
 
         }
@@ -38,7 +38,7 @@ def get_models(ana_type):
         from sklearn.tree import DecisionTreeClassifier
         from sklearn.linear_model import LogisticRegression
         from xgboost import XGBClassifier
-        # from lightgbm import LGBMClassifier
+        from lightgbm import LGBMClassifier
 
         models = {
             'rf': RandomForestClassifier(n_jobs=-1, random_state=123),
@@ -48,7 +48,7 @@ def get_models(ana_type):
             'gbc': GradientBoostingClassifier(random_state=123),
             'dt': DecisionTreeClassifier(random_state=123),
             'xgb': XGBClassifier(n_jobs=-1, random_state=123),
-            # 'lgbm': LGBMClassifier(n_jobs=-1, random_state=123)
+            'lgbm': LGBMClassifier(n_jobs=-1, random_state=123)
         }
 
     return models
