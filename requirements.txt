@@ -7,4 +7,4 @@ seaborn>=0.11.2
 matplotlib>=3.5.2
 joblib>=1.1.0
 xgboost==1.7.5
-lightgbm==3.3.5
+# lightgbm==3.3.5

@@ -409,7 +409,7 @@ and absorbance phenotypes. We identified opsins expressed in
 rod cells of vertebrates (mainly marine fishes) with absorption spectra measurements (λmax, the wavelength with the
 highest absorption). The dataset contains 175 samples of opsin sequences. We next applied deepBreaks on this
 dataset to find the most important sites contributing to the variations of λmax. 
-This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype.ipynb) 
+This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/continuous_phenotype_light_sensitivity.ipynb) 
 illustrates the steps.
 
 
@@ -424,7 +424,7 @@ representatives from stool metagenomics data of healthy adults from the
 [Human Microbiome Project](https://doi.org/10.1038/nature11234). The input for deepBreaks consists of 1) an MSA file
 with 1006 rows, each a representative strain of a specific microbial species, here Haemophilus parainfluenzae, with
 49839 lengths; and 2) labels for deepBreaks prediction are body sites from which samples were collected. 
-This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype.ipynb)
+This [Jupyter Notebook](https://github.com/omicsEye/deepbreaks/blob/master/examples/discrete_phenotype_HMP.ipynb)
 illustrates the steps.
 
 
