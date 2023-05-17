@@ -131,7 +131,7 @@ python -m pip install git+https://github.com/omicsEye/deepbreaks
   ```
 8) Install packages from Conda
   ```commandline
-  conda install lightgbm
+  conda install -c conda-forge lightgbm
   pip install xgboost
   ```
 9) Finally, install *deepBreaks*:
