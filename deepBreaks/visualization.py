@@ -29,7 +29,7 @@ def plot_scatter(summary_result, report_dir):
         color_list = [cmap(int(k * cmap_max / (n - 1))) for k in range(n)]
 
     if summary_result['p_value'].min() == 0:
-        min_value = min(summary_result.loc[summary_result['p_value'] > 0, 'p_value'].min()/10, 1e-300)
+        min_value = min(summary_result.loc[summary_result['p_value'] > 0, 'p_value'].min() / 10, 1e-300)
         summary_result.loc[summary_result['p_value'] == 0, 'p_value'] = min_value
 
     # Create the plot
@@ -227,8 +227,12 @@ def plot_imp_model(importance, X_train, y_train, model_name,
 
 
 def plot_imp_all(final_models, X_train, y_train,
-                 model_type, report_dir,
-                 meta_var = 'meta_var', n_positions=None, grouped_features=None,
+                 model_type,
+                 report_dir,
+                 aggregate_function='max',
+                 meta_var='meta_var',
+                 n_positions=None,
+                 grouped_features=None,
                  max_plots=100,
                  figsize=(3, 3)):
     """
@@ -245,6 +249,12 @@ def plot_imp_all(final_models, X_train, y_train,
         'reg' for regression and 'cl' for classification
     report_dir : str
         path to directory to save the plots
+    aggregate_function: str or callable
+        The aggregation function to apply. Can be a string
+        representing a built-in aggregation function (e.g., 'mean', 'max', 'min', 'std', etc.),
+        or a custom callable function that operates on a pandas Series. Default is 'max'.
+    meta_var : str
+        name of the meta variable for y-axis, default is 'meta_var'.
     n_positions : int
         Number of positions in the initial sequence file. Only needed when the model object
          does not have a preprocessing step.
@@ -282,7 +292,8 @@ def plot_imp_all(final_models, X_train, y_train,
     for model in final_models:
 
         tmp2 = pd.DataFrame.from_dict(importance_from_pipe(model, n_positions=n_positions,
-                                                           grouped_features=grouped_features))
+                                                           grouped_features=grouped_features,
+                                                           aggregate_function=aggregate_function))
         temp = tmp2.loc[:, ['feature', 'standard_value']]
         features = temp.sort_values(by='standard_value', ascending=False)['feature'].tolist()
         features = ['p' + str(f) for f in features]

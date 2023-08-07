@@ -207,17 +207,21 @@ def finalize_top(X, y, top_models, grid_param, cv, random_state=123, report_dir=
     return final_models
 
 
-def importance_from_pipe(model, n_positions=None, grouped_features=None):
+def importance_from_pipe(model, n_positions=None, grouped_features=None, aggregate_function='max'):
     """
     Calculate feature importance from a pipeline containing a feature selection/preprocessing step and a model.
 
-    Args: model (sklearn.pipeline.Pipeline): Trained pipeline containing a feature selection/preprocessing step and a
-    model.
+    Args:
+        model (sklearn.pipeline.Pipeline): Trained pipeline containing a feature selection/preprocessing step and a
+            model.
+        aggregate_function (str or callable): The aggregation function to apply. Can be a string
+            representing a built-in aggregation function (e.g., 'mean', 'max', 'min', 'std', etc.),
+            or a custom callable function that operates on a pandas Series. Default is 'max'.
 
     Returns: dict: Dictionary containing two lists: 'feature' - feature indices, and 'value' - corresponding feature
     importance values.
     """
-    assert 'prep' in model.named_steps or (n_positions is not None and grouped_features is not None),\
+    assert 'prep' in model.named_steps or (n_positions is not None and grouped_features is not None), \
         'If the model does not have a prep step, please provide n_positions and grouped_features'
     # Get the number of features in the input dataset
     if n_positions is None:
@@ -259,7 +263,12 @@ def importance_from_pipe(model, n_positions=None, grouped_features=None):
     tmp['feature'] = tmp['feature'].str.split('p').str[1].astype(int)
 
     # Aggregate feature importance values for each feature index and normalize by the maximum value
-    tmp = tmp.groupby('feature')['value'].mean().reset_index()
+    aggregation_dict = {'value': aggregate_function}
+    # if aggregate == 'max':
+    tmp = tmp.groupby('feature').agg(aggregation_dict).reset_index()
+    # if aggregate == 'mean':
+    #     tmp = tmp.groupby('feature')['value'].mean().reset_index()
+
     tmp2 = pd.DataFrame(range(1, n_positions), columns=['feature'])
     tmp2 = tmp2.merge(tmp, how='left')
     tmp2.fillna(0, inplace=True)
@@ -268,7 +277,10 @@ def importance_from_pipe(model, n_positions=None, grouped_features=None):
     return tmp2.to_dict(orient='list')
 
 
-def mean_importance(top_models: list, n_positions: int = None, grouped_features: dict = None, report_dir: str = None) -> pd.DataFrame:
+def mean_importance(top_models: list, n_positions: int = None,
+                    grouped_features: dict = None,
+                    report_dir: str = None,
+                    aggregate_function='max') -> pd.DataFrame:
     """
     Compute the mean feature importance of a list of models.
 
@@ -285,6 +297,10 @@ def mean_importance(top_models: list, n_positions: int = None, grouped_features:
     report_dir : str, optional
         The directory to save the importance report. If None, do not save the
         report (default is None).
+    aggregate_function: str or callable
+        The aggregation function to apply. Can be a string
+        representing a built-in aggregation function (e.g., 'mean', 'max', 'min', 'std', etc.),
+        or a custom callable function that operates on a pandas Series. Default is 'max'.
 
     Returns:
     --------
@@ -302,7 +318,9 @@ def mean_importance(top_models: list, n_positions: int = None, grouped_features:
         # Get the name of the model from the last step of the pipeline
         model_name = model.steps[-1][0]
         # Compute the feature importance for the model
-        imp = importance_from_pipe(model, n_positions=n_positions, grouped_features=grouped_features)
+        imp = importance_from_pipe(model, n_positions=n_positions,
+                                   grouped_features=grouped_features,
+                                   aggregate_function=aggregate_function)
         if n == 0:
             # For the first model, initialize the dictionary with the feature
             # names and the feature importance values

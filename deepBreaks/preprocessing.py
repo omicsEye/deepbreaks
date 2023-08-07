@@ -687,3 +687,23 @@ class CollinearCare(BaseEstimator, TransformerMixin):
 
     def get_shape_out(self):
         return self.shape_out
+
+
+# scaler
+class CustomStandardScaler(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.feature_names_out_ = None
+        self.mn = None
+        self.std = None
+        self.ind = None
+
+    def fit(self, X, y=None):
+        self.mn = X.mean()
+        self.std = X.std()
+        self.feature_names_out_ = X.columns
+        self.ind = X.index
+        return self
+
+    def transform(self, X, y=None):
+        transformed_X = (X - self.mn) / self.std
+        return transformed_X

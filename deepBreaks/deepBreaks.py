@@ -1,10 +1,7 @@
 # importing libraries
-# from deepBreaks.preprocessing import *
-# from deepBreaks.models import *
-# from deepBreaks.visualization import *
 from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline
 from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
-    CollinearCare
+    CollinearCare, CustomStandardScaler
 from deepBreaks.preprocessing import read_data, check_data, write_fasta, balanced_classes
 from deepBreaks.models import model_compare_cv, finalize_top, importance_from_pipe, mean_importance, summarize_results
 from deepBreaks.visualization import plot_scatter, dp_plot, plot_imp_model, plot_imp_all
@@ -56,6 +53,10 @@ def parse_arguments():
     parser.add_argument('--top_models', '-tm',
                         help="number of top models to consider for merging the results. Default value is 5",
                         type=int, default=3)
+    parser.add_argument('--aggregate', help="the aggregate function for summarising the importance values in the"
+                                            "positions. Can be a string representing a built-in aggregation "
+                                            "function (e.g., 'mean', 'max', 'min', 'std', etc.)",
+                        type=str, default='max', required=False)
     parser.add_argument('--cv', '-cv',
                         help="number of folds for cross validation. Default is 10. If the given number is less than 1,"
                              " then instead of CV, a train/test split approach will be used with "
@@ -151,6 +152,7 @@ def main():
             ('cc2', ConstantCare()),
             ('one_hot', CustomOneHotEncoder()),
             ('feature_selection', FeatureSelection(model_type=args.anatype, alpha=args.redundant_threshold)),
+            ('st_sc', CustomStandardScaler()),
             ('collinear_care', CollinearCare(dist_method=args.distance_metric, threshold=args.distance_threshold))
         ])
 
@@ -170,6 +172,7 @@ def main():
             ('one_hot', CustomOneHotEncoder()),
             ('feature_selection', FeatureSelection(model_type=args.anatype,
                                                    alpha=args.redundant_threshold, keep=True)),
+            ('st_sc', CustomStandardScaler()),
             ('collinear_care', CollinearCare(dist_method=args.distance_metric,
                                              threshold=args.distance_threshold, keep=True))
         ])
@@ -193,6 +196,7 @@ def main():
     sr = summarize_results(top_models=top, grouped_features=grouped_features,
                            p_values=p_values, cor_mat=corr_mat, report_dir=report_dir)
     mean_imp = mean_importance(top_models=top, n_positions=n_positions,
+                               aggregate_function=args.aggregate,
                                grouped_features=grouped_features, report_dir=report_dir)
 
     print('Visualizing the results...')
@@ -208,12 +212,12 @@ def main():
     for model in top:
         model_name = model.steps[-1][0]
         dp_plot(importance=importance_from_pipe(model=model, grouped_features=grouped_features,
-                                                n_positions=n_positions),
+                                                n_positions=n_positions, aggregate_function=args.aggregate),
                 imp_col='standard_value',
                 model_name=model_name, report_dir=report_dir)
 
         plot_imp_model(importance=importance_from_pipe(model=model, grouped_features=grouped_features,
-                                                       n_positions=n_positions),
+                                                       n_positions=n_positions, aggregate_function=args.aggregate),
                        X_train=df, y_train=y, model_name=model_name,
                        meta_var=args.metavar, model_type=args.anatype, report_dir=report_dir)
 
@@ -221,6 +225,7 @@ def main():
         plot_imp_all(final_models=top,
                      X_train=df, y_train=y,
                      meta_var=args.metavar, model_type=args.anatype,
+                     aggregate_function=args.aggregate,
                      n_positions=n_positions, grouped_features=grouped_features,
                      report_dir=report_dir, max_plots=100,
                      figsize=(1.85, 3))
