@@ -35,12 +35,12 @@ Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crand
 ## Contents ##
 
 * [Features](#features)
-* [deepBreaks](#deepBreaks)
+* [deepBreaks](#deepbreaks)
     * [Installation](#installation)
-      * [Windows Linux Mac](#Windows-Linux-Mac)
+      * [Windows Linux Mac](#windows-linux-mac)
       * [Apple M1/M2 MAC](#apple-m1m2-mac)
-* [Getting Started with deepBreaks](#getting-started-with-deepBreaks)
-    * [Test deepBreaks](#test-omeClust)
+* [Getting Started with deepBreaks](#getting-started-with-deepbreaks)
+    * [Test deepBreaks](#test-deepbreaks)
     * [Options](#options) 
     * [Input](#input)
     * [Output](#output)
