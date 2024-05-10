@@ -1,5 +1,5 @@
 # importing libraries
-from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline
+from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline, df_to_dict, imp_print, ref_id_type
 from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
     CollinearCare, CustomStandardScaler
 from deepBreaks.preprocessing import read_data, check_data, write_fasta, balanced_classes
@@ -62,7 +62,13 @@ def parse_arguments():
                              " then instead of CV, a train/test split approach will be used with "
                              "cv being the test size.",
                         type=float, default=10)
-
+    parser.add_argument('--ref_id', '-r', help="ID/order of the reference sequence in the sequence file."
+                                               " Default is last sequence.",
+                        default=-1, type=ref_id_type, required=False)
+    parser.add_argument('--ref_compare', '-c', help="ID/order of the sequences to compare with the reference sequence.",
+                        default=None, type=ref_id_type, required=False)
+    parser.add_argument('--compare_len', '-l', help="length of output sequences",
+                        default=50, type=int, required=False)
     parser.add_argument("--tune", help="After running the 10-fold cross validations, should the top selected models be"
                                        " tuned and finalize, or finalized only?",
                         action="store_true", default=False)
@@ -118,6 +124,9 @@ def main():
     print('reading fasta file')
     df = read_data(args.seqfile, seq_type=args.seqtype, gap_threshold=args.gap, is_main=True)
 
+    # sequence data in dictionary format
+    raw_seq = df_to_dict(df)
+
     if args.write:
         print('Writing cleaned FASTA file')
         write_fasta(dat=df, fasta_file=seq_file_name + '_clean.fasta', report_dir=report_dir)
@@ -146,7 +155,7 @@ def main():
 
     prep_pipeline = make_pipeline(
         steps=[
-            ('mc', MisCare(missing_threshold=args.miss_gap)),
+            ('mc', MisCare(missing_threshold=args.miss_gap, gap_threshold=args.gap)),
             ('cc', ConstantCare()),
             ('ur', URareCare(threshold=args.ult_rare)),
             ('cc2', ConstantCare()),
@@ -165,7 +174,7 @@ def main():
 
     prep_pipeline = make_pipeline(
         steps=[
-            ('mc', MisCare(missing_threshold=args.miss_gap)),
+            ('mc', MisCare(missing_threshold=args.miss_gap, gap_threshold=args.gap)),
             ('cc', ConstantCare()),
             ('ur', URareCare(threshold=args.ult_rare)),
             ('cc2', ConstantCare()),
@@ -229,6 +238,14 @@ def main():
                      n_positions=n_positions, grouped_features=grouped_features,
                      report_dir=report_dir, max_plots=100,
                      figsize=(1.85, 3))
+
+    # printing important positions with their importance values
+    positions = list(mean_imp.sort_values('mean', ascending=False)['feature'][:100])
+    importance = list(mean_imp.sort_values('mean', ascending=False)['mean'][:100].round(3))
+
+    imp_print(raw_seq, position=positions, importance=importance,
+              ref_seq_id=args.ref_id, compare_with=args.ref_compare,
+              compare_len=args.compare_len, report_dir=report_dir)
 
     zip_obj = ZipFile(str(report_dir + '/report.zip'), 'w')
     file_names = os.listdir(report_dir)

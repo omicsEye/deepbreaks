@@ -121,10 +121,15 @@ def read_data(file_path, seq_type=None, is_main=True, gap_threshold=0.7) -> pand
         for vl in na_values:
             to_replace.append(vl.upper())
         dat.replace(to_replace, np.nan, inplace=True)
-        if gap_threshold > 0:
-            col_to_drop = dat.columns[dat.isnull().sum() > (gap_threshold * dat.shape[0])]
-            dat.drop(col_to_drop, axis=1, inplace=True)
+        # if gap_threshold > 0:
+        #     col_to_drop = dat.columns[dat.isnull().sum() > (gap_threshold * dat.shape[0])]
+        #     dat.drop(col_to_drop, axis=1, inplace=True)
 
+        # raise a warning that in this version, we do not drop columns in read_data function
+        if gap_threshold is not None:
+            print('Columns with missing values over the gap_threshold% will be'
+                  ' dropped and eliminate from the analysis during preprocessing.'
+                  'Please use the missing_constant_care function to take care of missing values.')
         # naming each position as p + its rank
         dat.columns = [str('p' + str(i)) for i in range(1, dat.shape[1] + 1)]
     return dat
@@ -504,20 +509,25 @@ def cor_remove(dat, dic) -> pandas.DataFrame:
 
 # here _mis_constant_care
 class MisCare(BaseEstimator, TransformerMixin):
-    def __init__(self, missing_threshold):
+    def __init__(self, missing_threshold, gap_threshold=0.7):
+        self.columns_gap_drop_ = None
         self.mode_ = None
         self.columns_with_gap_ = None
         self.n_features_in_ = None
         self.missing_threshold = missing_threshold
+        self.gap_threshold = gap_threshold
 
     def fit(self, X, y=None):
         self.n_features_in_ = X.shape[1]
+        self.columns_gap_drop_ = X.columns[X.isnull().sum() > (self.gap_threshold * X.shape[0])]
+        X.drop(self.columns_gap_drop_, axis=1, inplace=True)
         self.columns_with_gap_ = X.columns[X.isna().sum() > int(self.missing_threshold * X.shape[0])]
         self.mode_ = X.mode().loc[0, :]
         return self
 
     def transform(self, X, y=None):
         tmp = X.copy()
+        tmp.drop(self.columns_gap_drop_, axis=1, inplace=True)
         tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
         tmp.fillna(self.mode_, inplace=True)
         return tmp

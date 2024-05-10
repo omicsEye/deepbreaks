@@ -8,6 +8,19 @@ import joblib
 from typing import List, Tuple
 
 
+def ref_id_type(value):
+    try:
+        # Try parsing as an integer
+        return int(value)
+    except ValueError:
+        # If parsing as an integer fails, return as string
+        return str(value)
+
+
+def df_to_dict(dat):
+    return dat.apply(lambda row: ''.join(row.astype(str).replace("None", 'N')), axis=1).to_dict()
+
+
 def get_models(ana_type):
     if ana_type == 'reg':
         from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
@@ -330,3 +343,130 @@ def load_obj(file_name: str) -> object:
     obj = joblib.load(file_name)
     # Return the loaded object
     return obj
+
+
+def print_highlighted_sequences(pos, imp, seq, start_pos, end_pos, compare_with=None):
+    """
+    Print the sequences with a highlighted position and position number.
+
+    Parameters:
+    - pos (int): The position to be highlighted.
+    - seq (dict): A dictionary containing sequences with IDs as keys and sequences as values.
+    - start_pos (int): The starting position of the highlighted segment.
+    - end_pos (int): The ending position of the highlighted segment.
+    - compare_with (list or None): Optional. If provided, compares sequences with another set of sequences.
+
+    Returns:
+    - None
+    """
+    if imp:
+        print(f'Position: {pos} --- Importance: {imp}')
+    else:
+        print(f'Position: {pos}')
+
+    if compare_with:
+        print('\n'.join(list(seq.keys())))
+
+    for n, seq_id in enumerate(seq):
+        if n > 0 or len(seq) == 1:
+            print(f'{" " * (pos - start_pos)}|')
+        print(''.join(seq[seq_id][start_pos:end_pos]))
+    return None
+
+
+def save_highlighted_sequences_to_file(pos, imp, seq, start_pos, end_pos, report_dir, compare_with=None):
+    """
+    Save the sequences with a highlighted position and position number to a file.
+
+    Parameters:
+    - pos (int): The position to be highlighted.
+    - seq (dict): A dictionary containing sequences with IDs as keys and sequences as values.
+    - start_pos (int): The starting position of the highlighted segment.
+    - end_pos (int): The ending position of the highlighted segment.
+    - report_dir (str): The directory where the report file will be saved.
+    - compare_with (list or None): Optional. If provided, compares sequences with another set of sequences.
+
+    Returns:
+    - None
+    """
+    with open(f'{report_dir}/imp_seq.txt', 'a') as f:
+        if imp:
+            f.write(f'>Position: {pos} --- Importance: {imp}\n')
+        else:
+            f.write(f'Position: {pos}\n')
+        if compare_with:
+            f.write('\n'.join(list(seq.keys())) + '\n')
+        for n, seq_id in enumerate(seq):
+            if n > 0 or len(seq) == 1:
+                f.write(f'{" " * (pos - start_pos)}|\n')
+            f.write(''.join(seq[seq_id][start_pos:end_pos]) + '\n')
+    return None
+
+
+def imp_print(raw_seq, position, importance=None, ref_seq_id=None,
+              compare_with=None, compare_len=None, report_dir=None):
+    """
+    Print the sequence with the given position highlighted.
+
+    Parameters:
+    -----------
+    raw_seq : str
+        The raw sequences dictionary.
+    position : int, or list of int
+        The position to be highlighted.
+    importance : float, or list of float optional (default=None)
+        The importance of the position.
+    ref_seq_id : str, int optional (default=None)
+        The reference sequence id, or order to be compared with the raw sequence.
+    compare_with : str, optional (default=None)
+        The sequence to be compared with the raw sequence.
+    compare_len : int, optional (default=None)
+        The maximum number of characters to compare.
+
+    Returns:
+    --------
+    None
+    """
+    # check if position is list or int
+    if type(position) is not list:
+        # all the positions should be integers
+        assert type(position) is int, 'Position should be an integer'
+        position = [position]
+    else:
+        for pos in position:
+            assert type(pos) is int, 'Position should be an integer'
+    # Get the sequences
+    seq = {}
+    seq_ids = list(raw_seq.keys())
+    if ref_seq_id is not None:
+        if type(ref_seq_id) is int:
+            ref_seq_id = seq_ids[ref_seq_id]
+        seq[ref_seq_id] = raw_seq[ref_seq_id]
+    else:
+        ref_seq_id = seq_ids[-1]
+        seq[ref_seq_id] = raw_seq[ref_seq_id]
+    if compare_with is not None:
+        for seq_id in compare_with:
+            if type(seq_id) is int:
+                seq_id = seq_ids[seq_id]
+            seq[seq_id] = raw_seq[seq_id]
+    for n, pos in enumerate(position):
+        if importance:
+            if importance[n] < 0.1:
+                continue
+            else:
+                imp = importance[n]
+        else:
+            imp = None
+
+        # check if the position is within the sequence length
+        if pos < 0 or pos >= len(seq[ref_seq_id]):
+            print('Position is out of range')
+            continue
+        # make an interval around the position
+        start_pos = max(0, pos - (compare_len // 2))
+        end_pos = min(len(seq[ref_seq_id]), pos + (compare_len // 2))
+        if report_dir is None:
+            print_highlighted_sequences(pos, imp, seq, start_pos, end_pos, compare_with)
+        else:
+            save_highlighted_sequences_to_file(pos, imp, seq, start_pos, end_pos, report_dir, compare_with)
