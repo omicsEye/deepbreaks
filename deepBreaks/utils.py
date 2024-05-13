@@ -467,6 +467,6 @@ def imp_print(raw_seq, position, importance=None, ref_seq_id=None,
         start_pos = max(0, pos - (compare_len // 2))
         end_pos = min(len(seq[ref_seq_id]), pos + (compare_len // 2))
         if report_dir is None:
-            print_highlighted_sequences(pos, imp, seq, start_pos, end_pos, compare_with)
+            print_highlighted_sequences(pos-1, imp, seq, start_pos, end_pos, compare_with)
         else:
-            save_highlighted_sequences_to_file(pos, imp, seq, start_pos, end_pos, report_dir, compare_with)
+            save_highlighted_sequences_to_file(pos-1, imp, seq, start_pos, end_pos, report_dir, compare_with)
