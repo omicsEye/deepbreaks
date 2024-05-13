@@ -430,6 +430,7 @@ def db_grouped(dat, report_dir=None, threshold=0.2) -> pandas.DataFrame:
 
     dc_df = pd.DataFrame(cr_mat.index.tolist(), columns=['feature'])
     dc_df['group'] = db.labels_
+    dc_df['group'] = dc_df['group'].astype(object)  # Convert to object type
 
     clusters = list(set(db.labels_))
     for cluster in clusters:
