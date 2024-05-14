@@ -470,3 +470,4 @@ def imp_print(raw_seq, position, importance=None, ref_seq_id=None,
             print_highlighted_sequences(pos, imp, seq, start_pos, end_pos, compare_with)
         else:
             save_highlighted_sequences_to_file(pos, imp, seq, start_pos, end_pos, report_dir, compare_with)
+    return None
