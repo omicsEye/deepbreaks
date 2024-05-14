@@ -529,10 +529,8 @@ class MisCare(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         tmp = X.copy()
-        if self.columns_gap_drop_:
-            tmp.drop(self.columns_gap_drop_, axis=1, inplace=True)
-        if self.columns_with_gap_:
-            tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
+        tmp.drop(self.columns_gap_drop_, axis=1, inplace=True)
+        tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
         tmp.fillna(self.mode_, inplace=True)
         return tmp
 
