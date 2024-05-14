@@ -464,6 +464,7 @@ def save_highlighted_sequences_to_file(pos, imp, seq, start_pos, end_pos, report
             if n > 0 or len(seq) == 1:
                 f.write(f'{" " * (pos - start_pos - 1)}|\n')
             f.write(''.join(seq[seq_id][start_pos:end_pos]) + '\n')
+            f.write('\n')
     return None
 
 
