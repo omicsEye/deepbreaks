@@ -219,7 +219,9 @@ def main():
 
     # report test scores
     if test_data:
-        test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test, report_dir=report_dir)
+        test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test,
+                                          ana_type=args.anatype,
+                                          report_dir=report_dir)
         for model in top:
             y_pred = model.predict(test_df)
             if args.anatype == 'cl':
