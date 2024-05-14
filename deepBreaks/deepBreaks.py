@@ -153,10 +153,10 @@ def main():
         test_data = True
         df = df.sample(frac=1)
         test_size = int(args.test * df.shape[0])
-        test = df.iloc[:test_size, :]
+        test_df = df.iloc[:test_size, :]
         df = df.iloc[test_size:, :]
-        y_test = test.loc[:, args.metavar].values
-        test.drop(args.metavar, axis=1, inplace=True)
+        y_test = test_df.loc[:, args.metavar].values
+        test_df.drop(args.metavar, axis=1, inplace=True)
         y = df.loc[:, args.metavar].values
         df.drop(args.metavar, axis=1, inplace=True)
     else:
@@ -219,9 +219,9 @@ def main():
 
     # report test scores
     if test_data:
-        test_metrics = report_test_scores(model=top, X_test=test, y_test=y_test, report_dir=report_dir)
+        test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test, report_dir=report_dir)
         for model in top:
-            y_pred = model.predict(test)
+            y_pred = model.predict(test_df)
             if args.anatype == 'cl':
                 y_pred = le.inverse_transform(y_pred)
                 visualize_cl(y_true=y_test, y_pred=y_pred,
