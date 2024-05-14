@@ -520,16 +520,19 @@ class MisCare(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         self.n_features_in_ = X.shape[1]
-        self.columns_gap_drop_ = X.columns[X.isnull().sum() > (self.gap_threshold * X.shape[0])]
-        X.drop(self.columns_gap_drop_, axis=1, inplace=True)
-        self.columns_with_gap_ = X.columns[X.isna().sum() > int(self.missing_threshold * X.shape[0])]
+        gap_thr = self.gap_threshold * X.shape[0]
+        missing_thr = self.missing_threshold * X.shape[0]
+        self.columns_gap_drop_ = X.columns[X.isnull().sum() > gap_thr]
+        self.columns_with_gap_ = X.columns[(X.isna().sum() > missing_thr) & (X.isna().sum() <= gap_thr)]
         self.mode_ = X.mode().loc[0, :]
         return self
 
     def transform(self, X, y=None):
         tmp = X.copy()
-        tmp.drop(self.columns_gap_drop_, axis=1, inplace=True)
-        tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
+        if self.columns_gap_drop_:
+            tmp.drop(self.columns_gap_drop_, axis=1, inplace=True)
+        if self.columns_with_gap_:
+            tmp.loc[:, self.columns_with_gap_] = tmp.loc[:, self.columns_with_gap_].fillna('GAP')
         tmp.fillna(self.mode_, inplace=True)
         return tmp
 
