@@ -225,7 +225,10 @@ def main():
 
     # report test scores
     if test_data:
-        y_test_num = le.transform(y_test)
+        if args.anatype == 'cl':
+            y_test_num = le.transform(y_test)
+        else:
+            y_test_num = y_test
         test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test_num,
                                           ana_type=args.anatype,
                                           report_dir=report_dir)
