@@ -128,7 +128,7 @@ def main():
     check_data(meta_data=meta_data, feature=args.metavar, model_type=args.anatype)
 
     # importing seq data
-    print('reading fasta file')
+    print('reading MSA file')
     df = read_data(args.seqfile, seq_type=args.seqtype, gap_threshold=args.gap, is_main=True)
 
     # sequence data in dictionary format
@@ -177,7 +177,7 @@ def main():
         args.cv = int(args.cv)
         print(f'Running a {args.cv}-fold cross-validation.')
     else:
-        print(f'Performing a {args.cv*100}% train-test split.')
+        print(f'Performing a {args.cv*100}% train-validation split.')
 
     prep_pipeline = make_pipeline(
         steps=[
@@ -225,7 +225,8 @@ def main():
 
     # report test scores
     if test_data:
-        test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test,
+        y_test_num = le.transform(y_test)
+        test_metrics = report_test_scores(model=top, X=test_df, y_true=y_test_num,
                                           ana_type=args.anatype,
                                           report_dir=report_dir)
         for model in top:
