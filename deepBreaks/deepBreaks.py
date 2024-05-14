@@ -117,6 +117,7 @@ def main():
 
     logging.basicConfig(filename=report_dir + "/log.txt", level=logging.DEBUG,
                         format="%(asctime)s %(message)s")
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     logging.info("The parameters are{}".format(args))
     print('reading meta-data')
@@ -159,9 +160,14 @@ def main():
         test_df.drop(args.metavar, axis=1, inplace=True)
         y = df.loc[:, args.metavar].values
         df.drop(args.metavar, axis=1, inplace=True)
+        logging.info("Test data is created")
+        logging.info("Test data shape is {}".format(test_df.shape))
+        logging.info("Train data shape is {}".format(df.shape))
     else:
         y = df.loc[:, args.metavar].values
         df.drop(args.metavar, axis=1, inplace=True)
+        logging.info("Test data is not created")
+        logging.info("Train data shape is {}".format(df.shape))
 
     if args.anatype == 'cl':
         le = LabelEncoder()
