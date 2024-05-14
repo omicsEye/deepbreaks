@@ -201,6 +201,12 @@ def plot_imp_model(importance, X_train, y_train, model_name,
         temp = importance
 
     temp = temp[['feature', 'standard_value']]
+    # drop zero values
+    try:
+        temp = temp[temp['standard_value'] > 0]
+    except:
+        return print('No importance values to plot')
+
     features = temp.sort_values(by='standard_value', ascending=False).head(4)['feature'].tolist()
     features = ['p' + str(f) for f in features]
 
