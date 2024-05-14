@@ -1,10 +1,11 @@
 # importing libraries
-from deepBreaks.utils import get_models, get_scores, get_params, make_pipeline, df_to_dict, imp_print, ref_id_type
+from deepBreaks.utils import get_models, get_scores, get_params, \
+    make_pipeline, df_to_dict, imp_print, ref_id_type, report_test_scores
 from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
     CollinearCare, CustomStandardScaler
 from deepBreaks.preprocessing import read_data, check_data, write_fasta, balanced_classes
 from deepBreaks.models import model_compare_cv, finalize_top, importance_from_pipe, mean_importance, summarize_results
-from deepBreaks.visualization import plot_scatter, dp_plot, plot_imp_model, plot_imp_all
+from deepBreaks.visualization import plot_scatter, dp_plot, plot_imp_model, plot_imp_all, visualize_reg, visualize_cl
 from sklearn.preprocessing import LabelEncoder
 import os
 import datetime
@@ -62,6 +63,11 @@ def parse_arguments():
                              " then instead of CV, a train/test split approach will be used with "
                              "cv being the test size.",
                         type=float, default=10)
+    parser.add_argument('--test', '-t',
+                        help="test dataset ratio. A random sample of the main data will be used as the test dataset."
+                             " If size of test dataset is less than 30 samples, then it will be ignored. "
+                             "Default is 0.2.",
+                        type=float, default=0.2)
     parser.add_argument('--ref_id', '-r', help="ID/order of the reference sequence in the sequence file."
                                                " Default is last sequence.",
                         default=-1, type=ref_id_type, required=False)
@@ -140,8 +146,22 @@ def main():
         df = balanced_classes(dat=df, meta_dat=meta_data, feature=args.metavar)
 
     df = df.merge(meta_data.loc[:, args.metavar], left_index=True, right_index=True)
-    y = df.loc[:, args.metavar].values
-    df.drop(args.metavar, axis=1, inplace=True)
+
+    # train test split
+    test_data = False
+    if args.test * df.shape[0] > 30:
+        test_data = True
+        df = df.sample(frac=1)
+        test_size = int(args.test * df.shape[0])
+        test = df.iloc[:test_size, :]
+        df = df.iloc[test_size:, :]
+        y_test = test.loc[:, args.metavar].values
+        test.drop(args.metavar, axis=1, inplace=True)
+        y = df.loc[:, args.metavar].values
+        df.drop(args.metavar, axis=1, inplace=True)
+    else:
+        y = df.loc[:, args.metavar].values
+        df.drop(args.metavar, axis=1, inplace=True)
 
     if args.anatype == 'cl':
         le = LabelEncoder()
@@ -197,6 +217,19 @@ def main():
         top = finalize_top(X=df, y=y, top_models=modified_top, grid_param={},
                            report_dir=report_dir, cv=args.cv)
 
+    # report test scores
+    if test_data:
+        test_metrics = report_test_scores(top_models=top, X_test=test, y_test=y_test, report_dir=report_dir)
+        for model in top:
+            y_pred = model.predict(test)
+            if args.anatype == 'cl':
+                y_pred = le.inverse_transform(y_pred)
+                visualize_cl(y_true=y_test, y_pred=y_pred,
+                             model_name=model.steps[-1][0], report_dir=report_dir)
+            else:
+                visualize_reg(y_true=y_test, y_pred=y_pred,
+                              model_name=model.steps[-1][0], report_dir=report_dir)
+
     n_positions = None
     grouped_features = None
     p_values = None
@@ -238,6 +271,8 @@ def main():
                      n_positions=n_positions, grouped_features=grouped_features,
                      report_dir=report_dir, max_plots=100,
                      figsize=(1.85, 3))
+
+
 
     # printing important positions with their importance values
     positions = list(mean_imp.sort_values('mean', ascending=False)['feature'][:100])
