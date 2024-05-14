@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from deepBreaks.models import importance_from_pipe
 from deepBreaks.utils import stacked_barplot, box_plot
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 
 def plot_scatter(summary_result, report_dir):
@@ -343,3 +345,107 @@ def plot_imp_all(final_models, X_train, y_train,
     with open(str(plot_dir + '/plots.pickle'), 'wb') as handle:
         pickle.dump(plots, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return plots
+
+
+def visualize_reg(y_pred, y_true, figsize=(7.2, 3), dpi=350,
+                  model_name='Model', ylab='Predictions', xlab='True values',
+                  title_fontsize=10, xlab_fontsize=8, ylab_fontsize=8,
+                  xtick_fontsize=6, ytick_fontsize=6, report_dir='.', **kwargs):
+    """
+    Visualize predictions for regression.
+
+    Parameters:
+    -----------
+    y_pred : 1D array
+        predicted values
+    y_true : 1D array
+        true values
+    figsize : tuple, default = (7.2, 3)
+        a tuple for the size of the plot
+    dpi : int, default = 350
+    model_name : str, default = 'Model'
+        name of the model
+    ylab : str, default = 'Predictions'
+        y-axis label
+    xlab : str, default = 'True values'
+        x-axis label
+    title_fontsize : int, default = 10
+        title font size
+    xlab_fontsize : int, default = 8
+        x-axis label font size
+    ylab_fontsize : int, default = 8
+        y-axis label font size
+    xtick_fontsize : int, default = 6
+        x-axis tick font size
+    ytick_fontsize : int, default = 6
+        y-axis tick font size
+    report_dir : str
+        path to directory to save the plots
+    **kwargs : dict
+        additional arguments to pass to `plt.scatter`
+    Returns :
+    ---------
+    str
+        It saves the plot as `pdf` in `report_dir`
+    """
+    plt.figure(figsize=figsize, dpi=dpi)
+    plt.scatter(y_true, y_pred, label=model_name, marker='o', **kwargs)
+    plt.plot(y_pred, y_pred, linestyle='--')
+
+    plt.title(model_name, loc='center', fontsize=title_fontsize)
+    plt.xlabel(xlab, fontsize=xlab_fontsize)
+    plt.xticks(fontsize=xtick_fontsize)
+    plt.ylabel(ylab, fontsize=ylab_fontsize)
+    plt.yticks(fontsize=ytick_fontsize)
+    plt.grid(True, linewidth=.3)
+    plt.grid(visible=True, which='minor', axis='x', color='r', linestyle='-', linewidth=2)
+    plt.savefig(str(report_dir + '/' + model_name + '_predictions' + str(350) + '.pdf'), bbox_inches='tight')
+    return print(model_name, ' Done')
+
+
+def visualize_cl(y_true, y_pred, model_name='Model', cmap='Blues',
+                 figsize=(3.6, 2.5), dpi=350,
+                 title_fontsize=10, xtick_fontsize=8, ytick_fontsize=8,
+                 report_dir='.', **kwargs):
+    """
+    Visualize confusion matrix for classification.
+
+    Parameters:
+    -----------
+    y_true : array-like
+        True labels
+    y_pred : array-like
+        Predicted labels
+    model_name : str, default='Model'
+        Name of the model
+    cmap : str or Colormap, default='Blues'
+        Colormap for the confusion matrix
+    figsize : tuple, default=(3.6, 2.5)
+        A tuple for the size of the plot
+    dpi : int, default=350
+    title_fontsize : int, default=10
+        Title font size
+    xtick_fontsize : int, default=6
+        X-axis tick font size
+    ytick_fontsize : int, default=6
+        Y-axis tick font size
+    report_dir : str, default='.'
+        Path to directory to save the plot
+    **kwargs : dict
+        Additional arguments to pass to `sns.heatmap`
+
+    Returns :
+    ---------
+    str
+        It saves the plot as `pdf` in `report_dir`
+    """
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=figsize, dpi=dpi)
+    sns.heatmap(cm, annot=True, fmt='d', cmap=cmap, **kwargs)
+    plt.title(f'Confusion Matrix - {model_name}', fontsize=title_fontsize)
+    plt.xlabel('Predicted', fontsize=xtick_fontsize)
+    plt.ylabel('True', fontsize=ytick_fontsize)
+    plt.xticks(fontsize=xtick_fontsize)
+    plt.yticks(fontsize=ytick_fontsize)
+    plt.savefig(f'{report_dir}/{model_name}_confusion_matrix.pdf', bbox_inches='tight')
+    return f"{model_name} Confusion Matrix Done"
