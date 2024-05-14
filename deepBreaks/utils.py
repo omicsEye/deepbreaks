@@ -6,6 +6,7 @@ import seaborn as sns
 from sklearn.pipeline import Pipeline
 import joblib
 from typing import List, Tuple
+from sklearn import metrics
 
 
 def ref_id_type(value):
@@ -83,6 +84,69 @@ def get_scores(ana_type):
               }
               }
     return scores[ana_type]
+
+
+def calculate_metrics(model, X, y_true, ana_type):
+    """
+    Calculate the metrics for the given model and data.
+
+    Parameters:
+    -----------
+    model : object
+        The trained model.
+    X : array-like
+        The input data.
+    y_true : array-like
+        The true labels.
+    ana_type : str
+        The type of analysis ('reg' for regression, 'cl' for classification).
+
+    Returns:
+    --------
+    metrics : dict
+        A dictionary containing the calculated metrics.
+    """
+    if type(model) is not list:
+        model = [model]
+    scores = get_scores(ana_type)
+    metrics_calc = {}
+    for estimator in model:
+        estimator_name = estimator.steps[-1][0]
+        metrics_calc[estimator_name] = {}
+        for score, f in scores.items():
+            scorer = metrics.get_scorer(f)
+            score_val = scorer(estimator, X, y_true)
+            if f.startswith('neg'):
+                score_val = -1 * score_val
+            metrics_calc[estimator_name][score] = score_val
+    return metrics_calc
+
+
+def report_test_scores(model, X, y_true, ana_type, report_dir=None):
+    """
+    Report the test scores for the given model and data.
+
+    Parameters:
+    -----------
+    model : object
+        The trained model.
+    X : array-like
+        The input data.
+    y_true : array-like
+        The true labels.
+    ana_type : str
+        The type of analysis ('reg' for regression, 'cl' for classification).
+    report_dir : str or None, optional (default=None)
+
+    Returns:
+    --------
+    None
+    """
+    metrics_calc = calculate_metrics(model, X, y_true, ana_type)
+    metrics_calc = pd.DataFrame.from_dict(metrics_calc, orient='index')
+    if report_dir is not None:
+        metrics_calc.to_csv(f'{report_dir}/test_scores.csv')
+    return metrics_calc
 
 
 def get_params():
