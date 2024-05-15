@@ -24,7 +24,7 @@ real-world applications.
 ---
 **Citation:**
 
-Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crandall, Ali Rahnavard (2023).
+Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Seth A. Frazer, Todd H. Oakley, Keith A. Crandall, Ali Rahnavard (2023).
 **_deepBreaks_: a machine learning tool for identifying and prioritizing genotype-phenotype associations**
 , https://github.com/omicsEye/deepBreaks/.
 
@@ -39,6 +39,7 @@ Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Todd H. Oakley, Keith A. Crand
     * [Installation](#installation)
       * [Windows Linux Mac](#windows-linux-mac)
       * [Apple M1/M2 MAC](#apple-m1m2-mac)
+      * [Docker](#docker)
 * [Getting Started with deepBreaks](#getting-started-with-deepbreaks)
     * [Test deepBreaks](#test-deepbreaks)
     * [Options](#options) 
@@ -143,6 +144,13 @@ or you can directly install if from GitHub:
 ```commandline
 python -m pip install git+https://github.com/omicsEye/deepbreaks
 ```
+### Docker ###
+If you are using Docker, you can pull the image from Docker Hub:
+```commandline
+docker pull omicseye/deepbreaks-dc:latest
+```
+For instructions on how to use the Docker image, please visit the [Docker Hub page](https://hub.docker.com/r/omicseye/deepbreaks-dc).
+
 -----------------------------------------------------------------------------------------------------------------------
 
 # Getting Started with deepBreaks #
@@ -165,29 +173,42 @@ $ deepBreaks -h
 ```
 ## Input ##
 ```commandline
-usage: deepBreaks [-h] --seqfile SEQFILE --seqtype SEQTYPE --meta_data META_DATA --metavar METAVAR [--gap GAP] [--miss_gap MISS_GAP]
-                  [--ult_rare ULT_RARE] --anatype {reg,cl}
+usage: deepbreaks [-h] --seqfile SEQFILE --seqtype SEQTYPE --meta_data
+                  META_DATA --metavar METAVAR [--gap GAP]
+                  [--miss_gap MISS_GAP] [--ult_rare ULT_RARE] --anatype
+                  {reg,cl}
                   [--distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}]
-                  [--fraction FRACTION] [--redundant_threshold REDUNDANT_THRESHOLD] [--distance_threshold DISTANCE_THRESHOLD]
-                  [--top_models TOP_MODELS] [--cv CV] [--separate_cv] [--tune] [--plot] [--write]
+                  [--fraction FRACTION]
+                  [--redundant_threshold REDUNDANT_THRESHOLD]
+                  [--distance_threshold DISTANCE_THRESHOLD]
+                  [--top_models TOP_MODELS] [--aggregate AGGREGATE] [--cv CV]
+                  [--test TEST] [--ref_id REF_ID] [--ref_compare REF_COMPARE]
+                  [--compare_len COMPARE_LEN] [--tune] [--plot] [--write]
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --seqfile SEQFILE, -sf SEQFILE
                         files contains the sequences
   --seqtype SEQTYPE, -st SEQTYPE
-                        type of sequence: 'nu' for nucleotides or 'aa' for amino-acid
+                        type of sequence: 'nu' for nucleotides or 'aa' for
+                        amino-acid
   --meta_data META_DATA, -md META_DATA
                         files contains the meta data
   --metavar METAVAR, -mv METAVAR
                         name of the meta var (response variable)
-  --gap GAP, -gp GAP    Threshold to drop positions that have GAPs above this proportion. Default value is 0.7 and it means that the positions that
-                        70% or more GAPs will be dropped from the analysis.
+  --gap GAP, -gp GAP    Threshold to drop positions that have GAPs above this
+                        proportion. Default value is 0.7 and it means that the
+                        positions that 70% or more GAPs will be dropped from
+                        the analysis.
   --miss_gap MISS_GAP, -mgp MISS_GAP
-                        Threshold to impute missing values with GAP. Gapsin positions that have missing values (gaps) above this proportionare
-                        replaced with the term 'GAP'. the rest of the missing valuesare replaced by the mode of each position.
+                        Threshold to impute missing values with GAP. Gapsin
+                        positions that have missing values (gaps) above this
+                        proportionare replaced with the term 'GAP'. the rest
+                        of the missing valuesare replaced by the mode of each
+                        position.
   --ult_rare ULT_RARE, -u ULT_RARE
-                        Threshold to modify the ultra rare cases in each position.
+                        Threshold to modify the ultra rare cases in each
+                        position.
   --anatype {reg,cl}, -a {reg,cl}
                         type of analysis
   --distance_metric {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}, -dm {correlation,hamming,jaccard,normalized_mutual_info_score,adjusted_mutual_info_score,adjusted_rand_score}
@@ -195,22 +216,49 @@ options:
   --fraction FRACTION, -fr FRACTION
                         fraction of main data to run
   --redundant_threshold REDUNDANT_THRESHOLD, -rt REDUNDANT_THRESHOLD
-                        threshold for the p-value of the statistical tests to drop redundant features. Defaultvalue is 0.25
+                        threshold for the p-value of the statistical tests to
+                        drop redundant features. Defaultvalue is 0.25
   --distance_threshold DISTANCE_THRESHOLD, -dth DISTANCE_THRESHOLD
-                        threshold for the distance between positions to put them in clusters. features with distances <= than the threshold will be
-                        grouped together. Default values is 0.3
+                        threshold for the distance between positions to put
+                        them in clusters. features with distances <= than the
+                        threshold will be grouped together. Default values is
+                        0.3
   --top_models TOP_MODELS, -tm TOP_MODELS
-                        number of top models to consider for merging the results. Default value is 5
-  --cv CV, -cv CV       number of folds for cross validation. Default is 10. If the given number is less than 1,
-                        then instead of CV, a train/test split approach will be used with --cv being the test size. 
-  
-  --tune                After running the 10-fold cross validations, should the top selected models be tuned and finalize, or finalized only?
-  --plot                plot all the individual positions that are statistically significant.Depending on your data, this process may produce many
-                        plots.
-  --write               During reading the fasta file we delete the positions that have GAPs over a certain threshold that can be changed in the
-                        `gap_threshold` argumentin the `read_data` function. As this may change the whole FASTA file, you maywant to save the FASTA
-                        file after this cleaning step.
-
+                        number of top models to consider for merging the
+                        results. Default value is 5
+  --aggregate AGGREGATE
+                        the aggregate function for summarising the importance
+                        values in thepositions. Can be a string representing a
+                        built-in aggregation function (e.g., 'mean', 'max',
+                        'min', 'std', etc.)
+  --cv CV, -cv CV       number of folds for cross validation. Default is 10.
+                        If the given number is less than 1, then instead of
+                        CV, a train/test split approach will be used with cv
+                        being the test size.
+  --test TEST, -t TEST  test dataset ratio. A random sample of the main data
+                        will be used as the test dataset. If size of test
+                        dataset is less than 30 samples, then it will be
+                        ignored. Default is 0.2.
+  --ref_id REF_ID, -r REF_ID
+                        ID/order of the reference sequence in the sequence
+                        file. Default is last sequence.
+  --ref_compare REF_COMPARE, -c REF_COMPARE
+                        ID/order of the sequences to compare with the
+                        reference sequence.
+  --compare_len COMPARE_LEN, -l COMPARE_LEN
+                        length of output sequences
+  --tune                After running the 10-fold cross validations, should
+                        the top selected models be tuned and finalize, or
+                        finalized only?
+  --plot                plot all the individual positions that are
+                        statistically significant.Depending on your data, this
+                        process may produce many plots.
+  --write               During reading the fasta file we delete the positions
+                        that have GAPs over a certain threshold that can be
+                        changed in the `gap_threshold` argumentin the
+                        `read_data` function. As this may change the whole
+                        FASTA file, you maywant to save the FASTA file after
+                        this cleaning step.
 ```
 
 ## Output ##  
