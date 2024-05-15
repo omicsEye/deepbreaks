@@ -22,6 +22,43 @@ def df_to_dict(dat):
     return dat.apply(lambda row: ''.join(row.astype(str).replace("None", 'N')), axis=1).to_dict()
 
 
+def train_test_split(dat, meta_name, test_size=0.2, random_state=123):
+    """
+    Split the data into training and testing sets.
+
+    Parameters:
+    -----------
+    dat : pandas DataFrame
+        The input data.
+    meta_name : str
+        The name of the column containing the metadata.
+    test_size : float, optional (default=0.2)
+        The proportion of the data to include in the testing set.
+    random_state : int, optional (default=123)
+        The random state for the split.
+
+    Returns:
+    --------
+    X_train : pandas DataFrame
+        The training data.
+    X_test : pandas DataFrame
+        The testing data.
+    y_train : pandas Series
+        The training labels.
+    y_test : pandas Series
+        The testing labels.
+    """
+    dat = dat.sample(frac=1, random_state=random_state)
+    test_size = int(test_size * dat.shape[0])
+    test_df = dat.iloc[:test_size, :]
+    dat = dat.iloc[test_size:, :]
+    y_test = test_df.loc[:, meta_name].values
+    test_df.drop(meta_name, axis=1, inplace=True)
+    y = dat.loc[:, meta_name].values
+    dat.drop(meta_name, axis=1, inplace=True)
+    return dat, test_df, y, y_test
+
+
 def get_models(ana_type):
     if ana_type == 'reg':
         from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
