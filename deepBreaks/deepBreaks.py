@@ -1,6 +1,6 @@
 # importing libraries
 from deepBreaks.utils import get_models, get_scores, get_params, \
-    make_pipeline, df_to_dict, imp_print, ref_id_type, report_test_scores
+    make_pipeline, df_to_dict, imp_print, ref_id_type, report_test_scores, train_test_split
 from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
     CollinearCare, CustomStandardScaler
 from deepBreaks.preprocessing import read_data, check_data, write_fasta, balanced_classes
@@ -86,6 +86,8 @@ def parse_arguments():
                                         "in the `read_data` function. As this may change the whole FASTA file, you may"
                                         "want to save the FASTA file after this cleaning step.",
                         action="store_true", default=False)
+    parser.add_argument('--seed', help="Seed for random number generator. Default is 123.",
+                        default=123, type=int, required=False)
 
     return parser.parse_args()
 
@@ -152,13 +154,8 @@ def main():
     test_data = False
     if args.test * df.shape[0] > 30:
         test_data = True
-        df = df.sample(frac=1)
-        test_size = int(args.test * df.shape[0])
-        test_df = df.iloc[:test_size, :]
-        df = df.iloc[test_size:, :]
-        y_test = test_df.loc[:, args.metavar].values
-        test_df.drop(args.metavar, axis=1, inplace=True)
-        y = df.loc[:, args.metavar].values
+        df, test_df, y, y_test = train_test_split(dat=df, meta_name=args.metavar,
+                                                  test_size=args.test, random_state=args.seed)
         df.drop(args.metavar, axis=1, inplace=True)
         logging.info("Test data is created")
         logging.info("Test data shape is {}".format(test_df.shape))
@@ -196,7 +193,8 @@ def main():
                                    models_dict=get_models(ana_type=args.anatype),
                                    scoring=get_scores(ana_type=args.anatype),
                                    report_dir=report_dir,
-                                   cv=args.cv, ana_type=args.anatype, cache_dir=None)
+                                   cv=args.cv, ana_type=args.anatype, cache_dir=None,
+                                   random_state=args.seed)
 
     prep_pipeline = make_pipeline(
         steps=[
@@ -218,10 +216,10 @@ def main():
 
     if args.tune:
         top = finalize_top(X=df, y=y, top_models=modified_top, grid_param=get_params(),
-                           report_dir=report_dir, cv=args.cv)
+                           report_dir=report_dir, cv=args.cv, random_state=args.seed)
     else:
         top = finalize_top(X=df, y=y, top_models=modified_top, grid_param={},
-                           report_dir=report_dir, cv=args.cv)
+                           report_dir=report_dir, cv=args.cv, random_state=args.seed)
 
     # report test scores
     if test_data:
