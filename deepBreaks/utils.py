@@ -19,6 +19,7 @@ def ref_id_type(value):
 
 
 def df_to_dict(dat):
+    dat.fillna('N', inplace=True)
     return dat.apply(lambda row: ''.join(row.astype(str).replace("None", 'N')), axis=1).to_dict()
 
 
