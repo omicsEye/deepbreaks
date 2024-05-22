@@ -19,8 +19,8 @@ def ref_id_type(value):
 
 
 def df_to_dict(dat):
-    dat.fillna('N', inplace=True)
-    return dat.apply(lambda row: ''.join(row.astype(str).replace("None", 'N')), axis=1).to_dict()
+    tmp = dat.fillna('N')
+    return tmp.apply(lambda row: ''.join(row.astype(str).replace("None", 'N')), axis=1).to_dict()
 
 
 def train_test_split(dat, meta_name, test_size=0.2, random_state=123):
