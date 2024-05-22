@@ -1,0 +1,296 @@
+>Position: 292 --- Importance: 1.0
+              |
+HQGSEFGPVFMTLPSFFAKAASIYNPIIYI
+
+>Position: 261 --- Importance: 0.53
+              |
+EREVTRMVIMMVISFLVCWLPYAGVAWFIF
+
+>Position: 50 --- Importance: 0.429
+              |
+AYAALGAYMFFLILVGFPINFLTLYVTIEH
+
+>Position: 299 --- Importance: 0.347
+              |
+PVFMTLPSFFAKAASIYNPIIYICMNKQFR
+
+>Position: 322 --- Importance: 0.345
+              |
+CMNKQFRHCMITTLCCGKNPFENEEEGAST
+
+>Position: 122 --- Importance: 0.341
+              |
+LGCNLEGFFATLGGEIGLWSLVVLAIERWL
+
+>Position: 137 --- Importance: 0.341
+              |
+IGLWSLVVLAIERWLVVCKPISNFRFGENH
+
+>Position: 309 --- Importance: 0.31
+              |
+AKAASIYNPIIYICMNKQFRHCMITTLCCG
+
+>Position: 158 --- Importance: 0.305
+              |
+SNFRFGENHAIMGLAFTWVGALSCAAPPLV
+
+>Position: 19 --- Importance: 0.295
+              |
+EGPFFYVPMANTTGIVRSPYEYPQHYLVNP
+
+>Position: 300 --- Importance: 0.29
+              |
+VFMTLPSFFAKAASIYNPIIYICMNKQFRH
+
+>Position: 37 --- Importance: 0.29
+              |
+PYEYPQHYLVNPAAYAALGAYMFFLILVGF
+
+>Position: 16 --- Importance: 0.285
+              |
+NGTEGPFFYVPMANTTGIVRSPYEYPQHYL
+
+>Position: 307 --- Importance: 0.281
+              |
+FFAKAASIYNPIIYICMNKQFRHCMITTLC
+
+>Position: 308 --- Importance: 0.278
+              |
+FAKAASIYNPIIYICMNKQFRHCMITTLCC
+
+>Position: 25 --- Importance: 0.274
+              |
+VPMANTTGIVRSPYEYPQHYLVNPAAYAAL
+
+>Position: 198 --- Importance: 0.274
+              |
+QVSCGVDYYTRAEGFNNESFVIYMFICHFM
+
+>Position: 33 --- Importance: 0.27
+              |
+IVRSPYEYPQHYLVNPAAYAALGAYMFFLI
+
+>Position: 107 --- Importance: 0.27
+              |
+TTIYTSMHGYFVLGRLGCNLEGFFATLGGE
+
+>Position: 39 --- Importance: 0.269
+              |
+EYPQHYLVNPAAYAALGAYMFFLILVGFPI
+
+>Position: 303 --- Importance: 0.269
+              |
+TLPSFFAKAASIYNPIIYICMNKQFRHCMI
+
+>Position: 41 --- Importance: 0.269
+              |
+PQHYLVNPAAYAALGAYMFFLILVGFPINF
+
+>Position: 40 --- Importance: 0.269
+              |
+YPQHYLVNPAAYAALGAYMFFLILVGFPIN
+
+>Position: 301 --- Importance: 0.269
+              |
+FMTLPSFFAKAASIYNPIIYICMNKQFRHC
+
+>Position: 318 --- Importance: 0.269
+              |
+IIYICMNKQFRHCMITTLCCGKNPFENEEE
+
+>Position: 306 --- Importance: 0.269
+              |
+SFFAKAASIYNPIIYICMNKQFRHCMITTL
+
+>Position: 304 --- Importance: 0.269
+              |
+LPSFFAKAASIYNPIIYICMNKQFRHCMIT
+
+>Position: 305 --- Importance: 0.269
+              |
+PSFFAKAASIYNPIIYICMNKQFRHCMITT
+
+>Position: 317 --- Importance: 0.269
+              |
+PIIYICMNKQFRHCMITTLCCGKNPFENEE
+
+>Position: 311 --- Importance: 0.269
+              |
+AASIYNPIIYICMNKQFRHCMITTLCCGKN
+
+>Position: 312 --- Importance: 0.269
+              |
+ASIYNPIIYICMNKQFRHCMITTLCCGKNP
+
+>Position: 313 --- Importance: 0.269
+              |
+SIYNPIIYICMNKQFRHCMITTLCCGKNPF
+
+>Position: 314 --- Importance: 0.269
+              |
+IYNPIIYICMNKQFRHCMITTLCCGKNPFE
+
+>Position: 316 --- Importance: 0.269
+              |
+NPIIYICMNKQFRHCMITTLCCGKNPFENE
+
+>Position: 38 --- Importance: 0.269
+              |
+YEYPQHYLVNPAAYAALGAYMFFLILVGFP
+
+>Position: 36 --- Importance: 0.269
+              |
+SPYEYPQHYLVNPAAYAALGAYMFFLILVG
+
+>Position: 319 --- Importance: 0.269
+              |
+IYICMNKQFRHCMITTLCCGKNPFENEEEG
+
+>Position: 28 --- Importance: 0.269
+              |
+ANTTGIVRSPYEYPQHYLVNPAAYAALGAY
+
+>Position: 13 --- Importance: 0.269
+            |
+MNGTEGPFFYVPMANTTGIVRSPYEYPQ
+
+>Position: 14 --- Importance: 0.269
+             |
+MNGTEGPFFYVPMANTTGIVRSPYEYPQH
+
+>Position: 17 --- Importance: 0.269
+              |
+GTEGPFFYVPMANTTGIVRSPYEYPQHYLV
+
+>Position: 18 --- Importance: 0.269
+              |
+TEGPFFYVPMANTTGIVRSPYEYPQHYLVN
+
+>Position: 20 --- Importance: 0.269
+              |
+GPFFYVPMANTTGIVRSPYEYPQHYLVNPA
+
+>Position: 21 --- Importance: 0.269
+              |
+PFFYVPMANTTGIVRSPYEYPQHYLVNPAA
+
+>Position: 22 --- Importance: 0.269
+              |
+FFYVPMANTTGIVRSPYEYPQHYLVNPAAY
+
+>Position: 23 --- Importance: 0.269
+              |
+FYVPMANTTGIVRSPYEYPQHYLVNPAAYA
+
+>Position: 35 --- Importance: 0.269
+              |
+RSPYEYPQHYLVNPAAYAALGAYMFFLILV
+
+>Position: 26 --- Importance: 0.269
+              |
+PMANTTGIVRSPYEYPQHYLVNPAAYAALG
+
+>Position: 27 --- Importance: 0.269
+              |
+MANTTGIVRSPYEYPQHYLVNPAAYAALGA
+
+>Position: 24 --- Importance: 0.269
+              |
+YVPMANTTGIVRSPYEYPQHYLVNPAAYAA
+
+>Position: 29 --- Importance: 0.269
+              |
+NTTGIVRSPYEYPQHYLVNPAAYAALGAYM
+
+>Position: 30 --- Importance: 0.269
+              |
+TTGIVRSPYEYPQHYLVNPAAYAALGAYMF
+
+>Position: 34 --- Importance: 0.269
+              |
+VRSPYEYPQHYLVNPAAYAALGAYMFFLIL
+
+>Position: 32 --- Importance: 0.269
+              |
+GIVRSPYEYPQHYLVNPAAYAALGAYMFFL
+
+>Position: 31 --- Importance: 0.269
+              |
+TGIVRSPYEYPQHYLVNPAAYAALGAYMFF
+
+>Position: 320 --- Importance: 0.269
+              |
+YICMNKQFRHCMITTLCCGKNPFENEEEGA
+
+>Position: 173 --- Importance: 0.264
+              |
+FTWVGALSCAAPPLVGWSRYIPEGMQVSCG
+
+>Position: 42 --- Importance: 0.255
+              |
+QHYLVNPAAYAALGAYMFFLILVGFPINFL
+
+>Position: 183 --- Importance: 0.254
+              |
+APPLVGWSRYIPEGMQVSCGVDYYTRAEGF
+
+>Position: 282 --- Importance: 0.236
+              |
+YAGVAWFIFTHQGSEFGPVFMTLPSFFAKA
+
+>Position: 81 --- Importance: 0.235
+              |
+KLRTPLNYILLNLAVADLFMVFGGFTTTIY
+
+>Position: 213 --- Importance: 0.219
+              |
+NNESFVIYMFICHFMIPLIIVFFCYGRLLC
+
+>Position: 82 --- Importance: 0.219
+              |
+LRTPLNYILLNLAVADLFMVFGGFTTTIYT
+
+>Position: 165 --- Importance: 0.198
+              |
+NHAIMGLAFTWVGALSCAAPPLVGWSRYIP
+
+>Position: 350 --- Importance: 0.192
+              |
+STTNASKTEASSVSSSSVSPA
+
+>Position: 264 --- Importance: 0.174
+              |
+VTRMVIMMVISFLVCWLPYAGVAWFIFTHQ
+
+>Position: 162 --- Importance: 0.168
+              |
+FGENHAIMGLAFTWVGALSCAAPPLVGWSR
+
+>Position: 166 --- Importance: 0.157
+              |
+HAIMGLAFTWVGALSCAAPPLVGWSRYIPE
+
+>Position: 216 --- Importance: 0.137
+              |
+SFVIYMFICHFMIPLIIVFFCYGRLLCAVK
+
+>Position: 169 --- Importance: 0.117
+              |
+MGLAFTWVGALSCAAPPLVGWSRYIPEGMQ
+
+>Position: 96 --- Importance: 0.105
+              |
+ADLFMVFGGFTTTIYTSMHGYFVLGRLGCN
+
+>Position: 70 --- Importance: 0.105
+              |
+FLTLYVTIEHKKLRTPLNYILLNLAVADLF
+
+>Position: 298 --- Importance: 0.103
+              |
+GPVFMTLPSFFAKAASIYNPIIYICMNKQF
+
+>Position: 286 --- Importance: 0.103
+              |
+AWFIFTHQGSEFGPVFMTLPSFFAKAASIY
+

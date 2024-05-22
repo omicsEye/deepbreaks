@@ -1,0 +1,400 @@
+>Position: 44911 --- Importance: 1.0
+              |
+CCTATCGATCAACTGTATCAGCATCAATTT
+
+>Position: 2114 --- Importance: 0.496
+              |
+ACGCCACATGAAGCTGCGAGCGATGCGCCA
+
+>Position: 28222 --- Importance: 0.496
+              |
+AGAGCATTAAGATACAACCTAAAGTATCTT
+
+>Position: 20240 --- Importance: 0.496
+              |
+CCTAATCTAGAACCGAATGCAAATTTCCGC
+
+>Position: 20191 --- Importance: 0.496
+              |
+TCTGAATCAGCCGGTCGTGTGGATAAACAA
+
+>Position: 47808 --- Importance: 0.496
+              |
+AGACCAACCCTACAAAATATCACATTTTAT
+
+>Position: 2327 --- Importance: 0.496
+              |
+AAACCAATAGAAAAGCCGAAACCAAAACCT
+
+>Position: 20185 --- Importance: 0.496
+              |
+ACAACATCTGAATCAGCCGGTCGTGTGGAT
+
+>Position: 2363 --- Importance: 0.496
+              |
+AAGCCAAAAGAAAAGCCTAAAAATGAGGTA
+
+>Position: 20170 --- Importance: 0.496
+              |
+AAATTAGGCTTTAACACAACATCTGAATCA
+
+>Position: 28593 --- Importance: 0.496
+              |
+ACTGTATATGAACTAGGTGAAGGCATTTTG
+
+>Position: 2382 --- Importance: 0.496
+              |
+AAAATGAGGTAAAAACAGAGAAACCAGTAG
+
+>Position: 23969 --- Importance: 0.496
+              |
+CAAATGGCTTATGCATGCATGTAGCAGGTA
+
+>Position: 23974 --- Importance: 0.496
+              |
+GGCTTATGCATGCATGTAGCAGGTAAAGGG
+
+>Position: 23977 --- Importance: 0.496
+              |
+TTATGCATGCATGTAGCAGGTAAAGGGAAT
+
+>Position: 23995 --- Importance: 0.496
+              |
+GGTAAAGGGAATTTGTTCTTCCCAATCGCG
+
+>Position: 24032 --- Importance: 0.496
+              |
+GTGAACTTGCTTTATTTTATTCTTTAGTGT
+
+>Position: 47658 --- Importance: 0.496
+              |
+ACGGGTTATTCTTTTCCATCAGGGCATTCT
+
+>Position: 2391 --- Importance: 0.496
+              |
+TAAAAACAGAGAAACCAGTAGAAATGCCGA
+
+>Position: 24037 --- Importance: 0.496
+              |
+CTTGCTTTATTTTATTCTTTAGTGTTCTTC
+
+>Position: 24041 --- Importance: 0.496
+              |
+CTTTATTTTATTCTTTAGTGTTCTTCTATC
+
+>Position: 47724 --- Importance: 0.496
+              |
+TTTAGCCAATTATTGGGCAATCGTTCTTTT
+
+>Position: 24043 --- Importance: 0.496
+              |
+TTATTTTATTCTTTAGTGTTCTTCTATCGA
+
+>Position: 23938 --- Importance: 0.496
+              |
+TCTGGGGTTCAATCTTATTAGCCCAGCGGG
+
+>Position: 28282 --- Importance: 0.496
+              |
+TTTAATCTCGATGAGTTCGAAAAATCTCAC
+
+>Position: 47685 --- Importance: 0.496
+              |
+TCTATTTTCGCAGCGACTTGGCTTATGTTA
+
+>Position: 47679 --- Importance: 0.496
+              |
+GGGCATTCTATTTTCGCAGCGACTTGGCTT
+
+>Position: 2078 --- Importance: 0.496
+              |
+GGTAGCATCCTTGGTGCGTTATTTTGGAAC
+
+>Position: 13581 --- Importance: 0.496
+              |
+AAATTAATTGTCGTTCTACTTTTATTAATT
+
+>Position: 47667 --- Importance: 0.496
+              |
+TCTTTTCCATCAGGGCATTCTATTTTCGCA
+
+>Position: 20277 --- Importance: 0.496
+              |
+AAACAAAGTGCGGTTGTGATCACTGATGAA
+
+>Position: 2222 --- Importance: 0.496
+              |
+GAACCTCAACAGGTGGAACCAGAACCTGAA
+
+>Position: 2221 --- Importance: 0.496
+              |
+TGAACCTCAACAGGTGGAACCAGAACCTGA
+
+>Position: 20302 --- Importance: 0.496
+              |
+ATGAAGACGGCAAGACACTACGGCAAAAGT
+
+>Position: 28256 --- Importance: 0.496
+              |
+CGGTACATGGGATTTGATGACTCCCCTTTA
+
+>Position: 23913 --- Importance: 0.496
+              |
+CCAATCTTGCACGGTACAGCGAAATTCTGG
+
+>Position: 23907 --- Importance: 0.496
+              |
+GAGATTCCAATCTTGCACGGTACAGCGAAA
+
+>Position: 38237 --- Importance: 0.496
+              |
+GTTAAAAACACAAGGTTTTTCGACCGCACT
+
+>Position: 38244 --- Importance: 0.496
+              |
+ACACAAGGTTTTTCGACCGCACTTTTCCAC
+
+>Position: 28213 --- Importance: 0.496
+              |
+CAAAAAGAAAGAGCATTAAGATACAACCTA
+
+>Position: 2120 --- Importance: 0.496
+              |
+CATGAAGCTGCGAGCGATGCGCCAGGTGAA
+
+>Position: 2121 --- Importance: 0.496
+              |
+ATGAAGCTGCGAGCGATGCGCCAGGTGAAA
+
+>Position: 2126 --- Importance: 0.496
+              |
+GCTGCGAGCGATGCGCCAGGTGAAATATCC
+
+>Position: 48069 --- Importance: 0.496
+              |
+TATCCAAGATTTATTGACGATTTAATGATG
+
+>Position: 2058 --- Importance: 0.496
+              |
+ATGAAGCGTTATTGATTCATGGTAGCATCC
+
+>Position: 31600 --- Importance: 0.496
+              |
+ATGTTTTTGCTTTATATTATTCTTTTCTTA
+
+>Position: 48068 --- Importance: 0.496
+              |
+GTATCCAAGATTTATTGACGATTTAATGAT
+
+>Position: 48067 --- Importance: 0.496
+              |
+GGTATCCAAGATTTATTGACGATTTAATGA
+
+>Position: 48055 --- Importance: 0.496
+              |
+CAACTTTACAGCGGTATCCAAGATTTATTG
+
+>Position: 38208 --- Importance: 0.496
+              |
+TTAGCGTCATTGGNACATTTAGAAGAGGTG
+
+>Position: 38469 --- Importance: 0.496
+              |
+GACAGTTTAAAAATAGATGTCTTGCATGTT
+
+>Position: 28417 --- Importance: 0.496
+              |
+GATAAAATCATCGTCATCTTTTTTATATCC
+
+>Position: 11097 --- Importance: 0.496
+              |
+CCGTATCATACCATATTATTAGTGCATTAG
+
+>Position: 11126 --- Importance: 0.496
+              |
+GTGATTTCAGCTTGTGCAAATAAAGACGTT
+
+>Position: 2190 --- Importance: 0.496
+              |
+GAGTGGAAGAACCCACTCCAGAACCGGAAC
+
+>Position: 2198 --- Importance: 0.496
+              |
+GAACCCACTCCAGAACCGGAACCTGAACCT
+
+>Position: 20305 --- Importance: 0.496
+              |
+AAGACGGCAAGACACTACGGCAAAAGTGAG
+
+>Position: 28231 --- Importance: 0.496
+              |
+AGATACAACCTAAAGTATCTTAAAACGGTA
+
+>Position: 47900 --- Importance: 0.496
+              |
+ACTCCGAGCTGGGATGCACGAAGGAGAAGT
+
+>Position: 39333 --- Importance: 0.496
+              |
+TGGCAATATCAAAATCCGAAAGCCTATAAG
+
+>Position: 47466 --- Importance: 0.496
+              |
+GTGATTAAAACAGGGTTAAAAACGGTTTTT
+
+>Position: 27217 --- Importance: 0.345
+              |
+AGTAGATAACACTCGAATTTATCTCACTGA
+
+>Position: 26954 --- Importance: 0.345
+              |
+GAAAATCGCCAGCTTAATTATGATTACCTT
+
+>Position: 26894 --- Importance: 0.345
+              |
+ATACCTGAAGGCGAGGTTATTCTACCGACG
+
+>Position: 26490 --- Importance: 0.345
+              |
+ATTTTGTATTTTATTTTTTGTTTTCTTCAG
+
+>Position: 26702 --- Importance: 0.345
+              |
+TTAAATAGTCATGTTGTTAGAATCAATAAT
+
+>Position: 26697 --- Importance: 0.345
+              |
+TTTCATTAAATAGTCATGTTGTTAGAATCA
+
+>Position: 26531 --- Importance: 0.345
+              |
+TGGGCGCTTAGAGGTGTTCAGTTACAAGAT
+
+>Position: 26498 --- Importance: 0.345
+              |
+TTTTATTTTTTGTTTTCTTCAGCTCCACAA
+
+>Position: 26847 --- Importance: 0.345
+              |
+AGGGGCCTTCGATGTCTTATTCTGATTTTA
+
+>Position: 17215 --- Importance: 0.305
+              |
+CAAAAACCACAACCCGTTCCTTAAACCAAA
+
+>Position: 17197 --- Importance: 0.287
+              |
+TTTAAAGAAGCTAACCCACAAAAACCACAA
+
+>Position: 17194 --- Importance: 0.287
+              |
+GCCTTTAAAGAAGCTAACCCACAAAAACCA
+
+>Position: 17117 --- Importance: 0.287
+              |
+GTATTTGTGGAAGGTGGTACGCTTGTTAAT
+
+>Position: 31072 --- Importance: 0.248
+              |
+ATGTGCCTAACTGTAATCATGTGGTGAAAC
+
+>Position: 30955 --- Importance: 0.248
+              |
+TTTTGGTTAGATCGGAGTTTATCGCGTTTG
+
+>Position: 30886 --- Importance: 0.248
+              |
+ATTGTGATAATTGGACATTACCTTGAACCG
+
+>Position: 30838 --- Importance: 0.248
+              |
+GGAATGGGCTGTGGTCATTGTTTGAGAAAT
+
+>Position: 48234 --- Importance: 0.241
+              |
+TCACACGAATTTTCCTTAGAACAAAAAAAA
+
+>Position: 12535 --- Importance: 0.24
+              |
+TTTATCGCGGTGAGAGGCTTTCTATCTCAC
+
+>Position: 38967 --- Importance: 0.231
+              |
+ACCATGTTTTTGGATCTACGTGCAGGATTC
+
+>Position: 2697 --- Importance: 0.216
+              |
+CTGGTGATGAAAGCCTAGATAATGCAGCAC
+
+>Position: 2738 --- Importance: 0.216
+              |
+AGAAGTGCAAGACCAGTTGGTCCAAAGGCG
+
+>Position: 17161 --- Importance: 0.215
+              |
+CCGAATATTTATTCTGGAAAACTAAAAGAC
+
+>Position: 19588 --- Importance: 0.21
+              |
+ACTTTATTACTGACTGAAAACTGGATATCC
+
+>Position: 3052 --- Importance: 0.208
+              |
+AGTGTGGTTCATACGAAGCAAAAACAGAAA
+
+>Position: 3130 --- Importance: 0.208
+              |
+ATTTCTGAACGTGGTAGAAATTATGCGAAT
+
+>Position: 3124 --- Importance: 0.208
+              |
+CGTGTGATTTCTGAACGTGGTAGAAATTAT
+
+>Position: 3112 --- Importance: 0.208
+              |
+GAAAAATTGACTCGTGTGATTTCTGAACGT
+
+>Position: 3109 --- Importance: 0.208
+              |
+ACCGAAAAATTGACTCGTGTGATTTCTGAA
+
+>Position: 2979 --- Importance: 0.208
+              |
+AAAGTGCAAACCGTGGATAAAAAATCTCAA
+
+>Position: 2991 --- Importance: 0.208
+              |
+GTGGATAAAAAATCTCAAAAGGGTTCGCGA
+
+>Position: 11647 --- Importance: 0.2
+              |
+GCGCTTCTAAACGCCTTCTTAGTTTTCGTT
+
+>Position: 40128 --- Importance: 0.188
+              |
+TTAACGCATTTAGGCCAAGAACCAGCTCAA
+
+>Position: 19268 --- Importance: 0.173
+              |
+CTCAAGTGGGGCAGCGGATTGGAAAGGAAG
+
+>Position: 19303 --- Importance: 0.173
+              |
+TTAATCGAAAAAGTAAGTAAAAACAGTGTG
+
+>Position: 19177 --- Importance: 0.173
+              |
+GAGGAACGCCCATTACTACATATTGTGGGT
+
+>Position: 19261 --- Importance: 0.173
+              |
+CTTTCTGCTCAAGTGGGGCAGCGGATTGGA
+
+>Position: 19315 --- Importance: 0.173
+              |
+GTAAGTAAAAACAGTGTGGCTTCAAGTCAC
+
+>Position: 19225 --- Importance: 0.173
+              |
+CAGGCAGAAGTGTTCTTTAATGATGATGGG
+
