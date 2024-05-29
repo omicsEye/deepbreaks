@@ -541,11 +541,14 @@ response variable (regression) or count of observations (classification).
 <h2 id="blast">
 Search for a specific mutation or a fragment of genome including the location of the mutations
 </h2>
-One of the outputs of the *deepBreaks* is the positions that are important in the prediction of the response variable. 
-In the `imp.txt` file, you can find the parts of the sequence that include the important positions. 
-You can use the sequence to run BLAST and find the functional properties of the positions or what gene this part of
-the sequence belongs to. One of the examples in the manuscript is SARS-CoV-2 sequences. We can use the reference 
-genome in the NCBI database study the functional properties/mutations of the important positions in the sequences.
+
+One of the outputs of *deepBreaks* is a text file containing positions that are crucial for predicting the response 
+variable. This file, named `imp_seq.txt`, highlights the segments of the sequence with these important positions.
+You can use these sequences to run BLAST and determine the functional properties of these positions or identify which 
+gene they belong to. An example provided in the manuscript involves SARS-CoV-2 sequences. 
+By using the reference genome available in the NCBI database
+([NC_045512.2](https://www.ncbi.nlm.nih.gov/nuccore/NC_045512.2?report=graph)), 
+we can analyze the functional properties or mutations at these significant positions.
 
 ![](https://github.com/omicsEye/deepbreaks/blob/master/img/sars_cov2/plot_results.png?raw=True)
 ![](https://github.com/omicsEye/deepbreaks/blob/master/img/sars_cov2/ncbi_blast.gif)
