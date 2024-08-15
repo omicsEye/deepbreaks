@@ -156,7 +156,7 @@ def main():
         test_data = True
         df, test_df, y, y_test = train_test_split(dat=df, meta_name=args.metavar,
                                                   test_size=args.test, random_state=args.seed)
-        df.drop(args.metavar, axis=1, inplace=True)
+        # df.drop(args.metavar, axis=1, inplace=True)
         logging.info("Test data is created")
         logging.info("Test data shape is {}".format(test_df.shape))
         logging.info("Train data shape is {}".format(df.shape))
