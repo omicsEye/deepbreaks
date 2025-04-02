@@ -269,7 +269,7 @@ def importance_from_pipe(model, n_positions=None, grouped_features=None, aggrega
     # if aggregate == 'mean':
     #     tmp = tmp.groupby('feature')['value'].mean().reset_index()
 
-    tmp2 = pd.DataFrame(range(1, n_positions), columns=['feature'])
+    tmp2 = pd.DataFrame(range(1, n_positions+1), columns=['feature'])
     tmp2 = tmp2.merge(tmp, how='left')
     tmp2.fillna(0, inplace=True)
     tmp2['standard_value'] = tmp2['value'] / np.max(tmp2['value'])
