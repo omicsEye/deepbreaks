@@ -281,6 +281,32 @@ group of the position (we group all the colinear positions together)
 deepBreaks -sf PATH_TO_SEQUENCE.FASTA -st aa -md PATH_TO_META_DATA.tsv -mv
  META_VARIABLE_NAME -a reg  -dth 0.15 --plot --write
 ```
+To run the Opsin example, you can use the following command:
+### Mac and Linux
+
+First, make a directory and download the data files:
+```commandline
+mkdir opsin_example
+cd opsin_example
+curl -L -O https://github.com/omicsEye/deepbreaks/raw/refs/heads/master/data/lite_mar/lite_mar.zip
+unzip lite_mar.zip -d lite_mar
+```
+Then run the following command:
+```commandline
+deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st aa -md lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg  -dth 0.15 --plot
+```
+### Windows (PowerShell)
+First, make a directory and download the data files:
+```commandline
+New-Item -ItemType Directory -Path opsin_example
+Set-Location opsin_example
+Invoke-WebRequest -Uri https://github.com/omicsEye/deepbreaks/raw/refs/heads/master/data/lite_mar/lite_mar.zip -OutFile lite_mar.zip
+Expand-Archive -Path lite_mar.zip -DestinationPath lite_mar
+```
+Then run the following command:
+```commandline
+deepBreaks -sf lite_mar/msa_RodOpsinLambdaMax.fasta -st aa -md lite_mar/meta_RodOpsinLambdaMax.tsv -mv LambdaMax -a reg  -dth 0.15 --plot
+```
 
 ## Tutorial ##
 Multiple detailed jupyter notebook of _deepBreaks_ implementation are available in the
