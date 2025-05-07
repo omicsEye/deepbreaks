@@ -22,11 +22,9 @@ in the millions), all modules have been written and benchmarked for computing ti
 real-world applications.
 
 ---
-**Citation:**
+**Citation:**  
+Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin et al. **deepBreaks: a Machine Learning Tool for Identifying and Prioritizing Genotype-phenotype Associations**, 01 February 2023, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2534899/v1]
 
-Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin, Seth A. Frazer, Todd H. Oakley, Keith A. Crandall, Ali Rahnavard (2023).
-**_deepBreaks_: a machine learning tool for identifying and prioritizing genotype-phenotype associations**
-, https://github.com/omicsEye/deepBreaks/.
 
 ---
 
