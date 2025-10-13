@@ -88,6 +88,7 @@ def parse_arguments():
                         action="store_true", default=False)
     parser.add_argument('--seed', help="Seed for random number generator. Default is 123.",
                         default=123, type=int, required=False)
+    parser.add_argument("-o", "--output", help="the output directory\n", required=True)
 
     return parser.parse_args()
 
@@ -111,11 +112,20 @@ def main():
         exit()
     # making directory
     print('directory preparation')
-    dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    #dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     seq_file_name = args.seqfile.split('.')[0]
 
-    report_dir = str(seq_file_name + '_' + args.metavar + '_' + dt_label)
-    os.makedirs(report_dir)
+    # Check that the output directory is writeable
+    output_dir = os.path.abspath(args.output)
+    if not os.path.isdir(output_dir):
+        try:
+            print("Creating output directory: " + output_dir)
+            os.mkdir(output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+
+    #report_dir = str(seq_file_name + '_' + args.metavar + '_' + dt_label)
+    #os.makedirs(report_dir)
 
     logging.basicConfig(filename=report_dir + "/log.txt", level=logging.DEBUG,
                         format="%(asctime)s %(message)s")
