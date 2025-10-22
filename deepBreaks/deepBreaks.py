@@ -1,4 +1,5 @@
 # importing libraries
+import sys
 from deepBreaks.utils import get_models, get_scores, get_params, \
     make_pipeline, df_to_dict, imp_print, ref_id_type, report_test_scores, train_test_split
 from deepBreaks.preprocessing import MisCare, ConstantCare, URareCare, CustomOneHotEncoder, FeatureSelection, \
@@ -86,9 +87,11 @@ def parse_arguments():
                                         "in the `read_data` function. As this may change the whole FASTA file, you may"
                                         "want to save the FASTA file after this cleaning step.",
                         action="store_true", default=False)
+    parser.add_argument("-o", "--output", help="Output directory to save the results.",
+                        type=str, required=True)
     parser.add_argument('--seed', help="Seed for random number generator. Default is 123.",
                         default=123, type=int, required=False)
-    parser.add_argument("-o", "--output", help="the output directory\n", required=True)
+    
 
     return parser.parse_args()
 
@@ -112,17 +115,17 @@ def main():
         exit()
     # making directory
     print('directory preparation')
-    #dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    dt_label = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     seq_file_name = args.seqfile.split('.')[0]
 
     # Check that the output directory is writeable
-    output_dir = os.path.abspath(args.output)
-    if not os.path.isdir(output_dir):
-        try:
-            print("Creating output directory: " + output_dir)
-            os.mkdir(output_dir)
-        except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+    report_dir = args.output
+    # Create the output directory if it does not exist
+    try:
+        os.makedirs(report_dir, exist_ok=True)
+        print(f"Output directory ready: {report_dir}")
+    except EnvironmentError as e:
+        sys.exit(f"CRITICAL ERROR: Unable to create output directory: {e}")
 
     #report_dir = str(seq_file_name + '_' + args.metavar + '_' + dt_label)
     #os.makedirs(report_dir)

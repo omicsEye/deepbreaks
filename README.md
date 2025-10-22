@@ -260,6 +260,8 @@ optional arguments:
                         `read_data` function. As this may change the whole
                         FASTA file, you maywant to save the FASTA file after
                         this cleaning step.
+  -o OUTPUT, --output OUTPUT
+                        Output directory to save the results.
   --seed                Seed for random number generator. Default is 123.
 ```
 
