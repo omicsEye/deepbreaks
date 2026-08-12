@@ -5,6 +5,7 @@
 ***deepBreaks*** , a computational method, aims to identify important
 changes in association with the phenotype of interest
 using multi-alignment sequencing data from a population.
+[https://doi.org/10.1038/s41598-025-25580-6](https://doi.org/10.1038/s41598-025-25580-6)
 
 **Key features:**
 
@@ -23,7 +24,21 @@ real-world applications.
 
 ---
 **Citation:**  
-Mahdi Baghbanzadeh, Tyson Dawson, Bahar Sayoldin et al. **deepBreaks: a Machine Learning Tool for Identifying and Prioritizing Genotype-phenotype Associations**, 01 February 2023, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2534899/v1]
+```
+@article{Baghbanzadeh2025,
+  title = {deepBreaks identifies and prioritizes genotype–phenotype associations using machine learning},
+  volume = {15},
+  ISSN = {2045-2322},
+  url = {http://dx.doi.org/10.1038/s41598-025-25580-6},
+  DOI = {10.1038/s41598-025-25580-6},
+  number = {1},
+  journal = {Scientific Reports},
+  publisher = {Springer Science and Business Media LLC},
+  author = {Baghbanzadeh,  Mahdi and Dawson,  Tyson and Sayoldin,  Bahar and Frazer,  Seth A. and Oakley,  Todd H. and Crandall,  Keith A. and Rahnavard,  Ali},
+  year = {2025},
+  month = Nov 
+}
+```
 
 
 ---
